@@ -43,3 +43,51 @@ ai-for-infra-pros/
 │   │   ├── cheatsheets.md
 │   │   └── estudos-de-caso.md
 └── README.md
+
+## 🚀 Como navegar
+
+Cada capítulo foi projetado para ser independente e complementar.  
+Se quiser começar rápido:
+
+| Objetivo | Onde começar |
+|-----------|---------------|
+| Entender como IA se conecta à Infraestrutura | [Capítulo 1 - Fundamentos de IA](docs/capitulos/01-introducao.md) |
+| Montar um ambiente de IA | [Capítulo 4 - IaC e Automação](docs/capitulos/04-iac.md) |
+| Medir e observar workloads de IA | [Capítulo 5 - Monitoramento e Observabilidade](docs/capitulos/05-monitoramento.md) |
+| Garantir segurança e resiliência | [Capítulo 6 - Segurança em Ambientes de IA](docs/capitulos/06-seguranca.md) |
+| Executar na prática | [Mini-Labs](docs/extras/labs/) |
+| Traduzir termos e conceitos | [Glossário Visual](docs/capitulos/10-glossario-visual.md) |
+
+---
+
+## 🧩 Público-alvo
+
+Profissionais de:
+
+- Infraestrutura e Cloud (Azure, AWS, GCP)
+- DevOps e SRE
+- Arquitetura de Soluções
+- Segurança e Governança
+- Engenharia de Dados que desejam compreender o lado infra da IA
+
+---
+
+## 💬 Missão
+
+Transformar o conhecimento de infraestrutura em vantagem na era da Inteligência Artificial.  
+Mostrar que **você não precisa ser cientista de dados para trabalhar com IA — mas precisa saber como ela roda, escala e é observada.**
+
+---
+
+## 📚 Créditos
+
+Criado por **Ricardo Martins**  
+📍 Principal Cloud Solution Architect @ Microsoft  
+📖 Autor de *Azure Governance Made Simple*  
+🌐 [rmmartins.com](https://rmmartins.com)
+
+
+---
+
+> _“A IA precisa de infraestrutura. E a infraestrutura precisa entender de IA.”_
+
