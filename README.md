@@ -43,6 +43,7 @@ ai-for-infra-pros/
 │   │   ├── cheatsheets.md
 │   │   └── estudos-de-caso.md
 └── README.md
+```
 
 ## 🚀 Como navegar
 
