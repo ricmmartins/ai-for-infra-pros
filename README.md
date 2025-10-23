@@ -45,7 +45,7 @@ ai-for-infra-pros/
 └── README.md
 ```
 
-## 🚀 Como navegar
+## Como navegar
 
 Cada capítulo foi projetado para ser independente e complementar.  
 Se quiser começar rápido:
@@ -61,7 +61,7 @@ Se quiser começar rápido:
 
 ---
 
-## 🧩 Público-alvo
+## Público-alvo
 
 Profissionais de:
 
@@ -73,14 +73,14 @@ Profissionais de:
 
 ---
 
-## 💬 Missão
+## Missão
 
 Transformar o conhecimento de infraestrutura em vantagem na era da Inteligência Artificial.  
 Mostrar que **você não precisa ser cientista de dados para trabalhar com IA — mas precisa saber como ela roda, escala e é observada.**
 
 ---
 
-## 📚 Créditos
+## Créditos
 
 Criado por **Ricardo Martins**  
 📍 Principal Cloud Solution Architect @ Microsoft  
