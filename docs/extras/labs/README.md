@@ -11,7 +11,7 @@ Each lab demonstrates how to apply the infrastructure concepts from the book in 
 |-----|--------------|---------------|
 | [**Terraform AKS GPU Cluster**](./terraform-aks-gpu/README.md) | Provision an Azure Kubernetes Service cluster with a dedicated GPU node pool for AI workloads. | Terraform, AKS, GPU, IaC |
 | [**Bicep VM with GPU**](./bicep-vm-gpu/README.md) | Deploy a single GPU-enabled VM using Azure Bicep to host AI inference workloads. | Bicep, Azure CLI, NVidia Drivers |
-| [**YAML Inference API (Azure ML)**](./yaml-inferencia-api/README.md) | Publish a trained model as an inference endpoint using Azure Machine Learning and YAML configuration. | Azure ML, YAML, CLI, REST API |
+| [**YAML Inference API (Azure ML)**](./yaml-inference-api/README.md) | Publish a trained model as an inference endpoint using Azure Machine Learning and YAML configuration. | Azure ML, YAML, CLI, REST API |
 
 ---
 
