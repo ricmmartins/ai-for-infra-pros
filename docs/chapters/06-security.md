@@ -176,4 +176,4 @@ but you must ensure it operates securely, efficiently, and continuously.
 
 ### ➡️ Next Chapter
 
-Discover how real-world teams are applying these principles in [**AI Use Cases for Infrastructure Professionals**](07-ai-use-cases.md).
+Discover how real-world teams are applying these principles in [**AI Use Cases for Infrastructure Professionals**](07-use-cases.md).
