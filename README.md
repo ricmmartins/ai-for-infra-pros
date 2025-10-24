@@ -1,11 +1,8 @@
 # 🤖 AI for Infra Pros  
 ### The Practical Handbook for Infrastructure Engineers  
 
----
-
 > “You don’t need to be a data scientist to work with AI — but you do need to understand how it runs, scales, and is observed.”
 
----
 
 ## 🧭 Overview
 
