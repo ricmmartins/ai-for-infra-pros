@@ -1,94 +1,101 @@
-# AI for Infra Pros  
-### O Guia Prático de Inteligência Artificial para Profissionais de Infraestrutura
+# AI for Infra Pros
+### The Artificial Intelligence Handbook for Infrastructure Professionals
 
 ---
 
-## Visão Geral
+## Overview
 
-**AI for Infra Pros** é um guia técnico e prático criado para quem vem do mundo da **infraestrutura tradicional** e quer entender — na prática — como **a Inteligência Artificial se conecta a redes, computação, automação e observabilidade**.
+**AI for Infra Pros** is a technical and hands-on handbook for professionals from the **traditional infrastructure world** who want to understand — in practice — how **Artificial Intelligence connects to networking, compute, automation, and observability**.
 
-Este projeto é o ponto de encontro entre **Infra + IA**, trazendo:
-- Conteúdo didático e aplicável (capítulos completos e organizados)
-- **Labs reais** para praticar com Azure CLI, Terraform, Bicep e AKS
-- **Diagramas arquiteturais** prontos para uso
-- **Checklists de segurança e governança**
-- **Casos de uso técnicos** e **framework de adoção**
-- **Glossário visual** para traduzir IA em linguagem de infraestrutura
+This project is the meeting point between **Infra + AI**, bringing:
+- Educational and applicable content (complete and organized chapters)
+- **Real labs** to practice with Azure CLI, Terraform, Bicep, and AKS
+- **Ready-to-use architectural diagrams**
+- **Security and governance checklists**
+- **Technical use cases** and an **adoption framework**
+- A **visual glossary** to translate AI into infrastructure language
 
 ---
 
-## 📂 Estrutura do Repositório
+## 📂 Repository Structure
 
-```bash
+\`\`\`bash
 ai-for-infra-pros/
 ├── docs/
-│   ├── capitulos/
-│   │   ├── 01-introducao.md
-│   │   ├── 02-dados.md
+│   ├── chapters/
+│   │   ├── 01-introduction.md
+│   │   ├── 02-data.md
 │   │   ├── 03-compute.md
 │   │   ├── 04-iac.md
-│   │   ├── 05-monitoramento.md
-│   │   ├── 06-seguranca.md
-│   │   ├── 07-casos-de-uso.md
-│   │   ├── 08-framework-adocao.md
+│   │   ├── 05-monitoring.md
+│   │   ├── 06-security.md
+│   │   ├── 07-use-cases.md
+│   │   ├── 08-adoption-framework.md
 │   │   ├── 09-openai-tpm-ptu.md
-│   │   └── 10-glossario-visual.md
+│   │   └── 10-visual-glossary.md
 │   ├── extras/
 │   │   ├── labs/
 │   │   │   ├── terraform-aks-gpu/
 │   │   │   ├── bicep-vm-gpu/
-│   │   │   └── yaml-inferencia-api/
-│   │   ├── diagramas/
-│   │   ├── faq-tecnico.md
+│   │   │   └── yaml-inference-api/
+│   │   ├── diagrams/
+│   │   ├── technical-faq.md
 │   │   ├── cheatsheets.md
-│   │   └── estudos-de-caso.md
+│   │   └── case-studies.md
 └── README.md
-```
-
-## Como navegar
-
-Cada capítulo foi projetado para ser independente e complementar.  
-Se quiser começar rápido:
-
-| Objetivo | Onde começar |
-|-----------|---------------|
-| Entender como IA se conecta à Infraestrutura | [Capítulo 1 - Fundamentos de IA](docs/capitulos/01-introducao.md) |
-| Montar um ambiente de IA | [Capítulo 4 - IaC e Automação](docs/capitulos/04-iac.md) |
-| Medir e observar workloads de IA | [Capítulo 5 - Monitoramento e Observabilidade](docs/capitulos/05-monitoramento.md) |
-| Garantir segurança e resiliência | [Capítulo 6 - Segurança em Ambientes de IA](docs/capitulos/06-seguranca.md) |
-| Executar na prática | [Mini-Labs](docs/extras/labs/) |
-| Traduzir termos e conceitos | [Glossário Visual](docs/capitulos/10-glossario-visual.md) |
+\`\`\`
 
 ---
 
-## Público-alvo
+## How to Navigate
 
-Profissionais de:
+Each chapter is designed to be **independent and complementary**.  
+Want to start quickly?
 
-- Infraestrutura e Cloud (Azure, AWS, GCP)
-- DevOps e SRE
-- Arquitetura de Soluções
-- Segurança e Governança
-- Engenharia de Dados que desejam compreender o lado infra da IA
-
----
-
-## Missão
-
-Transformar o conhecimento de infraestrutura em vantagem na era da Inteligência Artificial.  
-Mostrar que **você não precisa ser cientista de dados para trabalhar com IA — mas precisa saber como ela roda, escala e é observada.**
+| Goal | Where to Start |
+|------|----------------|
+| Understand how AI connects to Infrastructure | [Chapter 1 – AI Fundamentals](docs/chapters/01-introduction.md) |
+| Build an AI environment | [Chapter 4 – IaC and Automation](docs/chapters/04-iac.md) |
+| Measure and observe AI workloads | [Chapter 5 – Monitoring and Observability](docs/chapters/05-monitoring.md) |
+| Ensure security and resilience | [Chapter 6 – Security in AI Environments](docs/chapters/06-security.md) |
+| Get hands-on experience | [Mini Labs](docs/extras/labs/) |
+| Translate terms and concepts | [Visual Glossary](docs/chapters/10-visual-glossary.md) |
 
 ---
 
-## Créditos
+## Target Audience
 
-Criado por **Ricardo Martins**  
+Professionals in:
+
+- Infrastructure and Cloud (Azure, AWS, GCP)  
+- DevOps and SRE  
+- Solutions Architecture  
+- Security and Governance  
+- Data Engineering professionals who want to understand the infrastructure side of AI
+
+---
+
+## Mission
+
+Turn infrastructure knowledge into an edge in the era of Artificial Intelligence.  
+Show that **you don’t need to be a data scientist to work with AI — but you do need to know how it runs, scales, and is observed.**
+
+---
+
+## Contributing
+
+Contributions are welcome!  
+Open an issue or submit a pull request with improvements, examples, or fixes. Please keep examples reproducible and reference the chapter they relate to.
+
+---
+
+## Credits
+
+Created by **Ricardo Martins**  
 📍 Principal Cloud Solution Architect @ Microsoft  
-📖 Autor de *Azure Governance Made Simple*  
+📖 Author of *Azure Governance Made Simple*  
 🌐 [rmmartins.com](https://rmmartins.com)
 
-
 ---
 
-> _“A IA precisa de infraestrutura. E a infraestrutura precisa entender de IA.”_
-
+> _“AI needs infrastructure. And infrastructure needs to understand AI.”_
