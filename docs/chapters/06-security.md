@@ -37,7 +37,7 @@ That’s your domain as an infrastructure professional.
 
 - Use **Azure RBAC** to control access to resources (VMs, AKS, AML, Storage).  
 - Apply **Managed Identities (UAMI)** in pipelines and automated services.  
-- Adopt **Azure AD + Conditional Access + MFA** for human authentication.  
+- Adopt **Entra ID + Conditional Access + MFA** for human authentication.  
 - Avoid static keys — prefer **federated identities (OIDC)** and **temporary tokens**.  
 
 ```bash
