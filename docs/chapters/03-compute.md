@@ -176,3 +176,7 @@ Knowing which VM to use, how to scale clusters, and how to ensure availability i
 In the next chapters, we’ll dive into **Infrastructure as Code (IaC)** and **Automation for AI** — turning this entire foundation into **consistent, versionable, and reproducible deployments**.
 
 > “Infrastructure is the stage. AI is the show. And you’re the one making sure the lights never go out.”
+
+### ➡️ Next Chapter
+
+Continue your journey by learning how to automate and version your environments in [**Chapter 4 — Infrastructure as Code (IaC) and Automation for AI**](04-iac.md).
