@@ -89,8 +89,8 @@ Prefer **local NVMe** for heavy datasets and training workloads.
 
 ```mermaid
 graph LR
-A[Blob Storage] --> B[Azure Data Prep]
-B --> C[GPU VM (Training)]
+  A["Blob Storage"] --> B["Azure Data Prep"]
+  B --> C["GPU VM (Training)"]
 ```
 
 💡 **Example 2: Full Production Pipeline**
