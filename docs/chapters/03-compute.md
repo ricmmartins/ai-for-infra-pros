@@ -101,11 +101,11 @@ Network performance is just as critical as GPU performance.
 
 ```mermaid
 graph TD
-  user[User] --> api[API Gateway]
-  api --> aks[AKS with GPU]
-  aks --> pod[Pod running model]
-  pod --> blob[Azure Blob (Models & Data)]
-  aks --> monitor[Azure Monitor & Prometheus]
+  user["User"] --> api["API Gateway"]
+  api --> aks["AKS with GPU"]
+  aks --> pod["Pod running model"]
+  pod --> blob["Azure Blob (Models & Data)"]
+  aks --> monitor["Azure Monitor & Prometheus"]
 ```
 
 💬 This architecture is used by companies serving **LLMs** and **real-time inference**, combining **AKS**, **Blob Storage**, and continuous **monitoring**.
