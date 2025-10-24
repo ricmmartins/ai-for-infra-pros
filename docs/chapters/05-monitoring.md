@@ -1,141 +1,195 @@
-# Chapter 5 — Monitoring and Observability for AI Workloads
+# Chapter 5 — Monitoring and Observability for AI Environments
 
-> “You can’t manage what you can’t see — and in AI, that’s especially true.”
-
----
-
-## 🎯 Why Monitoring AI Is Different
-
-AI systems are not like traditional workloads.  
-A VM or API may look “healthy,” yet the model could be:
-- Producing **inaccurate predictions**
-- Running on **underutilized GPUs**
-- Experiencing **hidden latency** that hurts user experience
-
-That’s why observability in AI must cover both **infrastructure** and **model behavior**.
+> “You only control what you can measure — and with AI, that’s even more critical.”
 
 ---
 
-## 🔍 What to Monitor in AI Environments
+## 👁️ Why Monitoring AI Is Different
 
-| Layer | Key Metrics |
-|--------|--------------|
-| **Compute (GPU/CPU)** | Utilization, memory, temperature, uptime |
-| **Model (LLM/ML)** | Accuracy, inference latency, error rate |
-| **Network** | Throughput, packet loss, jitter |
-| **Data** | Quality, freshness, ingestion failures |
-| **Cost** | GPU time, tokens per request, request volume |
+AI environments behave differently from traditional workloads.  
+A model may be *running* and still deliver incorrect results, high latency, or unexpected costs.
 
----
+⚠️ **Common Scenarios:**
 
-## 🧰 Monitoring Tools in Azure
+- The model looks fine but predictions are degraded.  
+- The GPU is active but underutilized.  
+- Inference responds, but with high latency noticeable to users.  
+- Costs spike suddenly due to the volume of processed tokens.  
 
-| Tool | Primary Role |
-|------|---------------|
-| **Azure Monitor** | Metrics, logs, and alerts across all layers |
-| **Log Analytics Workspace** | Store and query logs using KQL |
-| **Azure Managed Prometheus** | Collect custom metrics (e.g., GPU, AKS) |
-| **Grafana** | Visualize metrics and dashboards |
-| **Azure ML Studio** | Monitor model performance and endpoints |
-| **Application Insights** | Trace application-level latency and failures |
+🔍 **Conclusion:** Observability isn’t optional — it’s a **core part of AI reliability**.
 
 ---
 
-## 🧪 Example — Monitoring GPU Utilization in AKS
+## 🧩 What to Monitor in AI Workloads
 
-### Step 1. Install Prometheus + Grafana
+| Layer / Category | Key Metrics | Tools / Sources |
+|------------------|-------------|----------------|
+| **Compute (GPU/CPU)** | Utilization, memory, temperature, failures | DCGM, nvidia-smi, Azure Monitor |
+| **Model (ML/LLM)** | Accuracy, inference latency, TPM/RPM | Application Insights, Azure ML, AOAI Logs |
+| **Network** | Throughput, jitter, slow connections | Azure Monitor for Network |
+| **Data** | Integrity, freshness, ingestion failures | Data Factory, Synapse, Log Analytics |
+| **Cost** | GPU usage, token volume, inference time | Cost Management + Log Analytics |
+| **Security / Compliance** | Secret access, Key Vault logs | Azure Policy, Defender for Cloud |
+
+💡 **Tip:** Monitor both the **model behavior** and the **infrastructure** that supports it.  
+Inference without GPU visibility is **incomplete diagnosis**.
+
+---
+
+## 🛠️ Observability Tools in Azure
+
+| Tool | Main Function |
+|------|----------------|
+| **Azure Monitor** | Collect and visualize resource metrics and logs |
+| **Log Analytics Workspace** | Advanced KQL queries |
+| **Azure Managed Prometheus** | Custom metrics, mainly for AKS and GPU |
+| **Grafana** | Real-time dashboard visualization |
+| **Application Insights** | Telemetry, response time, tracing |
+| **Azure ML Studio** | Model and endpoint monitoring |
+| **OpenTelemetry Collector** | Standardized metrics and export |
+
+---
+
+## ⚙️ Practical Example: Monitoring GPUs in AKS
+
+Install NVIDIA’s DCGM Exporter:
+
+```bash
+helm repo add nvidia https://nvidia.github.io/gpu-monitoring-tools
+helm install dcgm-exporter nvidia/dcgm-exporter
+```
+
+Integrate with Prometheus or Azure Managed Prometheus:
 
 ```bash
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm install prom prometheus-community/kube-prometheus-stack
 ```
 
-### Step 2. Enable NVIDIA DCGM Exporter
+### Visualize in Grafana
 
-```bash
-kubectl apply -f https://raw.githubusercontent.com/NVIDIA/dcgm-exporter/main/deployments/kubernetes/dcgm-exporter.yaml
-```
+Add panels with metrics such as:
 
-### Step 3. Visualize GPU Metrics
+- `DCGM_FI_DEV_GPU_UTIL`  
+- `DCGM_FI_DEV_FB_USED`  
+- `DCGM_FI_DEV_MEM_COPY_UTIL`
 
-In Grafana, add a dashboard showing:
-- `DCGM_FI_DEV_GPU_UTIL` → GPU usage  
-- `DCGM_FI_DEV_FB_USED` → Memory usage  
-- `DCGM_FI_DEV_POWER_USAGE` → Power draw  
-
-✅ **Result:** Real-time visualization of GPU performance per node and pod.
+💡 These metrics help detect GPU bottlenecks and optimize cluster usage.
 
 ---
 
-## 📊 Tracking Inference Latency
+## 📊 Inference Latency and Performance
 
-Use **Application Insights** to measure:
-- Average and P95 response time (`duration`)
-- Success rate
-- Correlation between latency and input size
+Use **Application Insights** to track:
 
-💡 Add telemetry in your API or SDK code:
+- `duration` — average response time  
+- `successRate` — success percentage  
+- `dependency calls` — external API response time  
+
+Add the App Insights or OpenTelemetry SDK directly to the inference code:
+
 ```python
-from opencensus.ext.azure.log_exporter import AzureLogHandler
-logger.addHandler(AzureLogHandler(connection_string="InstrumentationKey=..."))
+from opentelemetry import trace
+from azure.monitor.opentelemetry import configure_azure_monitor
+configure_azure_monitor()
+```
+
+🔧 **Recommendations:**
+
+- Track **p95/p99 latency per endpoint**.  
+- Create alerts for **HTTP 429/503** (throttling and timeouts).  
+- Correlate **model metrics**, **token usage**, and **runtime** data.  
+
+---
+
+## 💰 Cost Observability
+
+GPUs and tokens are **expensive — and fast**.
+
+| Item | How to Monitor |
+|------|----------------|
+| **GPU usage per hour** | Azure Monitor + Metrics Explorer |
+| **Token consumption (TPM/RPM)** | Azure OpenAI Metrics / Logs |
+| **Cost per project/team** | Cost Management with tags (Project=AI, Team=DataScience) |
+| **Future cost forecasting** | Azure Anomaly Detector or Machine Learning |
+
+💡 Create automatic alerts for **spending >10% above weekly average**.
+
+---
+
+## 🧠 Predictive Analysis and Intelligent Autoscaling
+
+Use AI to improve your own observability:
+
+- Predict GPU usage peaks based on historical data.  
+- Detect latency anomalies using **Azure Anomaly Detector**.  
+- Trigger intelligent autoscaling (**AKS / VMSS**) based on inferred load.  
+
+```mermaid
+graph LR
+  Metrics[Azure Monitor Metrics] --> AD[Anomaly Detector]
+  AD --> Scale[AKS AutoScaler]
+  Scale --> AKS[GPU Cluster]
 ```
 
 ---
 
-## 💰 Cost and Efficiency Observability
+## 🔒 Alerts and Automated Responses
 
-GPU workloads can easily exceed thousands of dollars monthly.  
-To control this:
-- Use **Cost Management** for GPU and API spend
-- Correlate cost with performance metrics
-- Tag resources (`Project=AI`, `Team=ML`) for segmentation
+| Event | Recommended Action |
+|--------|--------------------|
+| GPU > 90% for 30min | Check data bottlenecks or replicate pods |
+| Latency > 1s | Validate network or model performance |
+| Ingestion failure | Trigger fallback pipeline |
+| Accuracy drop | Retrain or activate previous version |
 
----
-
-## 🧠 Predictive Observability with AI
-
-You can apply AI to observability itself:
-- Forecast GPU usage or request load  
-- Detect anomalies in logs using **Azure Anomaly Detector**  
-- Auto-scale based on model performance or response latency
+Configure **Azure Monitor Action Groups** to trigger **emails, Logic Apps, or webhooks** automatically.
 
 ---
 
-## 🔔 Alerts and Automation
+## 🧪 Hands-On: Querying GPU Metrics via Kusto (Log Analytics)
 
-| Event | Action |
-|--------|--------|
-| GPU usage > 90% for 30 min | Check for data bottlenecks |
-| Latency > 1s | Investigate network or model inefficiency |
-| Data ingestion failure | Trigger backup pipeline |
-| Drop in model accuracy | Re-train or roll back model |
-
-Set these up in **Azure Monitor Action Groups** or via **Logic Apps**.
-
----
-
-## 🧩 KQL Example — GPU Metric Query
-
-```kql
+```kusto
 Perf
 | where ObjectName == "GPU Adapter"
 | summarize avg(CounterValue) by bin(TimeGenerated, 5m), CounterName
 ```
 
----
-
-## 🧠 Key Takeaways for Infrastructure Teams
-
-- GPU is often the **true bottleneck**, not the model.  
-- Observability isn’t just uptime — it’s **performance + cost + quality**.  
-- Every AI system should log, measure, and alert from **GPU → Model → API → User**.
+📈 Combine with **Application Insights logs** to correlate GPU usage with inference latency.
 
 ---
 
-## ✅ Conclusion
+## 🔐 Best Practices for Security and Observability
 
-Well-monitored AI systems are faster, cheaper, and more reliable.  
-A good infra engineer can make AI invisible — because when it works perfectly, no one notices.
+- Never log sensitive data (prompts, PII, user responses).  
+- Enable **automatic diagnostics** with Azure Policy.  
+- Centralize logs from all services in a single workspace.  
+- Keep at least **30 days of retention** for audit purposes.  
+- Use **Managed Identity + Key Vault** for secrets and authentication.  
 
-Next: [Chapter 6 — Security and Resilience in AI Environments](06-security.md)
+---
+
+## ✅ AI Observability Checklist
+
+- [x] GPU metrics (DCGM, Prometheus)  
+- [x] Inference latency monitoring  
+- [x] Centralized and correlated logs  
+- [x] Alerts for failures and throttling  
+- [x] Dashboards with TPM, QPS, tokens, and cost  
+
+---
+
+## 📚 References
+
+- [Monitoring AKS with GPUs](https://learn.microsoft.com/azure/aks/gpu-monitoring)  
+- [Azure Monitor Documentation](https://learn.microsoft.com/azure/azure-monitor/)  
+- [OpenTelemetry with Azure](https://learn.microsoft.com/azure/azure-monitor/app/opentelemetry-enable)  
+
+> “Good infrastructure is invisible when it works — but poorly monitored AI shows up quickly, either in your monthly bill or in the user experience.”
+
+---
+
+### ➡️ Next Chapter
+
+Continue to learn how to protect and harden your environments in [**Chapter 6 — Security and Resilience in AI Environments**](06-security.md).
 
