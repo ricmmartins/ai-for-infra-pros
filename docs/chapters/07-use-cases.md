@@ -178,4 +178,4 @@ and **that professional can be you.**
 
 ### ➡️ Next Chapter
 
-Continue your learning by exploring the strategic approach to scaling AI adoption in [**Chapter 8 — AI Adoption Framework for Infrastructure**](08-ai-adoption-framework.md).
+Continue your learning by exploring the strategic approach to scaling AI adoption in [**Chapter 8 — AI Adoption Framework for Infrastructure**](08-adoption-framework.md).
