@@ -1,16 +1,19 @@
 # Chapter 3 — Infrastructure and Compute for AI
 
-> “AI changed the game — but infrastructure still runs the show.”
+> “There is no AI without infrastructure. Behind every model, there is a network, a disk, a GPU — and an infrastructure engineer ensuring it all stays up.”
 
 ---
 
-## 🚀 Why AI Demands a New Infrastructure Mindset
+## 🚀 Why AI Requires a New Way of Thinking About Infrastructure
 
-Artificial Intelligence workloads are resource-intensive — both during **training** and **inference**.  
-We’re no longer talking about traditional CPU + HDD workloads; instead, we’re dealing with **massive parallel operations**, **multi-node clusters**, and **ultra-low latency** expectations.
+Artificial Intelligence is **resource-intensive**.  
+It demands **massive parallelism**, **minimal latency**, **fast storage**, and **high availability** — both for training and inference.
 
-The good news?  
-Most of what you already know about **compute, storage, networking, and security** still applies — but the scale, tuning, and inter-dependencies are much more demanding.
+AI workloads are not simple web applications.  
+They move terabytes of data, use GPU clusters, and require distributed pipelines.
+
+The good news? Much of what you already master — compute, networking, storage, security — remains essential.  
+The difference lies in the **level of demand**.
 
 ---
 
@@ -18,80 +21,98 @@ Most of what you already know about **compute, storage, networking, and security
 
 | Phase | What Happens | Technical Characteristics |
 |--------|----------------|----------------------------|
-| **Training** | The model learns from large datasets | High GPU demand, long duration, petabytes of data |
-| **Inference** | The trained model responds to new inputs | Low latency, scalable, can use CPU or GPU depending on model |
+| **Training** | The model learns from historical data | Extremely high GPU demand, long runtime, massive datasets |
+| **Inference** | The model responds to new data | Low latency, may use GPU or CPU depending on workload |
 
-**Example:**
-- Training a Large Language Model (LLM) can take **weeks** across **thousands of GPUs**.  
-- Running inference with the same model takes **milliseconds** but must scale efficiently to millions of requests.
-
----
-
-## 🎮 Compute Options for AI: CPU vs. GPU vs. TPU
-
-| Type | Best For | Details |
-|------|-----------|----------|
-| **CPU** | Traditional workloads, light inference | Flexible but limited parallelism |
-| **GPU** | Training + heavy inference | Thousands of cores optimized for matrix operations |
-| **TPU** | TensorFlow-based workloads (Google Cloud only) | Specialized ASIC for deep learning |
-
-🧩 **Infra Tip**  
-- Small NLP or tabular models can run on CPU.  
-- Vision, speech, or generative workloads need GPUs, even for inference.
+💡 **Example:**  
+Training an LLM can take days or weeks across thousands of GPUs.  
+Running inference with that same model takes milliseconds but requires fine-tuned scalability and performance.
 
 ---
 
-## 🏗️ Azure GPU VM Families
+## 🎮 Compute: CPU, GPU, and TPU
 
-| Family | Primary Use | Example Workload |
-|---------|---------------|------------------|
-| **NCas_T4_v3** | Cost-efficient inference | Chatbots, image classification |
-| **ND_A100_v4/v5** | Heavy training | LLMs, multi-GPU workloads |
-| **NVads_A10 / NVv4** | Visualization + light AI | R&D, desktop simulation |
-| **Standard_D/E/F** | CPU-based general compute | ETL, orchestration, preprocessing |
+| Type | Best For | Characteristics |
+|-------|-----------|-----------------|
+| **CPU** | Traditional workloads and light inference | Flexible but limited in parallelism |
+| **GPU** | Training and heavy inference | Massive parallelism (CUDA, Tensor Cores) |
+| **TPU** | TensorFlow and Deep Learning workloads | Specialized ASICs (Google Cloud) |
 
-💡 **Use Case:**  
-Inference clusters often combine both:  
-- **CPU pools** for orchestration  
-- **GPU pools** for execution
+🔧 **Infra Tip:**  
+Smaller or batch models can run efficiently on CPU.  
+LLMs and computer vision workloads **require GPUs**, even for inference.
 
 ---
 
-## 🧱 When One VM Isn’t Enough: Clustering
+## ☁️ GPU VM Types in Azure
 
-AI workloads often require distributed compute due to data or model size.
+| Family | Main Use Case | Example Workload |
+|---------|----------------|------------------|
+| **NCas_T4_v3** | Cost-efficient inference | Chatbots, lightweight vision models |
+| **ND_A100_v4/v5** | Heavy training and inference | LLMs, video, speech processing |
+| **NVv4 / NVads** | Visualization and lightweight AI | Development and testing |
+| **Standard_D/E/F** | CPU workloads | Preprocessing, data ingestion |
 
-| Need | Strategy | Tool |
-|------|-----------|------|
-| **Training across multiple GPUs** | Data or model parallelism | Horovod, PyTorch Distributed, Azure ML |
-| **Horizontal scaling for inference** | Load balancing across nodes | AKS, VMSS |
-| **High availability** | Zone redundancy and health probes | Azure Front Door, Application Gateway |
+### 🧩 Quick Checklist
 
-**AI Cluster Platforms:**
-- **Azure Kubernetes Service (AKS)** – GPU container orchestration  
-- **Azure Machine Learning** – training + deployment automation  
-- **Ray** – distributed training framework  
-
----
-
-## 🌐 Networking for AI: The Hidden Bottleneck
-
-If your dataset sits in a slow network, GPUs will stay idle waiting for input.
-
-| Resource | Why It Matters |
-|-----------|----------------|
-| **InfiniBand / RDMA** | Enables direct VM-to-VM GPU communication |
-| **Accelerated Networking** | Reduces latency and jitter |
-| **VNet Peering** | High-throughput internal communication |
-| **BlobFuse2 with cache** | Local NVMe caching for blob reads |
-
-🧩 **Infra Tip:**  
-AI ≠ bandwidth-heavy only — it’s **latency-sensitive**.  
-Each extra millisecond means thousands of GPU cores idling.
+- Check GPU quotas using `az vm list-skus`  
+- Prefer regions with **NDv5** or **NCas_T4_v3** availability  
+- Consider **VMSS (Virtual Machine Scale Sets)** for automatic scaling  
 
 ---
 
-## 🧪 Hands-On: Create a GPU VM for Testing
+## 🏗️ Clustering: When a Single VM Isn’t Enough
+
+Training or serving AI in production almost always requires distribution:
+
+- **Distributed Training:** Split dataset/model across multiple nodes  
+- **Horizontal Scalability:** Multiple instances serving many requests  
+- **High Availability:** Load balancers, health probes, and failover mechanisms  
+
+| Platform | Function |
+|-----------|-----------|
+| **AKS (Azure Kubernetes Service)** | Orchestration of GPU-enabled containers |
+| **Azure Machine Learning** | Automation of experiments and deployment |
+| **Ray / Horovod** | Large-scale distributed training |
+| **VMSS (Scale Sets)** | Automatic scaling of GPU VMs |
+
+💡 Use **AKS + nvidia-device-plugin** for GPU-ready containers.  
+Configure **taints/tolerations** and **node selectors** to isolate workloads.
+
+---
+
+## 🌐 Networking: The New AI Bottleneck
+
+If your dataset is on a slow network, GPUs will sit idle waiting for data.  
+Network performance is just as critical as GPU performance.
+
+| Network Feature | Why It Matters |
+|------------------|----------------|
+| **InfiniBand / RDMA** | Enables direct VM-to-VM communication with ultra-low latency |
+| **Accelerated Networking** | Reduces jitter and improves throughput |
+| **Efficient VNet Peering** | High-performance inter-region communication |
+| **NFS vs. Blob Storage** | Choice depends on access and read patterns |
+
+🔧 **Tip:** Use **BlobFuse2** with local NVMe caching to balance performance and cost.
+
+---
+
+## ☁️ Example Azure Architecture
+
+```mermaid
+graph TD
+  user[User] --> api[API Gateway]
+  api --> aks[AKS with GPU]
+  aks --> pod[Pod running model]
+  pod --> blob[Azure Blob (Models & Data)]
+  aks --> monitor[Azure Monitor & Prometheus]
+```
+
+💬 This architecture is used by companies serving **LLMs** and **real-time inference**, combining **AKS**, **Blob Storage**, and continuous **monitoring**.
+
+---
+
+## 🧪 Hands-On: Create Your First GPU VM
 
 ```bash
 az vm create \
@@ -99,50 +120,59 @@ az vm create \
   --resource-group rg-ai-lab \
   --image Ubuntu2204 \
   --size Standard_NC6s_v3 \
-  --admin-username azureuser \
+  --admin-username ricardo \
   --generate-ssh-keys
 ```
 
-After provisioning, install NVIDIA drivers:
+After creation:
 
 ```bash
 wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-ubuntu2204.pin
-sudo apt update && sudo apt install -y build-essential dkms
-sudo ./NVIDIA-Linux-*.run
-nvidia-smi
+sudo apt update && sudo apt install -y cuda
 ```
 
-✅ **Expected Result:**  
-GPU drivers installed successfully, `nvidia-smi` shows GPU status and utilization.
+💡 Also install **NVIDIA DCGM** to collect GPU metrics with **Azure Monitor**.
 
 ---
 
-## 📊 Monitoring AI Workloads
+## 📈 Monitoring and Observability
 
-| Metric | Tool |
-|---------|------|
-| GPU usage (memory, temperature) | `nvidia-smi`, Azure Monitor, Prometheus |
-| Inference latency | Application Insights, OpenTelemetry |
-| Node health | AKS metrics, VMSS diagnostics |
+| Metric | Tool | What to Evaluate |
+|---------|------|------------------|
+| **GPU Usage (memory, time)** | `nvidia-smi`, DCGM, Azure Monitor | Saturation, idleness |
+| **Inference Latency** | Application Insights, OpenTelemetry | SLA and response time |
+| **Node Availability** | AKS, VMSS Autoscaler | Failures and scaling behavior |
+| **Token Consumption (TPM)** | Azure OpenAI / Log Analytics | Limit adherence |
 
-🧩 **Recommended Setup:**  
-Use **Azure Managed Prometheus + Grafana** to visualize GPU workloads in real time.
+🧩 Use **Azure Managed Prometheus + Grafana** for GPU and inference dashboards.
 
 ---
 
-## 🛡️ Security and Access Control
+## 🔒 Security and Control
 
-- Enforce RBAC for GPU resources  
-- Use **Managed Identities** for AML pipelines  
-- Isolate compute workloads using **AKS namespaces** or **taints/tolerations**  
-- Apply **quotas** per project or team  
+- Access control for models and data via **RBAC**  
+- Workload isolation with **namespaces** and **node pools**  
+- **Key Vault** for secrets and encryption keys  
+- **Private Link / NSG / Firewall** for private endpoints  
+- GPU quotas per project for **financial control**  
+
+🚨 Configure **Managed Identity** for secure, automated resource access.
+
+---
+
+## 💡 Pro Insight
+
+> “You can have the best model in the world, but if your infrastructure chokes, the experience will be poor. Architecture matters — a lot.”
 
 ---
 
 ## ✅ Conclusion
 
-AI changed the performance expectations — but the **core of reliability, networking, and scalability** is still infrastructure.  
-Your expertise in compute sizing, high availability, and monitoring is what makes AI possible in production.
+AI has changed the game — but the game is still yours.  
+You, the one who understands **latency**, **throughput**, **disks**, and **networks**, are the bridge between theory and production.
 
-Next: [Chapter 4 — Infrastructure as Code and Automation for AI](04-iac.md)
+Knowing which VM to use, how to scale clusters, and how to ensure availability is **not the data scientist’s job** — it’s the **infrastructure professional’s** responsibility.
 
+In the next chapters, we’ll dive into **Infrastructure as Code (IaC)** and **Automation for AI** — turning this entire foundation into **consistent, versionable, and reproducible deployments**.
+
+> “Infrastructure is the stage. AI is the show. And you’re the one making sure the lights never go out.”
