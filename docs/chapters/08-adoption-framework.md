@@ -6,136 +6,181 @@
 
 ## 🧭 Overview
 
-Inspired by the [Microsoft Cloud Adoption Framework](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/), the **AI Adoption Framework for Infrastructure** provides a practical guide for technical teams to design, scale, and operate AI workloads safely, efficiently, and with governance in mind.
+The **AI Adoption Framework for Infrastructure** is a technical and strategic guide that helps infrastructure professionals **plan, prepare, and operate AI workloads** with security, efficiency, and governance.
 
-This framework defines **six clear phases**, each with goals, responsibilities, and technical checklists to help infrastructure engineers lead AI adoption confidently.
-
----
-
-## 🚀 Phase 1 — Discovery and Technical Motivation
-
-**Goal:** Understand *why* and *where* AI fits in your infrastructure.
-
-| Objective | Recommended Actions |
-|------------|----------------------|
-| Identify opportunities | Review operational pain points: performance, cost, and automation gaps. |
-| Map stakeholders | Engage data, DevOps, SRE, and security teams early. |
-| Assess infra maturity | Evaluate automation level, observability, GPU availability, and readiness. |
-| Start upskilling | Read this handbook, take **AI-900**, and experiment with the provided labs. |
-
-**Useful Tools:**  
-- Technical Readiness Assessment Form  
-- Infrastructure + AI Maturity Worksheet  
+Inspired by Microsoft’s **Cloud Adoption Framework**, this model translates the AI journey into the infrastructure domain — focusing on **automation, scalability, and continuous operation**.
 
 ---
 
-## 🧠 Phase 2 — Enablement and Technical Alignment
+## 🚀 Framework Structure
 
-**Goal:** Build foundational knowledge and align infra with AI workloads.
+The framework consists of **6 phases**, each with clear goals, practical activities, and recommended tools.
 
-| Objective | Recommended Actions |
-|------------|----------------------|
-| Train the infra team | Host workshops and labs focused on AI architecture and deployment. |
-| Translate AI concepts | Explain inference, training, tokens, and compute consumption. |
-| Create shared knowledge base | Glossary, cheat sheets, FAQs, and architecture blueprints. |
+```mermaid
+flowchart TD
+  1[Diagnostic and Technical Motivation] --> 2[Enablement and Alignment]
+  2 --> 3[Infrastructure Preparation]
+  3 --> 4[Experimentation and Initial Use Cases]
+  4 --> 5[Scale, Governance, and Resilience]
+  5 --> 6[Continuous Adoption and Feedback]
+```
 
-**Useful Resources:**  
-- Labs in this handbook  
-- Glossary Visual  
-- Microsoft Learn: AI Fundamentals (AI-900)  
+---
+
+## 🧩 Phase 1 — Diagnostic and Technical Motivation
+
+📌 **Goal:** Understand the *why* of AI and the role of infrastructure in the process.
+
+| Activity | Description |
+|-----------|-------------|
+| Identify opportunities | Review operational pain points, bottlenecks, and automation gaps |
+| Map stakeholders | Data, DevOps, security, and business teams |
+| Assess maturity | Is current infra automated? Observable? GPU-ready? |
+| Begin enablement | Complete AI-900 and read this eBook |
+
+🔧 **Useful Tools:**
+
+- Technical Maturity Assessment Sheet (Infra + AI)  
+- Azure OpenAI Quota Viewer  
+- Technical Readiness Form  
+
+💡 **Ask yourself:** “If I needed to run an AI model tomorrow, would my infrastructure be ready?”
+
+---
+
+## 🎓 Phase 2 — Enablement and Technical Alignment
+
+📌 **Goal:** Level technical understanding and create a shared knowledge foundation.
+
+| Activity | Description |
+|-----------|-------------|
+| Upskill the infra team | Workshops, labs, and guided reading per chapter |
+| Translate AI concepts | Inference, GPU, fine-tuning, tokens, quotas |
+| Build a knowledge base | Visual glossary, cheat sheets, mini-labs |
+| Promote hands-on sessions | Experimentation with scripts and templates |
+
+🔧 **Suggested Resources:**
+
+- eBook Labs  
+- AI-900 • Azure AI Fundamentals  
+- Visual Technical Glossary  
+- Initial Script Pack (Azure CLI, Terraform, Bicep)
 
 ---
 
 ## 🏗️ Phase 3 — Infrastructure Preparation
 
-**Goal:** Provision the required environments for AI workloads.
+📌 **Goal:** Provision the foundational building blocks for AI workloads.
 
-| Objective | Recommended Actions |
+| Component | Recommended Actions |
 |------------|----------------------|
-| Network and access | Configure VNets, NSGs, Private Endpoints, Key Vault, and RBAC. |
-| Compute | Deploy GPU-based VMs, AKS clusters, or Azure ML workspaces. |
-| Automation | Implement IaC with Terraform or Bicep; integrate GitHub Actions. |
-| Observability | Set up Azure Monitor, Application Insights, and Prometheus. |
+| **Networking** | Create VNet, subnets, Private Endpoints, NSGs, internal DNS |
+| **Compute** | Deploy GPU VMs, AKS GPU node pools, AML Workspaces |
+| **Storage** | Blob, Data Lake, local NVMe |
+| **Automation** | IaC (Terraform/Bicep), GitHub Actions |
+| **Observability** | Azure Monitor, Prometheus, Application Insights |
 
-**Included Templates:**  
-- `bicep-vm-gpu/main.bicep`  
-- `terraform-aks-gpu/main.tf`  
-- `yaml-inference-api/deploy.yaml`  
+🔧 **eBook Templates:**
+
+- `bicep/vm-gpu.bicep` — GPU VM with NVMe  
+- `terraform/aks-gpu.tf` — AKS cluster with GPU pool  
+- `yaml/inference-api.yaml` — Inference API with health checks  
+
+💬 **Reminder:** “You don’t scale AI with spreadsheets. You scale it with code.”
 
 ---
 
-## 🔬 Phase 4 — Guided Experimentation and Initial Use Cases
+## 🧠 Phase 4 — Guided Experimentation and Initial Use Cases
 
-**Goal:** Execute pilot projects with measurable results.
+📌 **Goal:** Validate real-world scenarios and build technical confidence.
 
-| Objective | Recommended Actions |
-|------------|----------------------|
-| Deploy first AI workloads | Test log analysis, AI copilots, and anomaly detection. |
-| Publish inference APIs | Use Azure ML, AKS, or Function Apps. |
-| Validate pipelines and security | Perform prompt-injection testing, enforce RBAC, and isolate workspaces. |
+| Activity | Description |
+|-----------|-------------|
+| Run pilots | Intelligent logging, copilots, GPT-based alerts |
+| Build inference APIs | Deploy in AKS, AML, or Azure Functions |
+| Validate security | Test RBAC, prompt injection, and isolation |
+| Document learnings | Capture results and best practices |
 
-**Recommended Use Cases:**  
-- AI-assisted monitoring with LLMs  
-- Log and alert classification  
-- Internal ChatOps copilots  
-- Inference pipelines with rollback policies  
+🔧 **Suggested Starter Use Cases:**
+
+- Monitoring with LLM + Prometheus  
+- AI-driven log and alert analysis  
+- ChatOps (internal GPT-based copilots)  
+- Inference pipeline with automated rollback  
 
 ---
 
-## 🏢 Phase 5 — Scale, Governance, and Resilience
+## 🧱 Phase 5 — Scale, Governance, and Resilience
 
-**Goal:** Standardize, secure, and sustain AI infrastructure at scale.
+📌 **Goal:** Standardize, secure, and sustain AI workloads in production.
 
-| Objective | Recommended Actions |
-|------------|----------------------|
-| Standardize deployments | Centralized IaC modules, naming conventions, and tagging. |
-| Control cost and access | Budgets, Key Vault, Azure Policy, and federated identity. |
-| Ensure resilience | Multi-zone deployments, backups, and autoscaling with GPU metrics. |
-| Monitor production | Track latency, GPU usage, inference success rate, and cost. |
+| Area | Recommended Actions |
+|-------|----------------------|
+| **Standardization** | Centralized IaC templates, tagging, and conventions |
+| **Costs** | Azure Cost Management, budgets, GPU quotas |
+| **Security** | Key Vault, RBAC, federated identity |
+| **Resilience** | Availability Zones, backups, HA via Front Door |
+| **Observability** | Latency, tokens, GPU usage, 429s, cost per model |
 
-**Key Tools:**  
-- Azure Cost Management  
-- Azure Defender for Cloud  
+🔧 **Tools:**
+
 - Application Insights + Log Analytics  
-- GPU Autoscale Templates  
+- Azure Policy + Defender for Cloud  
+- Grafana (GPU metrics via DCGM)  
+- Autoscaling templates for inference workloads  
 
 ---
 
-## 🔁 Phase 6 — Continuous Adoption and Feedback
+## 🔄 Phase 6 — Continuous Adoption and Feedback
 
-**Goal:** Make AI part of everyday infrastructure operations.
+📌 **Goal:** Integrate AI sustainably into the infrastructure lifecycle.
 
-| Objective | Recommended Actions |
-|------------|----------------------|
-| Establish review culture | Run AI-driven postmortems and evolution dashboards. |
-| Document and share | Internal wikis, architecture guides, and reusable playbooks. |
-| Continuously evolve | A/B test new models and integrate advanced components (e.g., vector databases). |
+| Activity | Description |
+|-----------|-------------|
+| Continuous review | Post-mortems with AI and evolving dashboards |
+| Learning culture | Internal wiki and “Infra + AI” Teams channels |
+| Continuous improvement | A/B testing models, integrating Vector DBs |
+| Impact measurement | KPIs: MTTR, avoided incidents, reduced cost |
 
-**Suggestions:**  
-- Create an internal “Infra + AI” channel.  
-- Host bi-weekly knowledge-sharing sessions.  
-- Track KPIs (MTTR, incidents reduced, GPU utilization).  
+💡 **Tip:** AI isn’t a project — it’s a process. Establish learning and feedback cadence.
 
 ---
 
-## 🧩 Practical Uses of This Framework
+## 🧩 Framework Summary
 
-This framework can serve as:
-- A **maturity checklist** for infra teams adopting AI  
-- A **project guide** for new AI initiatives  
-- A **technical onboarding reference** for hybrid AI projects  
-- A **communication bridge** between infra and data teams  
-
----
-
-## ✅ Key Takeaways
-
-You now have a **strategic and actionable map** to lead or support AI adoption from an infrastructure perspective.  
-AI success isn’t owned by data teams alone — it’s powered by the foundation that infrastructure engineers build.
-
-> “AI needs infrastructure. And infrastructure needs to understand AI.”
+| Phase | Key Deliverable | Core Tools |
+|--------|------------------|-------------|
+| **Diagnostic** | Technical readiness plan | Excel, Quota Viewer |
+| **Enablement** | Shared technical knowledge base | AI-900, Labs |
+| **Preparation** | Secure GPU-enabled IaC environments | Terraform, Bicep |
+| **Experimentation** | Use cases and inference APIs | Azure ML, AKS |
+| **Scale** | Standardization, observability, and HA | Cost Mgmt, Prometheus |
+| **Continuous Adoption** | Governance and improvement loops | Dashboards, Feedback Loops |
 
 ---
 
-Next: [Chapter 9 — Azure OpenAI for Infrastructure: TPM, RPM, and PTU Explained](09-openai-tpm-ptu.md)
+## 📘 Practical Applications of the Framework
 
+This framework can be used as:
+
+- ✅ **Infrastructure Maturity Checklist** for technical teams  
+- 🧭 **Adoption roadmap** for Azure OpenAI, AML, and AKS  
+- 📑 **Onboarding guide** for new infrastructure team members  
+- 🔄 **Rollout plan** for GPU and distributed inference environments  
+
+✅ **Direct Benefit:** Transforms AI from an “experimental concept” into an **operational, scalable, and governed practice.**
+
+---
+
+## ✅ Chapter Conclusion
+
+You now have a complete technical roadmap to lead AI adoption within your organization — starting from what you already know best: **infrastructure**.
+
+> “AI adoption isn’t just the responsibility of data teams.  
+> It’s the responsibility of those who build the foundation. And that person is you.”
+
+---
+
+### ➡️ Next Chapter
+
+Advance your understanding of Azure AI workloads in [**Chapter 9 — Azure OpenAI for Infrastructure: Understanding TPM, RPM, and PTU**](09-openai-tpm-ptu.md).
