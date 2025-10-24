@@ -1,19 +1,14 @@
 # Chapter 9 — Azure OpenAI for Infrastructure: Understanding TPM, RPM, and PTU
 
-> “It’s not just about running the model — it’s about scaling it efficiently, predictably, and with cost control.”
+> “It’s not just about running the model — it’s about scaling with efficiency, predictability, and cost control.”
 
 ---
 
 ## 🎯 Why This Matters
 
-In AI workloads — especially when working with **LLMs like GPT-4** — the main unit of cost and limitation isn’t CPU, RAM, or runtime.  
-It’s **tokens**.
+In AI workloads — especially those using models like **GPT-4** or **GPT-4 Turbo** — resources aren’t measured in CPU or RAM, but in **tokens**.
 
-Designing reliable and scalable systems for Azure OpenAI means understanding three key dimensions:
-
-- **TPM (Tokens Per Minute)** — total tokens processed (input + output) per minute  
-- **RPM (Requests Per Minute)** — number of API calls allowed per minute  
-- **PTU (Provisioned Throughput Unit)** — dedicated throughput capacity purchased for guaranteed performance
+For infrastructure architects and engineers, understanding **TPM (Tokens per Minute)**, **RPM (Requests per Minute)**, and **PTU (Provisioned Throughput Unit)** is essential to properly size throughput, cost, and latency.
 
 ---
 
@@ -21,133 +16,174 @@ Designing reliable and scalable systems for Azure OpenAI means understanding thr
 
 | Term | Definition |
 |------|-------------|
-| **Token** | A small text fragment (1–4 per word). Ex: “infrastructure” ≈ 2–3 tokens. |
-| **TPM** | Max number of tokens (input + output) the model can process per minute. |
-| **RPM** | Number of API calls per minute. Equivalent to **QPS × 60**. |
-| **QPS** | Queries per second — rate of concurrent inference calls. |
-| **Context Length** | Maximum number of tokens a model can handle in one request. |
-| **PTU** | A fixed throughput allocation (Azure OpenAI) that ensures predictable performance and latency. |
+| **Token** | A text fragment processed by the model. Example: “infrastructure” = 2–3 tokens. |
+| **TPM (Tokens per Minute)** | Maximum number of tokens (input + output) a model can process per minute. |
+| **RPM (Requests per Minute)** | Maximum number of API calls per minute. |
+| **QPS (Queries per Second)** | Requests per second — equivalent to RPM ÷ 60. |
+| **Context Length** | Maximum number of tokens that can be processed in a single request. |
+| **PTU (Provisioned Throughput Unit)** | Dedicated throughput unit in Azure OpenAI guaranteeing capacity and predictable latency. |
 
 ---
 
-## ⚙️ How to Calculate Throughput
+## 🔢 Essential Calculations
 
-### 1️⃣ Estimate TPM consumption
+📌 **Tokens are not words.**  
+A word can represent 1–4 tokens.
 
-```text
-TPM = (Input tokens + Output tokens) × RPM
-```
-
-Example:
-
-If your app makes **500 requests/minute** and each request consumes **800 tokens** (input + output):
-
-```
-TPM = 500 × 800 = 400,000 tokens per minute
-```
-
-➡️ You’ll need **≥400k TPM** available in your quota (and at least 500 RPM).
+**Example:**  
+“infrastructure is important” → 4 words ≈ 5–6 tokens
 
 ---
 
-### 2️⃣ Estimate tokens per request
+### 📈 Practical Formulas
 
-```text
-Tokens per request = TPM ÷ (QPS × 60)
+**Estimate tokens per request:**  
+`t_tokens_per_request ≈ input_tokens + avg_output_tokens`
+
+**Calculate total TPM consumption:**  
+`TPM_estimated = tokens_per_request × RPM`
+
+**Example:**  
+500 requests/min × 800 tokens/request = **400,000 TPM**  
+➡️ You need at least **400k TPM** and **500 RPM** available on your endpoint.
+
+---
+
+### 📊 QPS Calculation from TPM
+
+`QPS_max = TPM ÷ (tokens_per_request × 60)`
+
+**Example:**  
+If you have **15M TPM** and each request consumes **30k tokens:**  
+`QPS = 15,000,000 ÷ (30,000 × 60) ≈ 8 QPS`
+
+You can handle approximately **8 requests per second** at that throughput.
+
+---
+
+## ⚙️ Consumption Models Comparison
+
+| Characteristic | **Standard (Public Consumption)** | **PTU (Provisioned Throughput Unit)** |
+|----------------|------------------------------------|--------------------------------------|
+| **Allocation Type** | Shared (multi-tenant) | Dedicated (isolated and fixed) |
+| **Latency** | Variable | Stable and predictable |
+| **Throughput Control** | Limited to default quota | User-defined TPM and QPS |
+| **Capacity Guarantee** | ❌ Not guaranteed | ✅ Guaranteed by contract |
+| **Billing** | Pay per token | Pay per hour (usage-independent) |
+| **Ideal For** | POCs, dev, testing | Production, copilots, critical APIs |
+
+---
+
+## 🧮 Calculating Required PTUs
+
+Each PTU provides predictable capacity — for example:
+
+**1 PTU (GPT-4 Turbo)** ≈ **5,000 TPM** and **10 QPS**
+
+**Formula:**  
+`PTUs = desired_TPM ÷ 5,000`
+
+**Example:**  
+If your app needs **20,000 TPM**, reserve **4 PTUs**.
+
+---
+
+## 🧱 Typical Architecture with PTU
+
+```mermaid
+graph TD
+  user[User / Application] --> APIM[API Management]
+  APIM --> LB[Azure Front Door / Load Balancer]
+  LB --> AKS[AKS with Inference Pods]
+  AKS --> AOAI[Azure OpenAI PTU Endpoint]
+  AOAI --> Logs[Application Insights / Log Analytics]
 ```
 
-Example:
+**Recommended Components:**
 
-If you use **15M TPM** and handle **8 QPS**:
-
-```
-Tokens per request = 15,000,000 ÷ (8 × 60) = 31,250 tokens/request
-```
-
-Each call averages 31k tokens (prompt + completion combined).
+- API Management with **token-based rate limiting**  
+- AKS or Azure Functions for **decoupling**  
+- Front Door for **routing and failover**  
+- Logging and metrics via **Application Insights**  
 
 ---
 
-## 🔍 Understanding the Relationship Between TPM, QPS, and Cost
+## 🚨 Detecting Throttling and Bottlenecks
 
-| Metric | What It Impacts |
-|---------|----------------|
-| **TPM** | Defines overall throughput. |
-| **QPS** | Defines concurrency and responsiveness. |
-| **Tokens per request** | Affects both cost and throttling risk. |
-| **Model type** | Each model (GPT-4, GPT-4-Turbo, GPT-3.5) has different token pricing. |
+| Symptom | Possible Cause |
+|----------|----------------|
+| **HTTP 429** | Exceeded RPM or TPM |
+| **Irregular latency** | Model under load |
+| **Truncated responses** | Context overflow or throttling |
+| **Throughput drop** | Regional capacity constraints |
 
----
+**Diagnostic Tools:**
 
-## 🧱 Standard vs. PTU (Provisioned Throughput Unit)
-
-| Feature | **Standard (Consumption)** | **PTU (Dedicated Throughput)** |
-|----------|-----------------------------|--------------------------------|
-| **Billing** | Pay-per-use (per token) | Fixed hourly cost per PTU |
-| **Isolation** | Shared, multi-tenant | Dedicated resources |
-| **Latency** | May vary with demand | Predictable, low latency |
-| **Scalability** | Limited by quotas and region | Scales predictably with more PTUs |
-| **Ideal For** | Prototyping, small apps | Production workloads, enterprise LLMs |
-
-💡 **Example:**  
-1 PTU for GPT-4 Turbo provides around **5,000 TPM** and **10 QPS**.  
-You can combine multiple PTUs to scale linearly.
+- Application Insights (requests & duration metrics)  
+- Azure Monitor (custom metrics)  
+- Log Analytics (`requests | summarize count()`)  
 
 ---
 
-## 🚨 Recognizing Throttling Symptoms
-
-If your workload exceeds limits:
-
-- HTTP **429 (Too Many Requests)** errors  
-- Inconsistent latency or partial responses  
-- Timeouts or incomplete outputs  
-
-✅ **Mitigation Strategies**
-
-- Use **retry policies** with exponential backoff.  
-- Add **message queues (Event Hub, Storage Queue)** for bursts.  
-- Track real usage in **Application Insights** or **Azure API Management**.
-
----
-
-## 🔄 Performance Optimization Tips
+## 🧠 Strategies to Optimize Performance and Cost
 
 | Strategy | Benefit |
 |-----------|----------|
-| Shorten prompts | Reduces token cost and latency. |
-| Compress conversation history | Improves performance with long sessions. |
-| Cache frequent responses | Avoids redundant token use. |
-| Use embeddings (RAG) | Replace context tokens with vector search. |
-| Batch or multiplex requests | Maximizes throughput efficiency. |
-| Choose the right model | Smaller models (like GPT-3.5) are cheaper and faster for simple tasks. |
+| Reduce prompt size | Lowers cost and latency |
+| Summarize context with embeddings (RAG) | Maintains context efficiently |
+| Cache responses | Avoids recomputation |
+| Batch requests (multiplexing) | Increases throughput |
+| Use appropriate models | GPT-3.5 or embeddings for simpler tasks |
+| Intermediate queue (Event Hub, Queue) | Controls RPM and retries |
+| Retries with exponential backoff | Prevents overload |
 
 ---
 
-## 📊 Visual — Relationship Between TPM, QPS, and Cost
+## 📈 Relationship Between TPM, QPS, and Cost
 
-![Relationship Between TPM, QPS, and Cost](../images/relationship-tpm-qps-cost.png "Relationship Between TPM, QPS, and Cost")
-
----
-
-## ✅ Checklist for Infrastructure Engineers
-
-- [x] I know my workload’s **average tokens per request**.  
-- [x] I’ve estimated total **TPM** and **RPM** needed.  
-- [x] I monitor **429 errors** and **latency metrics**.  
-- [x] I have retry and fallback logic implemented.  
-- [x] I understand when to switch from **Standard to PTU**.  
-- [x] I track cost per request and per user.  
+```mermaid
+graph LR
+  TPM[Tokens per Minute] --> TPR[Tokens per Request]
+  QPS[Queries per Second] --> TPR
+  TPR --> Cost
+  Model[Model Type] --> Cost
+  TPR --> Throttling
+  QPS --> Latency
+```
 
 ---
 
-## 📚 References
+## ✅ Planning and Tuning Checklist
 
-- [Azure OpenAI Service Quotas and Limits](https://learn.microsoft.com/en-us/azure/ai-services/openai/quotas-limits)  
-- [Azure OpenAI Pricing](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/openai-service/)  
-- [Azure Monitor for OpenAI](https://learn.microsoft.com/en-us/azure/ai-services/openai/how-to/monitor)  
+- [x] Calculated total TPM needed  
+- [x] Estimated average tokens per request  
+- [x] Sized QPS and RPM expectations  
+- [x] Chose appropriate model (GPT-4, GPT-3.5, embeddings)  
+- [x] Set up usage and cost alerts  
+- [x] Configured Application Insights + Log Analytics  
+- [x] Planned fallback and automatic retries  
+- [x] Know when to migrate from **Standard → PTU**  
 
 ---
 
-Next: [Chapter 10 — Visual Glossary: AI for Infrastructure Professionals](10-visual-glossary.md)
+## 📘 References and Useful Resources
 
+- [Azure OpenAI Service Quotas and Limits](https://learn.microsoft.com/azure/ai-services/openai/quotas-limits)  
+- [PTU Pricing and Throughput](https://learn.microsoft.com/azure/ai-services/openai/concepts/provisioned-throughput)  
+- [Azure Monitor + Application Insights for OpenAI](https://learn.microsoft.com/azure/azure-monitor/app/opentelemetry-enable)  
+- [Token Cost Calculation](https://learn.microsoft.com/azure/ai-services/openai/how-to/costs)  
+
+---
+
+## 💡 Conclusion
+
+Understanding TPM, RPM, and PTU is essential to make AI **predictable, scalable, and cost-efficient**.  
+These metrics bridge the gap between **infrastructure** and **applied AI**, ensuring your architecture delivers consistent performance and controlled costs.
+
+> “Infrastructure makes AI run — but understanding consumption is what makes AI scale.”
+
+---
+
+### ➡️ Next Chapter
+
+Explore key AI terms and visuals that tie everything together in [**Chapter 10 — Visual Glossary: AI for Infrastructure Professionals**](10-visual-glossary.md).
