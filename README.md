@@ -19,7 +19,7 @@ This project is the meeting point between **Infra + AI**, bringing:
 
 ## 📂 Repository Structure
 
-\`\`\`bash
+```bash
 ai-for-infra-pros/
 ├── docs/
 │   ├── chapters/
@@ -43,7 +43,7 @@ ai-for-infra-pros/
 │   │   ├── cheatsheets.md
 │   │   └── case-studies.md
 └── README.md
-\`\`\`
+```
 
 ---
 
