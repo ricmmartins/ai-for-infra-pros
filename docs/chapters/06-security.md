@@ -121,7 +121,7 @@ az ml online-endpoint update \
 | Rate limiting and API auth | ✅ |
 | Access logs enabled | ✅ |
 | Deployment in private VNet | ✅ |
-| Prompt injection testing performed | 🔲 |
+| Prompt injection testing performed | ✅ |
 | Model backups isolated | ✅ |
 
 ---
