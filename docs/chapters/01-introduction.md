@@ -104,6 +104,6 @@ AI workloads demand a combination of **compute, network, and observability excel
 
 ## 🧭 What’s Next
 
-Continue to [Chapter 2 — Data: The Fuel of Artificial Intelligence](02-dados.md)  
+Continue to [Chapter 2 — Data: The Fuel of Artificial Intelligence](02-data.md)  
 to understand how data architecture, pipelines, and storage power every model you’ll deploy.
 
