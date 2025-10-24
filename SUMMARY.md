@@ -43,9 +43,3 @@
 - [Technical Case Studies](docs/extras/estudos-de-caso.md)
 
 ---
-
-## 🧠 Project Meta
-
-- [Contributing Guidelines](CONTRIBUTING.md)
-- [Portuguese Version (README_PT.md)](README_PT.md)
-- [English Version (README_EN.md)]
