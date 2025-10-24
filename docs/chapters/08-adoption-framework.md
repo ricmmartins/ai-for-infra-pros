@@ -80,9 +80,9 @@ flowchart TD
 | **Automation** | IaC (Terraform/Bicep), GitHub Actions |
 | **Observability** | Azure Monitor, Prometheus, Application Insights |
 
-🔧 **eBook Templates:**
+🔧 **Templates:**
 
-- `bicep/vm-gpu.bicep` — GPU VM with NVMe  
+- `[bicep/vm-gpu.bicep](../../extras/labs/bicep-vpm-gpu)` — GPU VM with NVMe  
 - `terraform/aks-gpu.tf` — AKS cluster with GPU pool  
 - `yaml/inference-api.yaml` — Inference API with health checks  
 
