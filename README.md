@@ -1,20 +1,44 @@
-# AI for Infra Pros
-### The Artificial Intelligence Handbook for Infrastructure Professionals
+# 🤖 AI for Infra Pros  
+### The Practical Handbook for Infrastructure Engineers  
 
 ---
 
-## Overview
+> “You don’t need to be a data scientist to work with AI — but you do need to understand how it runs, scales, and is observed.”
 
-**AI for Infra Pros** is a technical and hands-on handbook for professionals from the **traditional infrastructure world** who want to understand — in practice — how **Artificial Intelligence connects to networking, compute, automation, and observability**.
+---
 
-This project is the meeting point between **Infra + AI**, bringing:
-- Educational and applicable content (complete and organized chapters)
-- **Real labs** to practice with Azure CLI, Terraform, Bicep, and AKS
-- **Ready-to-use architectural diagrams**
-- **Security and governance checklists**
-- **Technical use cases** and an **adoption framework**
-- A **visual glossary** to translate AI into infrastructure language
+## 🧭 Overview
 
+**AI for Infra Pros** is a practical and technical handbook designed to help infrastructure, cloud, and DevOps professionals understand and apply **Artificial Intelligence in a secure, efficient, and scalable way**.
+
+This repository combines foundational knowledge, best practices, and real-world examples to turn infrastructure expertise into a competitive advantage in the AI era.
+
+---
+
+## 🧩 What You’ll Find
+
+- 🧠 AI fundamentals explained from an infrastructure perspective  
+- ⚙️ Architecture and automation models using **Bicep**, **Terraform**, and **YAML**  
+- 🧪 Hands-on mini-labs with **AKS**, **GPU VMs**, and **Azure Machine Learning**  
+- 📈 Strategies for **monitoring, security, and resilience** in AI workloads  
+- 🧰 Visual glossary comparing key **Infrastructure vs. AI** concepts  
+- 🧩 An **AI Adoption Framework** tailored for technical teams  
+
+---
+
+## 🚀 How to Navigate
+
+Each chapter is designed to be **independent and complementary**.  
+If you want to start quickly:
+
+| Goal | Where to Start |
+|-----------|---------------|
+| Understand how AI connects to Infrastructure | [Chapter 1 - AI Fundamentals](docs/chapters/01-introduction.md) |
+| Build an AI environment | [Chapter 4 - IaC and Automation](docs/chapters/04-iac.md) |
+| Measure and observe AI workloads | [Chapter 5 - Monitoring and Observability](docs/chapters/05-monitoring.md) |
+| Ensure security and resilience | [Chapter 6 - Security in AI Environments](docs/chapters/06-security.md) |
+| Get hands-on experience | [Mini-Labs](docs/extras/labs/) |
+| Translate terms and concepts | [Visual Glossary](docs/chapters/10-visual-glossary.md) |
 ---
 
 ## 📂 Repository Structure
@@ -44,28 +68,11 @@ ai-for-infra-pros/
 │   │   └── case-studies.md
 └── README.md
 └── SUMMARY.md
-
 ```
 
 ---
 
-## How to Navigate
-
-Each chapter is designed to be **independent and complementary**.  
-Want to start quickly?
-
-| Goal | Where to Start |
-|------|----------------|
-| Understand how AI connects to Infrastructure | [Chapter 1 – AI Fundamentals](docs/chapters/01-introduction.md) |
-| Build an AI environment | [Chapter 4 – IaC and Automation](docs/chapters/04-iac.md) |
-| Measure and observe AI workloads | [Chapter 5 – Monitoring and Observability](docs/chapters/05-monitoring.md) |
-| Ensure security and resilience | [Chapter 6 – Security in AI Environments](docs/chapters/06-security.md) |
-| Get hands-on experience | [Mini Labs](docs/extras/labs/) |
-| Translate terms and concepts | [Visual Glossary](docs/chapters/10-visual-glossary.md) |
-
----
-
-## Target Audience
+## 🧩 Target Audience
 
 Professionals in:
 
@@ -73,29 +80,31 @@ Professionals in:
 - DevOps and SRE  
 - Solutions Architecture  
 - Security and Governance  
-- Data Engineering professionals who want to understand the infrastructure side of AI
+- Data Engineering professionals who want to understand the infrastructure side of AI  
 
 ---
 
-## Mission
+## 💬 Mission
 
-Turn infrastructure knowledge into an edge in the era of Artificial Intelligence.  
-Show that **you don’t need to be a data scientist to work with AI — but you do need to know how it runs, scales, and is observed.**
-
----
-
-## Contributing
-
-Contributions are welcome!  
-Open an issue or submit a pull request with improvements, examples, or fixes. Please keep examples reproducible and reference the chapter they relate to.
+To turn infrastructure knowledge into an advantage in the era of Artificial Intelligence.  
+To show that **you don’t need to be a data scientist to work with AI — but you do need to understand how it runs, scales, and is observed.**
 
 ---
 
-## Credits
+## 🧪 Extra Resources
+
+- [Infrastructure Mini-Labs for AI](docs/extras/labs/)  
+- [Architectural Diagrams](docs/extras/diagrams/README.md)  
+- [Technical FAQ and Cheatsheets](docs/extras/technical-faq.md)  
+- [Real Case Studies](docs/extras/case-studies.md)
+
+---
+
+## 📚 Credits
 
 Created by **Ricardo Martins**  
-📍 Principal Cloud Solution Architect @ Microsoft  
-📖 Author of *Azure Governance Made Simple*  
+📍 Principal Solutions Engineer @ Microsoft  
+📖 Author of [*Azure Governance Made Simple*](https://book.azgovernance.com/)  
 🌐 [rmmartins.com](https://rmmartins.com)
 
 ---
