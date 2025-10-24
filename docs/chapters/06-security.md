@@ -158,7 +158,7 @@ Resilience is built *before* failure.
 | API rate limiting and authentication | ✅ |
 | Centralized logging and auditing | ✅ |
 | Private VNet deployment with NSG | ✅ |
-| Prompt injection / abuse testing | 🔲 |
+| Prompt injection / abuse testing | ✅ |
 | Model backup and versioning | ✅ |
 | Disaster recovery strategy defined | ✅ |
 
