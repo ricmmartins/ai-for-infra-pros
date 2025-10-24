@@ -13,16 +13,16 @@
 
 ## 📖 Main Chapters
 
-1. [Foundations of AI for Infrastructure](docs/capitulos/01-introducao.md)
-2. [Data — The Fuel of Artificial Intelligence](docs/capitulos/02-dados.md)
-3. [Infrastructure and Compute for AI Workloads](docs/capitulos/03-compute.md)
-4. [Infrastructure as Code (IaC) and Automation](docs/capitulos/04-iac.md)
-5. [Monitoring and Observability for AI Environments](docs/capitulos/05-monitoramento.md)
-6. [Security and Resilience in AI Systems](docs/capitulos/06-seguranca.md)
-7. [AI Use Cases for Infrastructure Engineers](docs/capitulos/07-casos-de-uso.md)
-8. [AI Adoption Framework for Infrastructure](docs/capitulos/08-framework-adocao.md)
-9. [Azure OpenAI for Infra — Understanding TPM, RPM, and PTUs](docs/capitulos/09-openai-tpm-ptu.md)
-10. [Visual Glossary — Translating AI for Infra Engineers](docs/capitulos/10-glossario-visual.md)
+1. [Foundations of AI for Infrastructure](docs/chapters/01-introduction.md)
+2. [Data — The Fuel of Artificial Intelligence](docs/chapters/02-data.md)
+3. [Infrastructure and Compute for AI Workloads](docs/chapters/03-compute.md)
+4. [Infrastructure as Code (IaC) and Automation](docs/chapters/04-iac.md)
+5. [Monitoring and Observability for AI Environments](docs/chapters/05-monitoring.md)
+6. [Security and Resilience in AI Systems](docs/chapters/06-security.md)
+7. [AI Use Cases for Infrastructure Engineers](docs/chapters/07-use-cases.md)
+8. [AI Adoption Framework for Infrastructure](docs/chapters/08-adoption-framework.md)
+9. [Azure OpenAI for Infrastructure — Understanding TPM, RPM, and PTUs](docs/chapters/09-azure-openai-tpm-ptu.md)
+10. [Visual Glossary — Translating AI for Infrastructure Engineers](docs/chapters/10-visual-glossary.md)
 
 ---
 
@@ -30,15 +30,14 @@
 
 - [Mini-Labs Overview](docs/extras/labs/README.md)
   - [Deploying a GPU VM with Bicep](docs/extras/labs/bicep-vm-gpu/README.md)
-  - [Creating an AKS Cluster with GPU (Terraform)](docs/extras/labs/terraform-aks-gpu/README.md)
-  - [Building an Inference API with YAML](docs/extras/labs/yaml-inferencia-api/README.md)
+  - [Creating an AKS Cluster with GPU using Terraform](docs/extras/labs/terraform-aks-gpu/README.md)
+  - [Building an Inference API with YAML](docs/extras/labs/yaml-inference-api/README.md)
 
 ---
 
 ## 🧩 Extras and Reference Material
 
-- [Architectural Diagrams](docs/extras/diagramas/README.md)
-- [Technical FAQ and Cheatsheets](docs/extras/faq-tecnico.md)
-- [Checklists and Quick References](docs/extras/cheatsheets.md)
-- [Technical Case Studies](docs/extras/estudos-de-caso.md)
-
+- [Architectural Diagrams](docs/extras/diagrams/README.md)
+- [Technical FAQ and Cheatsheets](docs/extras/technical-faq.md)
+- [Checklists and Quick References](docs/extras/checklists.md)
+- [Technical Case Studies](docs/extras/case-studies.md)
