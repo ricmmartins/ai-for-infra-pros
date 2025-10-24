@@ -126,7 +126,7 @@ If your workload exceeds limits:
 
 ## 📊 Visual — Relationship Between TPM, QPS, and Cost
 
-![Relationship Between TPM, QPS, and Cost](relationship-tpm-qps-cost.png "Relationship Between TPM, QPS, and Cost")
+![Relationship Between TPM, QPS, and Cost](../images/relationship-tpm-qps-cost.png "Relationship Between TPM, QPS, and Cost")
 
 ---
 
