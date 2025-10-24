@@ -83,8 +83,8 @@ flowchart TD
 🔧 **Templates:**
 
 - [bicep/vm-gpu.bicep](../extras/labs/bicep-vm-gpu/) — GPU VM with NVMe  
-- `terraform/aks-gpu.tf` — AKS cluster with GPU pool  
-- `yaml/inference-api.yaml` — Inference API with health checks  
+- [terraform/aks-gpu.tf](../extras/labs/terraform-aks-gpu/) — AKS cluster with GPU pool  
+- [yaml/inference-api.yaml](../extras/labs/yaml-inference-api/) — Inference API with health checks  
 
 💬 **Reminder:** “You don’t scale AI with spreadsheets. You scale it with code.”
 
