@@ -1,83 +1,107 @@
 # Chapter 6 — Security and Resilience in AI Environments
 
-> “Powerful models require equally strong protections.”
+> “Powerful models demand equally strong protections.”
 
 ---
 
-## 🎯 Why AI Security Is Different
+## 🚨 Why AI Security Is Different
 
-AI workloads introduce new and unique risks:
-- **Data leakage** (PII or intellectual property)
-- **Prompt injection** or model manipulation
-- **Abuse of inference APIs**
-- **Unexpected GPU cost spikes**
-- **Downtime in mission-critical decision systems**
+AI environments face unique risks that go beyond traditional application security:
 
-AI doesn’t run in isolation — it depends on secure, resilient, and auditable infrastructure.  
-That’s where infrastructure engineers shine.
+- Leakage of sensitive data (PII, intellectual property, customer data)  
+- Model misuse, such as prompt injection and jailbreaks  
+- Attacks on inference APIs and quota exploitation  
+- Unexpected costs from GPU abuse or token consumption  
+- Dependency on critical infrastructure — where failures can halt business decisions  
+
+AI doesn’t run in isolation — it depends on **secure, resilient, and auditable infrastructure**.  
+That’s your domain as an infrastructure professional.
 
 ---
 
-## 🔐 Core Security Pillars for AI
+## 🧱 Security Fundamentals for AI Environments
 
-| Pillar | Applied to AI |
-|---------|----------------|
-| **Identity & Access** | Who can access models, data, and GPUs? |
-| **Data Security** | Encryption, DLP, data classification |
-| **API Protection** | Auth, throttling, validation of inference requests |
-| **Secrets Management** | Keys, credentials, and tokens |
-| **Governance** | Auditing, compliance, environment isolation |
+| Security Pillar | Application in AI |
+|------------------|------------------|
+| **Identity and Access** | Who can access the model, data, and GPU |
+| **Data Protection** | Encryption, DLP, classification, segregation |
+| **API Security** | Authentication, rate limiting, WAF, monitoring |
+| **Secret Management** | Keys, connections, and tokens stored securely |
+| **Governance and Auditability** | Compliance, logging, traceability |
+
+💡 Security in AI isn’t just about firewalls — it’s about **trust, traceability, and ethical use**.
 
 ---
 
 ## 👤 Identity and Access Control
 
-- Use **Azure RBAC** for VMs, AKS, AML, and storage.
-- Prefer **User-Assigned Managed Identity** for pipelines.
-- Enforce **Conditional Access** and MFA for dashboards and endpoints.
-- Avoid static keys — use federated identities via OIDC.
+- Use **Azure RBAC** to control access to resources (VMs, AKS, AML, Storage).  
+- Apply **Managed Identities (UAMI)** in pipelines and automated services.  
+- Adopt **Azure AD + Conditional Access + MFA** for human authentication.  
+- Avoid static keys — prefer **federated identities (OIDC)** and **temporary tokens**.  
+
+```bash
+az ad sp create-for-rbac --name "ai-aks-service" --role contributor \
+  --scopes /subscriptions/{id}/resourceGroups/rg-ai
+```
+
+🔐 **Tip:** Temporary and federated identities drastically reduce credential exposure risks.
 
 ---
 
-## 🔒 Data Protection
+## 🔑 Secrets and Key Protection
 
-| Action | Azure Feature |
-|---------|----------------|
-| **Encryption at rest** | Server-Side Encryption (SSE) enabled by default |
-| **Encryption in transit** | Enforce HTTPS, TLS 1.2+ |
-| **Data classification** | Microsoft Purview |
-| **Environment isolation** | VNets, NSGs, and separate workspaces |
-| **Model/data backups** | Azure Backup, snapshots, GitHub repos |
+| Resource | Function | Best Practice |
+|-----------|-----------|----------------|
+| **Azure Key Vault** | Secure storage for keys and secrets | Use RBAC and restrictive access policies |
+| **Managed Identity** | Avoids credential exposure | Replaces static passwords in pipelines |
+| **API Tokens** | Fine-grained control over usage and billing | Combine with rate limiting |
+| **Azure Policy** | Governance for diagnostics and logging | Ensures active logging and compliance |
 
-💡 **Best practices:**
-- Never expose model endpoints without authentication.
-- Use **SAS tokens with short TTL** for temporary dataset access.
-- Store secrets only in **Key Vault**, never in code.
+```bash
+az keyvault set-policy --name kv-ai --object-id <principalId> --secret-permissions get list
+```
 
 ---
 
-## 🧬 Securing Models and Inference APIs
+## 🔐 Data and Model Protection
+
+| Action | Azure Tool / Service | Note |
+|---------|----------------------|------|
+| **Encryption at rest** | SSE enabled by default on Storage | Use customer-managed keys (CMK) |
+| **Encryption in transit** | TLS 1.2+ and mandatory HTTPS | Include valid certificates in Front Door / Gateway |
+| **Data classification** | Microsoft Purview | Identify PII and sensitive data |
+| **Environment segregation** | VNets, NSGs, isolated workspaces | Separate dev/test/prod |
+| **Model backups** | Azure Backup, Snapshots, Git repos | Include metadata and versioning |
+
+🚫 **Never expose inference endpoints publicly without authentication.**  
+Use **Private Endpoints** and **API Management** for control and logging.
+
+---
+
+## ⚔️ Model and Inference Security
 
 | Risk | Recommended Mitigation |
-|------|------------------------|
-| **Prompt Injection / Jailbreaks** | Input sanitization, parameter validation |
-| **Model Abuse / Overuse** | Auth + Rate limiting |
-| **Model Extraction (stealing)** | Limit requests per IP/token |
-| **Unauthorized GPU access** | Taints, tolerations, RBAC in AKS / AML |
+|------|-------------------------|
+| **Prompt Injection / Jailbreaks** | Input sanitization, filters, and validation |
+| **Model Misuse** | Authentication and rate limiting on APIs |
+| **Model Stealing (Reverse Extraction)** | Limit requests per IP/token |
+| **GPU Access Abuse** | RBAC + taints/tolerations in AKS |
+| **Data Leakage** | Audit logs and anonymize prompts/responses |
+
+💡 Conduct **internal red teaming** to test prompt and response vulnerabilities.
 
 ---
 
-## 🛡️ Building Resilience for AI Workloads
+## 🛡️ Network Protections
 
-1. **Availability Zones:** deploy across multiple zones/regions.  
-2. **Azure Front Door / App Gateway:** load balancing + health probes.  
-3. **Auto-scaling:** use GPU metrics, latency, and QPS thresholds.  
-4. **Container probes:** restart on failed inference.  
-5. **Retry and fallback logic:** ensure continuity for critical endpoints.
-
----
-
-## 🧪 Example — Restricting Endpoint Access
+| Resource | Recommended Use |
+|-----------|----------------|
+| **Private Endpoints** | Private communication with OpenAI, AML, and Storage |
+| **NSG + UDR** | Restrict traffic in GPU subnets |
+| **Azure Firewall / WAF** | Block payload injection attacks |
+| **API Management** | Authentication, quotas, logging, centralized auditing |
+| **Front Door / App Gateway** | Load balancing with TLS and health probes |
 
 ```bash
 az ml online-endpoint update \
@@ -86,51 +110,70 @@ az ml online-endpoint update \
   --set public_network_access=disabled
 ```
 
-✅ Allow access only via private VNet and firewall rules.
+🔧 Allow access **only via VNet** with **Private Link** and properly configured firewalls.
 
 ---
 
-## ⚙️ Resilience Patterns
+## 🔁 Resilience: Designing for High Availability
 
-| Component | Strategy |
-|------------|-----------|
-| **Storage** | Geo-redundant or zone-redundant replication |
-| **Compute** | Multiple node pools (GPU + CPU) |
-| **API** | Front Door failover between regions |
-| **Pipeline** | Retry policy + circuit breaker pattern |
+Strategies for inference workloads and critical pipelines:
+
+- **Availability Zones:** Deploy across multiple zones/regions.  
+- **Load Balancing:** Use Front Door or Application Gateway.  
+- **Intelligent Autoscaling:** Based on GPU usage, latency, or request queues.  
+- **Health Probes and Auto-Restart:** For AKS pods and critical containers.  
+- **Retry and Fallback:** With alternate models or cached responses.  
+- **Disaster Recovery:** Replicate data and models across secondary regions.  
+
+```mermaid
+graph LR
+  user[User / API Client] --> APIM[API Management]
+  APIM --> WAF[Web Application Firewall]
+  WAF --> AKS[AKS with GPU]
+  AKS --> OpenAI[Azure OpenAI (Private Endpoint)]
+  AKS --> KV[Key Vault]
+  AKS --> Log[Azure Monitor + Log Analytics]
+  KV --> Storage[Blob with Models / Checkpoints]
+```
 
 ---
 
-## 🧠 AI Security ≠ Traditional Security
+## 💡 Production Lessons (Real Cases)
 
-| Traditional Security | AI Security Adds |
-|----------------------|------------------|
-| Protect servers & networks | Protect *models* and *data flows* |
-| Monitor login attempts | Monitor token usage and inference logs |
-| Patch management | Model version control and drift detection |
-| Firewall rules | API-level filters and input validation |
+❌ Pod froze after 200 requests without readiness probe → ✅ **Fix:** Add health check + auto-restart.  
+❌ Key Vault token expired and blocked pipeline → ✅ **Fix:** Use Managed Identity with auto-renewal.  
+❌ Logs captured customer prompts → ✅ **Fix:** Mask and anonymize logs.  
+
+🔄 **Test your incidents before they happen.**  
+Resilience is built *before* failure.
 
 ---
 
-## 📋 Security & Resilience Checklist
+## 🧾 Security and Resilience Checklist
 
 | Item | Status |
-|-------|--------|
+|------|---------|
 | Managed identities, no static keys | ✅ |
-| Data & models encrypted | ✅ |
-| Rate limiting and API auth | ✅ |
-| Access logs enabled | ✅ |
-| Deployment in private VNet | ✅ |
-| Prompt injection testing performed | ✅ |
-| Model backups isolated | ✅ |
+| Models and data encrypted | ✅ |
+| API rate limiting and authentication | ✅ |
+| Centralized logging and auditing | ✅ |
+| Private VNet deployment with NSG | ✅ |
+| Prompt injection / abuse testing | 🔲 |
+| Model backup and versioning | ✅ |
+| Disaster recovery strategy defined | ✅ |
 
 ---
 
 ## ✅ Conclusion
 
-AI infrastructure must be both **secure and resilient**.  
-Your expertise in segmentation, high availability, and access control is vital to make AI reliable.  
-You don’t need to know everything about LLMs — but you must ensure they run safely, efficiently, and continuously.
+Security and resilience are what sustain AI in production.  
+Without them, even the most advanced model can become a liability.
 
-Next: [Chapter 7 — AI Use Cases for Infrastructure Engineers](07-use-cases.md)
+You don’t need to understand every layer of the model to be essential in AI —  
+but you must ensure it operates securely, efficiently, and continuously.
 
+---
+
+### ➡️ Next Chapter
+
+Discover how real-world teams are applying these principles in [**AI Use Cases for Infrastructure Professionals**](07-ai-use-cases.md).
