@@ -127,13 +127,13 @@ Strategies for inference workloads and critical pipelines:
 
 ```mermaid
 graph LR
-  user[User / API Client] --> APIM[API Management]
-  APIM --> WAF[Web Application Firewall]
-  WAF --> AKS[AKS with GPU]
-  AKS --> OpenAI[Azure OpenAI (Private Endpoint)]
-  AKS --> KV[Key Vault]
-  AKS --> Log[Azure Monitor + Log Analytics]
-  KV --> Storage[Blob with Models / Checkpoints]
+  user["User / API Client"] --> APIM["API Management"]
+  APIM --> WAF["Web Application Firewall"]
+  WAF --> AKS["AKS with GPU"]
+  AKS --> OpenAI["Azure OpenAI (Private Endpoint)"]
+  AKS --> KV["Key Vault"]
+  AKS --> Log["Azure Monitor + Log Analytics"]
+  KV --> Storage["Blob with Models / Checkpoints"]
 ```
 
 ---
