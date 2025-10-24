@@ -42,4 +42,3 @@
 - [Checklists and Quick References](docs/extras/cheatsheets.md)
 - [Technical Case Studies](docs/extras/estudos-de-caso.md)
 
----
