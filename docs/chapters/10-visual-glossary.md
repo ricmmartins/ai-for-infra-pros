@@ -56,7 +56,7 @@ Each AI term comes with:
 
 ### 🧠 Model Lifecycle
 
-![Model Lifecycle](../images/model.life-cycle.png "Model Lifecycle")
+![Model Lifecycle](../images/model-life-cycle.png "Model Lifecycle")
 
 ---
 
