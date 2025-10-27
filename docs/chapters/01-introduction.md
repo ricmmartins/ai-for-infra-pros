@@ -11,7 +11,7 @@ If you work in infrastructure, your journey probably included:
 - Virtualization (VMware, Hyper-V), then cloud and containers  
 - High availability, clusters, and those “ugly but functional” scripts  
 
-🔌 You’ve always been the backbone of operations. But now there’s a new type of workload changing the game: **Artificial Intelligence**.
+You’ve always been the backbone of operations. But now there’s a new type of workload changing the game: **Artificial Intelligence**.
 
 ## What Is Artificial Intelligence (AI)?
 
@@ -22,8 +22,6 @@ Artificial Intelligence (AI) is the field of computer science that aims to creat
 | **AI** | General term for intelligent systems | ChatGPT, autonomous cars, Alexa |
 | **ML (Machine Learning)** | Subset of AI that learns from data | Movie recommendations |
 | **DL (Deep Learning)** | Type of ML using deep neural networks | Facial recognition, automatic translation |
-
----
 
 ## The AI Formula: Data + Model + Infrastructure
 
@@ -42,7 +40,6 @@ AI doesn’t work in isolation. It depends on three main building blocks:
   - How do you ensure availability, security, and scalability?
 
 👉 This involves clusters with GPUs, large-scale storage, low-latency networks, CUDA-enabled containers, GPU monitoring, and horizontal scaling.
-
 
 ## Traditional Infrastructure vs. AI Infrastructure
 
@@ -90,8 +87,6 @@ But understanding AI and its resource demands allows you to:
 ✅ Help **bring AI workloads into production**  
 ✅ Become a **technical leader in AI architecture**
 
----
-
 ## The Opportunity: The AI-Ready Infra Professional
 
 Imagine the value of someone who:
@@ -104,7 +99,6 @@ Imagine the value of someone who:
 
 That’s the **AI-ready infrastructure professional** — and this eBook will turn you into one.
 
-
 ## Key terms you’ll hear often
 
 - **Inference** → Running the trained model with new data  
@@ -116,8 +110,6 @@ That’s the **AI-ready infrastructure professional** — and this eBook will tu
 - **CUDA** → NVIDIA framework for GPU programming  
 - **ONNX** → Open standard for exporting models across platforms  
 
----
-
 ## Suggested mini-lab (No Code Yet)
 
 **Mission:** Discover which GPU VMs are available in your Azure subscription.
@@ -128,14 +120,10 @@ az vm list-skus --location eastus --size Standard_N --output table
 
 💡 Use `az vm list-skus -h` to explore other options.
 
----
-
 ### Questions
 
 - Which VM uses the **T4 GPU** (great for inference)?  
 - Which one uses the **A100 GPU** (ideal for training)?
-
----
 
 ## Conclusion
 
