@@ -35,7 +35,7 @@ Below is a quick list of all chapters included in this handbook. Each chapter is
 - **Chapter 6 – Security in AI Environments:** [link](docs/chapters/06-security.md)  
 - **Chapter 7 – AI Use Cases for Infrastructure Engineers:** [link](docs/chapters/07-use-cases.md)  
 - **Chapter 8 – AI Adoption Framework:** [link](docs/chapters/08-adoption-framework.md)  
-- **Chapter 9 – Azure OpenAI: TPM, RPM, and PTU:** [link](docs/chapters/09-openai-tpm-ptu.md)  
+- **Chapter 9 – Azure OpenAI: TPM, RPM, and PTU:** [link](docs/chapters/09-azure-openai-tpm-ptu.md)  
 - **Chapter 10 – Visual Glossary:** [link](docs/chapters/10-visual-glossary.md)
 
 ---
