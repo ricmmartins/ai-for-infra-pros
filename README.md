@@ -69,18 +69,25 @@ ai-for-infra-pros/
 │   │   ├── 06-security.md
 │   │   ├── 07-use-cases.md
 │   │   ├── 08-adoption-framework.md
-│   │   ├── 09-openai-tpm-ptu.md
+│   │   ├── 09-azure-openai-tpm-ptu.md
 │   │   └── 10-visual-glossary.md
 │   ├── extras/
 │   │   ├── labs/
-│   │   │   ├── terraform-aks-gpu/
 │   │   │   ├── bicep-vm-gpu/
+│   │   │   │   └── README.md
+│   │   │   ├── terraform-aks-gpu/
+│   │   │   │   └── README.md
 │   │   │   └── yaml-inference-api/
-│   │   ├── diagrams/
-│   │   ├── technical-faq.md
+│   │   │       └── README.md
+│   │   ├── case-studies.md
 │   │   ├── cheatsheets.md
-│   │   └── case-studies.md
-└── README.md
+│   │   └── technical-faq.md
+│   ├── images/
+│   │   ├── infrastructure-flow.png
+│   │   ├── model-life-cycle.png
+│   │   └── relationship-tpm-qps-cost.png
+│   └── README.md
+├── README.md
 └── SUMMARY.md
 ```
 
