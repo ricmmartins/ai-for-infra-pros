@@ -21,7 +21,7 @@
 6. [Security and Resilience in AI Systems](docs/chapters/06-security.md)
 7. [AI Use Cases for Infrastructure Engineers](docs/chapters/07-use-cases.md)
 8. [AI Adoption Framework for Infrastructure](docs/chapters/08-adoption-framework.md)
-9. [Azure OpenAI for Infrastructure — Understanding TPM, RPM, and PTUs](docs/chapters/09-openai-tpm-ptu.md)
+9. [Azure OpenAI for Infrastructure — Understanding TPM, RPM, and PTUs](docs/chapters/09-azure-openai-tpm-ptu.md)
 10. [Visual Glossary — Translating AI for Infrastructure Engineers](docs/chapters/10-visual-glossary.md)
 
 ---
