@@ -23,16 +23,16 @@ This repository combines foundational knowledge, best practices, and real-world 
 
 Below is a quick list of all chapters included in this handbook. Each chapter is self-contained and can be read independently:
 
-- **Chapter 1 – AI Fundamentals:** [link](docs/chapters/01-introduction.md)  
-- **Chapter 2 – Data: The Fuel of AI:** [link](docs/chapters/02-data.md)  
-- **Chapter 3 – Infrastructure and Compute for AI:** [link](docs/chapters/03-compute.md)  
-- **Chapter 4 – IaC and Automation:** [link](docs/chapters/04-iac.md)  
-- **Chapter 5 – Monitoring and Observability:** [link](docs/chapters/05-monitoring.md)  
-- **Chapter 6 – Security in AI Environments:** [link](docs/chapters/06-security.md)  
-- **Chapter 7 – AI Use Cases for Infrastructure Engineers:** [link](docs/chapters/07-use-cases.md)  
-- **Chapter 8 – AI Adoption Framework:** [link](docs/chapters/08-adoption-framework.md)  
-- **Chapter 9 – Azure OpenAI: TPM, RPM, and PTU:** [link](docs/chapters/09-azure-openai-tpm-ptu.md)  
-- **Chapter 10 – Visual Glossary:** [link](docs/chapters/10-visual-glossary.md)
+- Chapter 1 – AI Fundamentals: [link](docs/chapters/01-introduction.md)  
+- Chapter 2 – Data: The Fuel of AI: [link](docs/chapters/02-data.md)  
+- Chapter 3 – Infrastructure and Compute for AI: [link](docs/chapters/03-compute.md)  
+- Chapter 4 – IaC and Automation: [link](docs/chapters/04-iac.md)  
+- Chapter 5 – Monitoring and Observability: [link](docs/chapters/05-monitoring.md)  
+- Chapter 6 – Security in AI Environments: [link](docs/chapters/06-security.md)  
+- Chapter 7 – AI Use Cases for Infrastructure Engineers: [link](docs/chapters/07-use-cases.md)  
+- Chapter 8 – AI Adoption Framework: [link](docs/chapters/08-adoption-framework.md)  
+- Chapter 9 – Azure OpenAI: TPM, RPM, and PTU: [link](docs/chapters/09-azure-openai-tpm-ptu.md)  
+- Chapter 10 – Visual Glossary: [link](docs/chapters/10-visual-glossary.md)
 
 ## How to navigate
 
@@ -112,7 +112,5 @@ Created by **Ricardo Martins**
 📍 Principal Solutions Engineer @ Microsoft  
 📖 Author of [*Azure Governance Made Simple*](https://book.azgovernance.com/) and [Linux Hackathon](https://linuxhackathon.com/)
 🌐 [rmmartins.com](https://rmmartins.com)
-
----
 
 > _“AI needs infrastructure. And infrastructure needs to understand AI.”_
