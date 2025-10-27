@@ -1,8 +1,8 @@
-# Chapter 1 — Artificial Intelligence: What It Is and Why It Matters for Infrastructure
+# Chapter 1 — Artificial Intelligence: What it is and Why it matters for infrastructure
 
 > “It’s no longer a question of *if* Artificial Intelligence will impact infrastructure — it’s a question of **when, where, and how you’ll adapt**.”
 
-## The Reality of the Infrastructure Professional
+## The reality of the infrastructure professional
 
 If you work in infrastructure, your journey probably included:
 
@@ -13,11 +13,11 @@ If you work in infrastructure, your journey probably included:
 
 You’ve always been the backbone of operations. But now there’s a new type of workload changing the game: **Artificial Intelligence**.
 
-## What Is Artificial Intelligence (AI)?
+## What is Artificial Intelligence (AI)?
 
 Artificial Intelligence (AI) is the field of computer science that aims to create systems capable of performing tasks that normally require human intelligence — such as recognizing patterns, making decisions, interpreting natural language, generating images, or predicting behaviors.
 
-| Concept | What It Is | Common Example |
+| Concept | What it is | Common example |
 |----------|-------------|----------------|
 | **AI** | General term for intelligent systems | ChatGPT, autonomous cars, Alexa |
 | **ML (Machine Learning)** | Subset of AI that learns from data | Movie recommendations |
@@ -52,7 +52,7 @@ AI doesn’t work in isolation. It depends on three main building blocks:
 | **Deployment** | App servers, VMs | Containers and inference APIs |
 | **Observability** | Logs, metrics | GPU telemetry, inference throughput and latency |
 
-## Infra x Dev x Data: Breaking Down Silos
+## Infra x Dev x Data: Breaking down silos
 
 Traditionally:
 
@@ -71,7 +71,7 @@ In the world of AI, these worlds collide. You now see:
 
 You don’t need to be a data scientist — but you do need to understand what’s happening in the stack.
 
-## The Risk of Falling Behind
+## The risk of falling behind
 
 Ignoring AI means:
 
