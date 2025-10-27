@@ -10,20 +10,16 @@
 
 This repository combines foundational knowledge, best practices, and real-world examples to turn infrastructure expertise into a competitive advantage in the AI era.
 
----
+## What you’ll find
 
-## 🧩 What You’ll Find
+- AI fundamentals explained from an infrastructure perspective  
+- Architecture and automation models using **Bicep**, **Terraform**, and **YAML**  
+- Hands-on mini-labs with **AKS**, **GPU VMs**, and **Azure Machine Learning**  
+- Strategies for **monitoring, security, and resilience** in AI workloads  
+- Visual glossary comparing key **Infrastructure vs. AI** concepts  
+- An **AI Adoption Framework** tailored for technical teams  
 
-- 🧠 AI fundamentals explained from an infrastructure perspective  
-- ⚙️ Architecture and automation models using **Bicep**, **Terraform**, and **YAML**  
-- 🧪 Hands-on mini-labs with **AKS**, **GPU VMs**, and **Azure Machine Learning**  
-- 📈 Strategies for **monitoring, security, and resilience** in AI workloads  
-- 🧰 Visual glossary comparing key **Infrastructure vs. AI** concepts  
-- 🧩 An **AI Adoption Framework** tailored for technical teams  
-
----
-
-## 📚 Chapter List
+## Chapter list
 
 Below is a quick list of all chapters included in this handbook. Each chapter is self-contained and can be read independently:
 
@@ -38,9 +34,7 @@ Below is a quick list of all chapters included in this handbook. Each chapter is
 - **Chapter 9 – Azure OpenAI: TPM, RPM, and PTU:** [link](docs/chapters/09-azure-openai-tpm-ptu.md)  
 - **Chapter 10 – Visual Glossary:** [link](docs/chapters/10-visual-glossary.md)
 
----
-
-## 🚀 How to Navigate
+## How to navigate
 
 Each chapter is designed to be **independent and complementary**.  
 If you want to start quickly:
@@ -55,7 +49,7 @@ If you want to start quickly:
 | Translate terms and concepts | [Visual Glossary](docs/chapters/10-visual-glossary.md) |
 ---
 
-## 📂 Repository Structure
+## Repository structure
 
 ```bash
 ai-for-infra-pros/
@@ -91,9 +85,7 @@ ai-for-infra-pros/
 └── SUMMARY.md
 ```
 
----
-
-## 🧩 Target Audience
+## Target audience
 
 Professionals in:
 
@@ -103,28 +95,22 @@ Professionals in:
 - Security and Governance  
 - Data Engineering professionals who want to understand the infrastructure side of AI  
 
----
-
-## 💬 Mission
+## Mission
 
 To turn infrastructure knowledge into an advantage in the era of Artificial Intelligence.  
 To show that **you don’t need to be a data scientist to work with AI — but you do need to understand how it runs, scales, and is observed.**
 
----
-
-## 🧪 Extra Resources
+## Extra resources
 
 - [Infrastructure Mini-Labs for AI](docs/extras/labs/)  
 - [Technical FAQ and Cheatsheets](docs/extras/technical-faq.md)  
 - [Real Case Studies](docs/extras/case-studies.md)
 
----
-
-## 📚 Credits
+## Credits
 
 Created by **Ricardo Martins**  
 📍 Principal Solutions Engineer @ Microsoft  
-📖 Author of [*Azure Governance Made Simple*](https://book.azgovernance.com/)  
+📖 Author of [*Azure Governance Made Simple*](https://book.azgovernance.com/) and [Linux Hackathon](https://linuxhackathon.com/)
 🌐 [rmmartins.com](https://rmmartins.com)
 
 ---
