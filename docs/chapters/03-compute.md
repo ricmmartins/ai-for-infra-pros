@@ -1,10 +1,8 @@
-# Chapter 3 — Infrastructure and Compute for AI
+# Chapter 3 — Infrastructure and compute for AI
 
 > “There is no AI without infrastructure. Behind every model, there is a network, a disk, a GPU — and an infrastructure engineer ensuring it all stays up.”
 
----
-
-## 🚀 Why AI Requires a New Way of Thinking About Infrastructure
+## Why AI requires a new way of thinking about infrastructure
 
 Artificial Intelligence is **resource-intensive**.  
 It demands **massive parallelism**, **minimal latency**, **fast storage**, and **high availability** — both for training and inference.
@@ -15,11 +13,9 @@ They move terabytes of data, use GPU clusters, and require distributed pipelines
 The good news? Much of what you already master — compute, networking, storage, security — remains essential.  
 The difference lies in the **level of demand**.
 
----
+## Training vs. Inference
 
-## 🧠 Training vs. Inference
-
-| Phase | What Happens | Technical Characteristics |
+| Phase | What happens | Technical characteristics |
 |--------|----------------|----------------------------|
 | **Training** | The model learns from historical data | Extremely high GPU demand, long runtime, massive datasets |
 | **Inference** | The model responds to new data | Low latency, may use GPU or CPU depending on workload |
@@ -28,9 +24,7 @@ The difference lies in the **level of demand**.
 Training an LLM can take days or weeks across thousands of GPUs.  
 Running inference with that same model takes milliseconds but requires fine-tuned scalability and performance.
 
----
-
-## 🎮 Compute: CPU, GPU, and TPU
+## Compute: CPU, GPU, and TPU
 
 | Type | Best For | Characteristics |
 |-------|-----------|-----------------|
@@ -38,30 +32,26 @@ Running inference with that same model takes milliseconds but requires fine-tune
 | **GPU** | Training and heavy inference | Massive parallelism (CUDA, Tensor Cores) |
 | **TPU** | TensorFlow and Deep Learning workloads | Specialized ASICs (Google Cloud) |
 
-🔧 **Infra Tip:**  
+**Infra Tip:**  
 Smaller or batch models can run efficiently on CPU.  
 LLMs and computer vision workloads **require GPUs**, even for inference.
 
----
+## PU VM types in Azure
 
-## ☁️ GPU VM Types in Azure
-
-| Family | Main Use Case | Example Workload |
+| Family | Main use case | Example workload |
 |---------|----------------|------------------|
 | **NCas_T4_v3** | Cost-efficient inference | Chatbots, lightweight vision models |
 | **ND_A100_v4/v5** | Heavy training and inference | LLMs, video, speech processing |
 | **NVv4 / NVads** | Visualization and lightweight AI | Development and testing |
 | **Standard_D/E/F** | CPU workloads | Preprocessing, data ingestion |
 
-### 🧩 Quick Checklist
+### Quick checklist
 
 - Check GPU quotas using `az vm list-skus`  
 - Prefer regions with **NDv5** or **NCas_T4_v3** availability  
 - Consider **VMSS (Virtual Machine Scale Sets)** for automatic scaling  
 
----
-
-## 🏗️ Clustering: When a Single VM Isn’t Enough
+## Clustering: When a single VM isn’t enough
 
 Training or serving AI in production almost always requires distribution:
 
@@ -79,25 +69,21 @@ Training or serving AI in production almost always requires distribution:
 💡 Use **AKS + nvidia-device-plugin** for GPU-ready containers.  
 Configure **taints/tolerations** and **node selectors** to isolate workloads.
 
----
-
-## 🌐 Networking: The New AI Bottleneck
+## Networking: The new AI bottleneck
 
 If your dataset is on a slow network, GPUs will sit idle waiting for data.  
 Network performance is just as critical as GPU performance.
 
-| Network Feature | Why It Matters |
+| Network feature | Why it matters |
 |------------------|----------------|
-| **InfiniBand / RDMA** | Enables direct VM-to-VM communication with ultra-low latency |
-| **Accelerated Networking** | Reduces jitter and improves throughput |
-| **Efficient VNet Peering** | High-performance inter-region communication |
-| **NFS vs. Blob Storage** | Choice depends on access and read patterns |
+| **InfiniBand/RDMA** | Enables direct VM-to-VM communication with ultra-low latency |
+| **Accelerated networking** | Reduces jitter and improves throughput |
+| **Efficient VNet peering** | High-performance inter-region communication |
+| **NFS vs. Blob storage** | Choice depends on access and read patterns |
 
-🔧 **Tip:** Use **BlobFuse2** with local NVMe caching to balance performance and cost.
+**Tip:** Use **BlobFuse2** with local NVMe caching to balance performance and cost.
 
----
-
-## ☁️ Example Azure Architecture
+## Example Azure architecture
 
 ```mermaid
 graph TD
@@ -108,11 +94,9 @@ graph TD
   aks --> monitor["Azure Monitor & Prometheus"]
 ```
 
-💬 This architecture is used by companies serving **LLMs** and **real-time inference**, combining **AKS**, **Blob Storage**, and continuous **monitoring**.
+This architecture is used by companies serving **LLMs** and **real-time inference**, combining **AKS**, **Blob Storage**, and continuous **monitoring**.
 
----
-
-## 🧪 Hands-On: Create Your First GPU VM
+## Hands-On: Create your first GPU VM
 
 ```bash
 az vm create \
@@ -133,22 +117,18 @@ sudo apt update && sudo apt install -y cuda
 
 💡 Also install **NVIDIA DCGM** to collect GPU metrics with **Azure Monitor**.
 
----
+##  Monitoring and observability
 
-## 📈 Monitoring and Observability
-
-| Metric | Tool | What to Evaluate |
+| Metric | Tool | What to evaluate |
 |---------|------|------------------|
 | **GPU Usage (memory, time)** | `nvidia-smi`, DCGM, Azure Monitor | Saturation, idleness |
 | **Inference Latency** | Application Insights, OpenTelemetry | SLA and response time |
 | **Node Availability** | AKS, VMSS Autoscaler | Failures and scaling behavior |
 | **Token Consumption (TPM)** | Azure OpenAI / Log Analytics | Limit adherence |
 
-🧩 Use **Azure Managed Prometheus + Grafana** for GPU and inference dashboards.
+Use **Azure Managed Prometheus + Grafana** for GPU and inference dashboards.
 
----
-
-## 🔒 Security and Control
+## Security and control
 
 - Access control for models and data via **RBAC**  
 - Workload isolation with **namespaces** and **node pools**  
@@ -156,17 +136,14 @@ sudo apt update && sudo apt install -y cuda
 - **Private Link / NSG / Firewall** for private endpoints  
 - GPU quotas per project for **financial control**  
 
-🚨 Configure **Managed Identity** for secure, automated resource access.
+Configure **Managed Identity** for secure, automated resource access.
 
----
-
-## 💡 Pro Insight
+## 💡 Pro insight
 
 > “You can have the best model in the world, but if your infrastructure chokes, the experience will be poor. Architecture matters — a lot.”
 
----
 
-## ✅ Conclusion
+## Conclusion
 
 AI has changed the game — but the game is still yours.  
 You, the one who understands **latency**, **throughput**, **disks**, and **networks**, are the bridge between theory and production.
