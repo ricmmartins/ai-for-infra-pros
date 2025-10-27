@@ -32,7 +32,5 @@
 
 ## 🧩 Extras and Reference Material
 
-- [Architectural Diagrams](docs/extras/diagrams/README.md)
 - [Technical FAQ and Cheatsheets](docs/extras/technical-faq.md)
-- [Checklists and Quick References](docs/extras/checklists.md)
 - [Technical Case Studies](docs/extras/case-studies.md)
