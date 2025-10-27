@@ -11,10 +11,7 @@ If you work in infrastructure, your journey probably included:
 - Virtualization (VMware, Hyper-V), then cloud and containers  
 - High availability, clusters, and those “ugly but functional” scripts  
 
-🔌 You’ve always been the backbone of operations.  
-But now there’s a new type of workload changing the game: **Artificial Intelligence**.
-
----
+🔌 You’ve always been the backbone of operations. But now there’s a new type of workload changing the game: **Artificial Intelligence**.
 
 ## What Is Artificial Intelligence (AI)?
 
