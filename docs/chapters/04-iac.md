@@ -1,10 +1,8 @@
-# Chapter 4 — Infrastructure as Code (IaC) and AI Environments
+# Chapter 4 — Infrastructure as Code (IaC) and AI environments
 
 > “You don’t scale AI with spreadsheets. You scale it with code.”
 
----
-
-## 🎯 Why IaC Is Essential for AI Workloads
+## Why IaC Is essential for AI workloads
 
 AI environments are:
 
@@ -15,9 +13,7 @@ AI environments are:
 Manual provisioning is slow, error-prone, and not scalable.  
 That’s why **Infrastructure as Code (IaC)** is the foundation of modern AI — not a luxury.
 
----
-
-## 💡 Direct Benefits
+## Direct benefits
 
 | Without IaC | With IaC |
 |--------------|----------|
@@ -28,11 +24,9 @@ That’s why **Infrastructure as Code (IaC)** is the foundation of modern AI —
 
 💬 IaC turns a test environment into something **reproducible, traceable, and secure**.
 
----
+## IaC fundamentals for AI
 
-## 🧱 IaC Fundamentals for AI
-
-| Concept | Role in AI Environments |
+| Concept | Role in AI environments |
 |----------|--------------------------|
 | **IaC (Infrastructure as Code)** | Defines infrastructure through declarative files |
 | **Idempotency** | Running the same code always produces the same result |
@@ -46,9 +40,7 @@ That’s why **Infrastructure as Code (IaC)** is the foundation of modern AI —
 ✅ **Azure CLI** — For quick tests or simple automation  
 ✅ **GitHub Actions** — For CI/CD pipelines for infrastructure
 
----
-
-## 🏗️ Common Components of an AI Environment
+## Common components of an AI environment
 
 - **Networking:** VNets, subnets, NSGs, Peering  
 - **Compute:** GPU VMs, AKS with GPU node pools  
@@ -57,9 +49,7 @@ That’s why **Infrastructure as Code (IaC)** is the foundation of modern AI —
 - **Monitoring:** Log Analytics, Application Insights  
 - **AI Services:** Azure ML, OpenAI, Front Door, Purview  
 
----
-
-## ⚙️ Example 1: Creating a GPU VM with Bicep
+## Example 1: Creating a GPU VM with Bicep
 
 ```bicep
 resource vm 'Microsoft.Compute/virtualMachines@2022-03-01' = {
@@ -85,7 +75,7 @@ resource vm 'Microsoft.Compute/virtualMachines@2022-03-01' = {
 }
 ```
 
-### 📦 Deploy
+### Deploy
 
 ```bash
 az deployment group create \
@@ -93,9 +83,7 @@ az deployment group create \
   --template-file main.bicep
 ```
 
----
-
-## 🧩 Example 2: AKS Cluster with GPU Node Pool (Terraform)
+## Example 2: AKS cluster with GPU node pool (Terraform)
 
 ```hcl
 resource "azurerm_kubernetes_cluster" "aks_ai" {
@@ -127,9 +115,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "gpu_pool" {
 
 💡 **Tip:** Use `terraform apply -auto-approve` for quick tests and **modules** for complex environments.
 
----
-
-## 🤖 Automating Deployments with GitHub Actions
+## Automating deployments with GitHub Actions
 
 ```yaml
 jobs:
@@ -145,33 +131,25 @@ jobs:
 
 💡 Combine GitHub Actions with **protected environments**, **reviewers**, and **approval policies** for IaC governance.
 
----
-
-## 🔁 Recommended Patterns
+## Recommended patterns
 
 - Separate modules for **network**, **compute**, **storage**, and **observability**.  
 - Configurable parameters (region, SKU, scalability).  
 - Automation for model updates, such as:  
   Upload new model to Blob → Update AKS pod → Recreate inference endpoint.  
 
----
-
-## 🧠 Pro Insight
+##  Pro insight
 
 > “If you can deploy your entire environment with a `terraform apply` or `az deployment`, you’re doing it right.”
 
----
-
-## 🔒 Security and Governance with IaC
+## Security and governance with IaC
 
 - **RBAC** for data and MLOps teams  
 - Automated **Key Vault** for secrets  
 - **NSGs** and **Private Link** to isolate endpoints  
 - **Policies** and **Blueprints** for automated compliance  
 
----
-
-## 🧪 Hands-On: Quick Deploy with Azure CLI + Bicep
+## Hands-On: Quick deploy with Azure CLI + Bicep
 
 ```bash
 az group create --name rg-ai-test --location eastus
@@ -187,16 +165,12 @@ Then:
 - Install NVIDIA drivers  
 - Validate with `nvidia-smi`  
 
----
-
-## 🧩 Advanced Curiosity
+## Advanced curiosity
 
 Did you know you can estimate the **average request size** of your AI models based on **TPM (Tokens per Minute)** and **QPS (Queries per Second)**?  
 👉 See **Chapter 8** to learn how to calculate this and prevent throttling in critical AI workloads.
 
----
-
-## 📚 References
+## References
 
 - [Azure Bicep Docs](https://learn.microsoft.com/azure/azure-resource-manager/bicep/)  
 - [Terraform on Azure](https://learn.microsoft.com/azure/developer/terraform/)  
