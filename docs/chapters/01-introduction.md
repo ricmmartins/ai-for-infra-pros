@@ -2,9 +2,7 @@
 
 > “It’s no longer a question of *if* Artificial Intelligence will impact infrastructure — it’s a question of **when, where, and how you’ll adapt**.”
 
----
-
-## 👷🏽‍♂️ The Reality of the Infrastructure Professional
+## The Reality of the Infrastructure Professional
 
 If you work in infrastructure, your journey probably included:
 
@@ -18,7 +16,7 @@ But now there’s a new type of workload changing the game: **Artificial Intelli
 
 ---
 
-## 🤖 What Is Artificial Intelligence (AI)?
+## What Is Artificial Intelligence (AI)?
 
 Artificial Intelligence (AI) is the field of computer science that aims to create systems capable of performing tasks that normally require human intelligence — such as recognizing patterns, making decisions, interpreting natural language, generating images, or predicting behaviors.
 
@@ -30,7 +28,7 @@ Artificial Intelligence (AI) is the field of computer science that aims to creat
 
 ---
 
-## 🧩 The AI Formula: Data + Model + Infrastructure
+## The AI Formula: Data + Model + Infrastructure
 
 AI doesn’t work in isolation. It depends on three main building blocks:
 
@@ -48,9 +46,8 @@ AI doesn’t work in isolation. It depends on three main building blocks:
 
 👉 This involves clusters with GPUs, large-scale storage, low-latency networks, CUDA-enabled containers, GPU monitoring, and horizontal scaling.
 
----
 
-## ⚙️ Traditional Infrastructure vs. AI Infrastructure
+## Traditional Infrastructure vs. AI Infrastructure
 
 | Characteristic | Traditional Infrastructure | AI Infrastructure |
 |----------------|-----------------------------|-------------------|
@@ -61,9 +58,7 @@ AI doesn’t work in isolation. It depends on three main building blocks:
 | **Deployment** | App servers, VMs | Containers and inference APIs |
 | **Observability** | Logs, metrics | GPU telemetry, inference throughput and latency |
 
----
-
-## 🔀 Infra x Dev x Data: Breaking Down Silos
+## Infra x Dev x Data: Breaking Down Silos
 
 Traditionally:
 
@@ -82,9 +77,7 @@ In the world of AI, these worlds collide. You now see:
 
 You don’t need to be a data scientist — but you do need to understand what’s happening in the stack.
 
----
-
-## ⚠️ The Risk of Falling Behind
+## The Risk of Falling Behind
 
 Ignoring AI means:
 
@@ -102,7 +95,7 @@ But understanding AI and its resource demands allows you to:
 
 ---
 
-## 📈 The Opportunity: The AI-Ready Infra Professional
+## The Opportunity: The AI-Ready Infra Professional
 
 Imagine the value of someone who:
 
@@ -114,9 +107,8 @@ Imagine the value of someone who:
 
 That’s the **AI-ready infrastructure professional** — and this eBook will turn you into one.
 
----
 
-## 🧠 Key Terms You’ll Hear Often
+## Key terms you’ll hear often
 
 - **Inference** → Running the trained model with new data  
 - **Training** → Teaching the model using large datasets  
@@ -129,7 +121,7 @@ That’s the **AI-ready infrastructure professional** — and this eBook will tu
 
 ---
 
-## 🧪 Suggested Mini-Lab (No Code Yet)
+## Suggested mini-lab (No Code Yet)
 
 **Mission:** Discover which GPU VMs are available in your Azure subscription.
 
@@ -141,14 +133,14 @@ az vm list-skus --location eastus --size Standard_N --output table
 
 ---
 
-### 🧭 Questions
+### Questions
 
 - Which VM uses the **T4 GPU** (great for inference)?  
 - Which one uses the **A100 GPU** (ideal for training)?
 
 ---
 
-## ✅ Conclusion
+## Conclusion
 
 You’re already halfway there.  
 All your experience in computing, networking, and distributed systems is **highly transferable to AI**.
