@@ -8,8 +8,6 @@
 - [Mission](README.md#-mission)
 - [Credits](README.md#-credits)
 
----
-
 ## 📖 Main Chapters
 
 1. [Foundations of AI for Infrastructure](docs/chapters/01-introduction.md)
@@ -23,7 +21,6 @@
 9. [Azure OpenAI for Infrastructure — Understanding TPM, RPM, and PTUs](docs/chapters/09-azure-openai-tpm-ptu.md)
 10. [Visual Glossary — Translating AI for Infrastructure Engineers](docs/chapters/10-visual-glossary.md)
 
----
 
 ## 🧪 Hands-on Labs
 
@@ -32,7 +29,6 @@
   - [Creating an AKS Cluster with GPU using Terraform](docs/extras/labs/terraform-aks-gpu/README.md)
   - [Building an Inference API with YAML](docs/extras/labs/yaml-inference-api/README.md)
 
----
 
 ## 🧩 Extras and Reference Material
 
