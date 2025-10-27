@@ -7,7 +7,6 @@
 - [Target Audience](README.md#-target-audience)
 - [Mission](README.md#-mission)
 - [Credits](README.md#-credits)
-- [Next Steps](README.md#-next-steps)
 
 ---
 
