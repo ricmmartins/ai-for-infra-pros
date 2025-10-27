@@ -110,7 +110,7 @@ To show that **you don’t need to be a data scientist to work with AI — but y
 
 Created by **Ricardo Martins**  
 📍 Principal Solutions Engineer @ Microsoft  
-📖 Author of [*Azure Governance Made Simple*](https://book.azgovernance.com/) and [Linux Hackathon](https://linuxhackathon.com/) </br>
+📖 Author of [*Azure Governance Made Simple*](https://book.azgovernance.com/) and [*Linux Hackathon*](https://linuxhackathon.com/) </br>
 🌐 [rmmartins.com](https://rmmartins.com)
 
 > _“AI needs infrastructure. And infrastructure needs to understand AI.”_
