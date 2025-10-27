@@ -1,6 +1,6 @@
 # Chapter 1 — Artificial Intelligence: What it is and Why it matters for infrastructure
 
-> “It’s no longer a question of *if* Artificial Intelligence will impact infrastructure — it’s a question of **when, where, and how you’ll adapt**.”
+> “It’s no longer a question of *if* Artificial Intelligence will impact infrastructure - it’s a question of **when, where, and how you’ll adapt**.”
 
 ## The reality of the infrastructure professional
 
