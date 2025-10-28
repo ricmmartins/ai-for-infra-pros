@@ -148,7 +148,8 @@ graph LR
 ## References and useful resources
 
 - [Azure OpenAI Service Quotas and Limits](https://learn.microsoft.com/azure/ai-services/openai/quotas-limits)  
-- [PTU Pricing and Throughput](https://learn.microsoft.com/azure/ai-services/openai/concepts/provisioned-throughput)  
+- [PTU Pricing and Throughput](https://learn.microsoft.com/azure/ai-services/openai/concepts/provisioned-throughput)
+- [Tokenization](https://microsoft.github.io/Workshop-Interact-with-OpenAI-models/tokenization/)
 - [Azure Monitor + Application Insights for OpenAI](https://learn.microsoft.com/azure/azure-monitor/app/opentelemetry-enable)  
 
 ## Conclusion
