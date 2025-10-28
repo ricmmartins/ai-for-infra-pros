@@ -34,4 +34,4 @@
 
 - [Technical Case Studies](docs/extras/case-studies.md)
 - [Cheatsheets](docs/extras/cheatsheets.md)
-- - [Technical FAQ](docs/extras/technical-faq.md)
+- [Technical FAQ](docs/extras/technical-faq.md)
