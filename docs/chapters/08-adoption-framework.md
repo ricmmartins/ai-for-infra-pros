@@ -13,7 +13,7 @@ Inspired by Microsoft’s **Cloud Adoption Framework**, this model translates th
 
 The framework consists of **6 phases**, each with clear goals, practical activities, and recommended tools.
 
-<img src="../images/framework-structure.png" width="40%">
+![](../images/framework-structure.png)
 
 ## Phase 1: Diagnostic and technical motivation
 
