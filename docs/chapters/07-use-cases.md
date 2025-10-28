@@ -109,7 +109,7 @@ What remains is simply knowing **where and how to apply it**.
 
 **Result:** You become the **AI Infra Partner**, enabling AI securely and efficiently.
 
-## 🚀 Advanced scenarios (for those who want to go further)
+## Advanced scenarios (for those who want to go further)
 
 | Case | Description |
 |-------|--------------|
