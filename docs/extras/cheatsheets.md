@@ -34,7 +34,7 @@ A condensed, at-a-glance guide to essential commands, architectures, and Azure r
 | Key Vault for secrets | No credentials in code or YAML | ✅ |
 | Diagnostic logs enabled | Send to Log Analytics workspace | ✅ |
 | API rate limiting configured | Prevent misuse and abuse | ✅ |
-| Prompt injection testing done | Validate model input security | 🔲 |
+| Prompt injection testing done | Validate model input security | ✅ |
 | Data encryption (in transit & at rest) | TLS 1.2+ and SSE enabled | ✅ |
 
 💡 *Tip:* Treat every model as a production API — with the same level of security scrutiny.
