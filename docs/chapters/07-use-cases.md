@@ -149,6 +149,6 @@ With Azure expertise and a curious mindset, you can:
 
 The future of AI needs those who understand infrastructure and **that professional can be you.**
 
-### Next chapter
+<!-- ### Next chapter
 
-Continue your learning by exploring the strategic approach to scaling AI adoption in [**Chapter 8 — AI adoption framework for infrastructure**](08-adoption-framework.md).
+Continue your learning by exploring the strategic approach to scaling AI adoption in [**Chapter 8 — AI adoption framework for infrastructure**](08-adoption-framework.md). -->
