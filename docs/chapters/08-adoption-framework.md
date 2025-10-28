@@ -168,4 +168,4 @@ You now have a complete technical roadmap to lead AI adoption within your organi
 
 ### ➡️ Next Chapter
 
-Advance your understanding of Azure AI workloads in [**Chapter 9 — Azure OpenAI for Infrastructure: Understanding TPM, RPM, and PTU**](09-openai-tpm-ptu.md).
+Advance your understanding of Azure AI workloads in [**Chapter 9 — Azure OpenAI for Infrastructure: Understanding TPM, RPM, and PTU**](09-azure-openai-tpm-ptu.md).
