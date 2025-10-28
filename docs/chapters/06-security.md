@@ -150,6 +150,6 @@ Security and resilience are what sustain AI in production. Without them, even th
 You don’t need to understand every layer of the model to be essential in AI, but you must ensure it operates securely, efficiently, and continuously.
 
 
-### ➡️ Next Chapter
+### Next chapter
 
-Discover how real-world teams are applying these principles in [**Chapter 7 — AI Use Cases for Infrastructure Professionals**](07-use-cases.md).
+Discover how real-world teams are applying these principles in [**Chapter 7 — AI use cases for infrastructure professionals**](07-use-cases.md).
