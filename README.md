@@ -3,7 +3,7 @@
 
 > “You don’t need to be a data scientist to work with AI — but you do need to understand how it runs, scales, and is observed.”
 
-![logo](../docs/images/ai4infrapros.png "logo")
+![logo](/docs/images/ai4infrapros.png "logo")
 
 ### About this project  
 As someone who spent years in infrastructure before transitioning into AI, I experienced firsthand how challenging it can be to bridge the gap between systems, compute, and machine learning. This repository **AI for Infra Pros**, was born from that journey. It documents the exact steps, labs, and concepts I wish I had when starting out, helping other infrastructure engineers confidently navigate their AI learning path. Each chapter connects real infrastructure knowledge to AI foundations, tools, and workloads on Azure and beyond.
