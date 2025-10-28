@@ -154,7 +154,7 @@ In the next chapters, we’ll explore how these data foundations connect to **co
 
 > “Without data, there’s no model. Without a model, there’s no AI. And without infrastructure, none of it comes to life.”
 
-### ➡️ Next Chapter
+### Next chapter
 
-Continue your journey by exploring how compute and clusters bring AI workloads to life in [**Chapter 3 — Compute: Where Intelligence Comes to Life**](03-compute.md).
+Continue your journey by exploring how compute and clusters bring AI workloads to life in [**Chapter 3 — Compute: Where intelligence comes to life**](03-compute.md).
 
