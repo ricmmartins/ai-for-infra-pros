@@ -2,27 +2,23 @@
 
 > “You only control what you can measure — and with AI, that’s even more critical.”
 
----
-
-## 👁️ Why Monitoring AI Is Different
+## Why Monitoring AI Is Different
 
 AI environments behave differently from traditional workloads.  
 A model may be *running* and still deliver incorrect results, high latency, or unexpected costs.
 
-⚠️ **Common Scenarios:**
+**Common Scenarios:**
 
 - The model looks fine but predictions are degraded.  
 - The GPU is active but underutilized.  
 - Inference responds, but with high latency noticeable to users.  
 - Costs spike suddenly due to the volume of processed tokens.  
 
-🔍 **Conclusion:** Observability isn’t optional — it’s a **core part of AI reliability**.
+**Conclusion:** Observability isn’t optional — it’s a **core part of AI reliability**.
 
----
+## What to Monitor in AI Workloads
 
-## 🧩 What to Monitor in AI Workloads
-
-| Layer / Category | Key Metrics | Tools / Sources |
+| Layer/Category | Key Metrics | Tools/Sources |
 |------------------|-------------|----------------|
 | **Compute (GPU/CPU)** | Utilization, memory, temperature, failures | DCGM, nvidia-smi, Azure Monitor |
 | **Model (ML/LLM)** | Accuracy, inference latency, TPM/RPM | Application Insights, Azure ML, AOAI Logs |
@@ -34,23 +30,19 @@ A model may be *running* and still deliver incorrect results, high latency, or u
 💡 **Tip:** Monitor both the **model behavior** and the **infrastructure** that supports it.  
 Inference without GPU visibility is **incomplete diagnosis**.
 
----
+## Observability Tools in Azure
 
-## 🛠️ Observability Tools in Azure
-
-| Tool | Main Function |
+| Tool | Main function |
 |------|----------------|
 | **Azure Monitor** | Collect and visualize resource metrics and logs |
-| **Log Analytics Workspace** | Advanced KQL queries |
+| **Log Analytics Workspace** | Store logs / Advanced KQL queries |
 | **Azure Managed Prometheus** | Custom metrics, mainly for AKS and GPU |
 | **Grafana** | Real-time dashboard visualization |
 | **Application Insights** | Telemetry, response time, tracing |
 | **Azure ML Studio** | Model and endpoint monitoring |
 | **OpenTelemetry Collector** | Standardized metrics and export |
 
----
-
-## ⚙️ Practical Example: Monitoring GPUs in AKS
+## Practical example: Monitoring GPUs in AKS
 
 Install NVIDIA’s DCGM Exporter:
 
@@ -76,9 +68,7 @@ Add panels with metrics such as:
 
 💡 These metrics help detect GPU bottlenecks and optimize cluster usage.
 
----
-
-## 📊 Inference Latency and Performance
+## Inference latency and performance
 
 Use **Application Insights** to track:
 
@@ -100,24 +90,20 @@ configure_azure_monitor()
 - Create alerts for **HTTP 429/503** (throttling and timeouts).  
 - Correlate **model metrics**, **token usage**, and **runtime** data.  
 
----
-
-## 💰 Cost Observability
+## Cost observability
 
 GPUs and tokens are **expensive — and fast**.
 
-| Item | How to Monitor |
+| Item | How to monitor |
 |------|----------------|
 | **GPU usage per hour** | Azure Monitor + Metrics Explorer |
-| **Token consumption (TPM/RPM)** | Azure OpenAI Metrics / Logs |
+| **Token consumption (TPM/RPM)** | Azure OpenAI Metrics/Logs |
 | **Cost per project/team** | Cost Management with tags (Project=AI, Team=DataScience) |
 | **Future cost forecasting** | Azure Anomaly Detector or Machine Learning |
 
 💡 Create automatic alerts for **spending >10% above weekly average**.
 
----
-
-## 🧠 Predictive Analysis and Intelligent Autoscaling
+## Predictive analysis and intelligent autoscaling
 
 Use AI to improve your own observability:
 
@@ -132,11 +118,9 @@ graph LR
   Scale --> AKS[GPU Cluster]
 ```
 
----
+## Alerts and automated responses
 
-## 🔒 Alerts and Automated Responses
-
-| Event | Recommended Action |
+| Event | Recommended action |
 |--------|--------------------|
 | GPU > 90% for 30min | Check data bottlenecks or replicate pods |
 | Latency > 1s | Validate network or model performance |
@@ -145,9 +129,7 @@ graph LR
 
 Configure **Azure Monitor Action Groups** to trigger **emails, Logic Apps, or webhooks** automatically.
 
----
-
-## 🧪 Hands-On: Querying GPU Metrics via Kusto (Log Analytics)
+## Hands-On: Querying GPU metrics via Kusto (Log Analytics)
 
 ```kusto
 Perf
@@ -155,11 +137,9 @@ Perf
 | summarize avg(CounterValue) by bin(TimeGenerated, 5m), CounterName
 ```
 
-📈 Combine with **Application Insights logs** to correlate GPU usage with inference latency.
+Combine with **Application Insights logs** to correlate GPU usage with inference latency.
 
----
-
-## 🔐 Best Practices for Security and Observability
+## Best practices for security and observability
 
 - Never log sensitive data (prompts, PII, user responses).  
 - Enable **automatic diagnostics** with Azure Policy.  
@@ -167,9 +147,7 @@ Perf
 - Keep at least **30 days of retention** for audit purposes.  
 - Use **Managed Identity + Key Vault** for secrets and authentication.  
 
----
-
-## ✅ AI Observability Checklist
+## AI observability checklist
 
 - [x] GPU metrics (DCGM, Prometheus)  
 - [x] Inference latency monitoring  
@@ -177,9 +155,7 @@ Perf
 - [x] Alerts for failures and throttling  
 - [x] Dashboards with TPM, QPS, tokens, and cost  
 
----
-
-## 📚 References
+## References
 
 - [Monitoring AKS with GPUs](https://learn.microsoft.com/azure/aks/gpu-monitoring)  
 - [Azure Monitor Documentation](https://learn.microsoft.com/azure/azure-monitor/)  
