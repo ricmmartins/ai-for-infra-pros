@@ -96,13 +96,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "gpu_pool" {
 
 ## Where to run your model — Decision flow
 
-```mermaid
-graph TD
-    A[Is your model already trained?] -->|Yes| B[Do you need scaling?]
-    B -->|Yes| C[Use AKS + GPU Pool]
-    B -->|No| D[Use single GPU VM]
-    A -->|No| E[Use Azure ML for training pipeline]
-```
+![](../images/where-to-run.png)
 
 💡 *Rule:*  
 - **AKS + GPU Pool:** For scalable inference and production APIs  
