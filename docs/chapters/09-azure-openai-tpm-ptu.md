@@ -77,7 +77,7 @@ If your app needs **20,000 TPM**, reserve **4 PTUs**.
 
 ## Typical architecture with PTU
 
-<img src="../images/typical-architecture-ptu.png" width="40%">
+![](../images/typical-architecture-ptu.png)
 
 **Recommended Components:**
 
@@ -116,7 +116,7 @@ If your app needs **20,000 TPM**, reserve **4 PTUs**.
 
 ## Relationship between TPM, QPS, and cost
 
-<img src="../images/relationship-tpm-qps-cost.png" width="75%">
+![](../images/relationship-tpm-qps-cost.png)
 
 
 ## Planning and tuning checklist
