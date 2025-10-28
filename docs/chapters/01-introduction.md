@@ -108,7 +108,12 @@ That’s the **AI-ready infrastructure professional** — and this eBook will tu
 - **LLM** → Large Language Model (like GPT, Claude, Mistral)  
 - **MLOps** → DevOps applied to the ML lifecycle  
 - **CUDA** → NVIDIA framework for GPU programming  
-- **ONNX** → Open standard for exporting models across platforms  
+- **ONNX** → Open standard for exporting models across platforms
+
+## References and useful resources
+
+- [What is an AI model?](https://microsoft.github.io/Workshop-Interact-with-OpenAI-models/ai-models/)
+- [Large Language Model (LLM)](https://microsoft.github.io/Workshop-Interact-with-OpenAI-models/llms/)
 
 ## Suggested mini-lab (No Code Yet)
 
