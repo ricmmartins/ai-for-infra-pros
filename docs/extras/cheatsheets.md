@@ -1,12 +1,10 @@
-# 🧾 Cheatsheets — Quick Reference for AI Infrastructure Engineers
+# Cheatsheets — Quick reference for AI infrastructure engineers
 
 A condensed, at-a-glance guide to essential commands, architectures, and Azure resources for managing AI workloads efficiently.
 
----
+## Azure GPU VM comparison
 
-## ⚙️ Azure GPU VM Comparison
-
-| VM SKU | Ideal For | GPU Type | Inference | Training | Notes |
+| VM SKU | Ideal for | GPU type | Inference | Training | Notes |
 |--------|------------|-----------|------------|-----------|--------|
 | **Standard_NC6s_v3** | General AI workloads | 1× V100 | ✅ | ✅ (light) | Balanced price/performance |
 | **Standard_NCas_T4_v3** | Cost-effective inference | 1× T4 | ✅✅ | ❌ | Best option for production inference |
@@ -15,9 +13,7 @@ A condensed, at-a-glance guide to essential commands, architectures, and Azure r
 
 💡 *Tip:* For inference, prefer **T4 or A10 GPUs**. For large-scale training, use **A100s**.
 
----
-
-## 📊 CPU vs GPU Quick Reference
+## CPU vs GPU quick reference
 
 | Attribute | CPU | GPU |
 |------------|------|------|
@@ -29,9 +25,7 @@ A condensed, at-a-glance guide to essential commands, architectures, and Azure r
 
 💡 *Rule of thumb:* GPUs are specialized hardware. Use them only where parallelism matters.
 
----
-
-## 🔐 Security Checklist for AI Workloads
+## Security checklist for AI workloads
 
 | Control | Description | Status |
 |----------|--------------|---------|
@@ -45,9 +39,7 @@ A condensed, at-a-glance guide to essential commands, architectures, and Azure r
 
 💡 *Tip:* Treat every model as a production API — with the same level of security scrutiny.
 
----
-
-## 📈 Monitoring and Observability Cheat Sheet
+## Monitoring and observability cheat sheet
 
 | Metric | Source | Tool |
 |--------|---------|------|
@@ -59,11 +51,9 @@ A condensed, at-a-glance guide to essential commands, architectures, and Azure r
 
 💡 *Tip:* Always correlate **GPU utilization + latency + token throughput**.
 
----
+## Infrastructure quick deploy commands
 
-## 💡 Infrastructure Quick Deploy Commands
-
-### 🧱 Create a GPU VM
+### Create a GPU VM
 ```bash
 az vm create \
   --resource-group rg-ai-lab \
@@ -74,12 +64,12 @@ az vm create \
   --generate-ssh-keys
 ```
 
-### 🚀 Deploy a Model Endpoint (Azure ML)
+### Deploy a model endpoint (Azure ML)
 ```bash
 az ml online-endpoint create --name infer-demo --file endpoint.yml
 ```
 
-### ☁️ Create an AKS Cluster with GPU Node Pool (Terraform)
+### Create an AKS cluster with GPU node pool (Terraform)
 ```hcl
 resource "azurerm_kubernetes_cluster_node_pool" "gpu_pool" {
   name                  = "gpu"
@@ -93,9 +83,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "gpu_pool" {
 }
 ```
 
----
-
-## 🧠 Performance and Throughput Formulas
+## Performance and throughput formulas
 
 | Metric | Formula | Example |
 |--------|----------|----------|
@@ -106,9 +94,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "gpu_pool" {
 
 💡 *Tip:* Log and analyze TPM, RPM, and QPS to prevent throttling and overprovisioning.
 
----
-
-## 🧰 Where to Run Your Model — Decision Flow
+## 🧰 Where to run your model — Decision flow
 
 ```mermaid
 graph TD
@@ -123,9 +109,7 @@ graph TD
 - **VM:** For isolated testing or proof of concept  
 - **Azure ML:** For training, registry, and lifecycle management
 
----
-
-## 🧭 Resource Tagging Convention for AI Workloads
+## Resource tagging convention for AI workloads
 
 | Tag | Example | Purpose |
 |------|----------|----------|
@@ -137,9 +121,7 @@ graph TD
 
 💡 *Tip:* Standardize tags for automation, budget tracking, and governance.
 
----
-
-## 📘 Reference Links
+## Reference links
 
 - [Azure Machine Learning Documentation](https://learn.microsoft.com/en-us/azure/machine-learning/)
 - [Azure OpenAI Quotas & Limits](https://learn.microsoft.com/en-us/azure/ai-services/openai/quotas-limits)
