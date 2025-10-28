@@ -1,4 +1,4 @@
-# Chapter 10 — Visual Glossary: AI for infrastructure professionals
+# Chapter 10 — Visual glossary: AI for infrastructure professionals
 
 > “Infrastructure and AI don’t speak different languages — they just have distinct technical dialects.”
 
