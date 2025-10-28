@@ -77,7 +77,7 @@ If your app needs **20,000 TPM**, reserve **4 PTUs**.
 
 ## Typical architecture with PTU
 
-<img src="../images/typical-architecture-ptu.png" width="75%">
+<img src="../images/typical-architecture-ptu.png" width="45%">
 
 **Recommended Components:**
 
