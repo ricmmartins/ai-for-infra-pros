@@ -22,7 +22,6 @@ What remains is simply knowing **where and how to apply it**.
 | **High availability** | Readiness probes, replication, and regional failover |
 | **DevOps integration** | GitHub Actions, CI/CD, and model promotion between environments |
 
----
 
 ## 📘 Use Case 1 — Predicting disk and server failures
 
