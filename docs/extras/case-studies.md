@@ -1,11 +1,9 @@
-# 📘 Technical Case Studies — AI for Infrastructure Engineers
+# Technical case studies: AI for infrastructure engineers
 
 Real-world examples of how infrastructure professionals are already applying AI in production environments.  
 Each scenario connects the theory from the chapters with hands-on impact and measurable outcomes.
 
----
-
-## 🧩 Case 1 — Predicting Failures with Intelligent Logs
+## Case 1: Predicting failures with intelligent logs
 
 **Scenario:**  
 An infrastructure team managed hundreds of VMs and constantly received disk and CPU alerts, often too late to prevent downtime.
@@ -26,9 +24,7 @@ Logs and metrics existed but provided no predictive signal — alerts only trigg
 **Lesson:**  
 You don’t need to be a data scientist to predict failures — prebuilt AI APIs + clean telemetry are enough to create value.
 
----
-
-## 🤖 Case 2 — Building an Internal Copilot with Azure OpenAI
+## Case 2: Building an internal copilot with Azure OpenAI
 
 **Scenario:**  
 A NOC team handled over 200 support tickets weekly — mostly repetitive troubleshooting requests and command lookups.
@@ -49,9 +45,7 @@ Overload and slow response times, especially off-hours.
 **Lesson:**  
 AI copilots are not just for developers — infrastructure teams can automate support and accelerate resolution.
 
----
-
-## 💡 Case 3 — Cost-Efficient AI Infrastructure for Startups
+## Case 3: Cost-efficient AI infrastructure for startups
 
 **Scenario:**  
 A startup wanted to deploy an image classification model trained elsewhere, but lacked GPU expertise and had a limited budget.
@@ -74,9 +68,7 @@ A startup wanted to deploy an image classification model trained elsewhere, but 
 **Lesson:**  
 With Infrastructure as Code and the right SKU, small teams can run production AI affordably.
 
----
-
-## ⚙️ Case 4 — Scaling GPU Workloads with AKS and Observability
+## Case 4: Scaling GPU workloads with AKS and observability
 
 **Scenario:**  
 A multinational company ran on-prem GPU servers with local Python scripts — no scalability or monitoring.
@@ -99,9 +91,7 @@ A multinational company ran on-prem GPU servers with local Python scripts — no
 **Lesson:**  
 Container orchestration brings enterprise-grade reliability to AI workloads — even for legacy scripts.
 
----
-
-## 📊 Case 5 — Using AI to Optimize Infrastructure Costs
+## Case 5: Using AI to optimize infrastructure costs
 
 **Scenario:**  
 A SaaS DevOps team needed to cut costs and suspected their AKS cluster was over-provisioned.
@@ -121,8 +111,6 @@ No visibility into real GPU and CPU utilization — decisions were guesswork.
 
 **Lesson:**  
 Infrastructure + Data + AI = Smarter, measurable cloud efficiency.
-
----
 
 > “AI doesn’t replace infrastructure — it rewards those who understand it.”
 
