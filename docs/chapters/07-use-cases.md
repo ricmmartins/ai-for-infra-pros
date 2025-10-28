@@ -1,35 +1,30 @@
-# Chapter 7 — AI Use Cases for Infrastructure Professionals
+# Chapter 7 — AI use cases for infrastructure professionals
 
 > “You don’t need to train a model to be part of the AI revolution. Infrastructure is the foundation that makes it all possible.”
 
----
+## Why this matters
 
-## 🎯 Why This Matters
-
-Many infrastructure professionals still see AI as a “data scientist’s domain.”  
-But in practice, **no AI project reaches production without a solid infrastructure foundation** — secure, observable, and automated.
+Many infrastructure professionals still see AI as a “data scientist’s domain.”  But in practice, **no AI project reaches production without a solid infrastructure foundation** — secure, observable, and automated.
 
 If you understand **networking, compute, automation, monitoring, and security**, you already master about **70%** of what’s needed to operate AI at scale.  
 What remains is simply knowing **where and how to apply it**.
 
----
+## Natural areas of impact for infra + AI
 
-## 🔍 Natural Areas of Impact for Infra + AI
-
-| Area | Infrastructure Professional Contribution |
+| Area | Infrastructure professional contribution |
 |-------|-------------------------------------------|
-| **GPU Provisioning** | Selecting SKUs, validating quotas, and scaling GPU clusters |
-| **API Security** | Access control, rate limiting, and abuse prevention |
+| **GPU provisioning** | Selecting SKUs, validating quotas, and scaling GPU clusters |
+| **API security** | Access control, rate limiting, and abuse prevention |
 | **Observability** | Logs, metrics, and tracing (GPU, TPM, RPM) |
-| **Cost and Efficiency** | Monitoring tokens, usage, and intelligent billing |
+| **Cost and efficiency** | Monitoring tokens, usage, and intelligent billing |
 | **Automation and IaC** | Deploying clusters, models, and inference pipelines |
-| **Networking and Private Access** | VNets, Private Endpoints, NSGs, and secure isolation |
-| **High Availability** | Readiness probes, replication, and regional failover |
-| **DevOps Integration** | GitHub Actions, CI/CD, and model promotion between environments |
+| **Networking and private access** | VNets, Private Endpoints, NSGs, and secure isolation |
+| **High availability** | Readiness probes, replication, and regional failover |
+| **DevOps integration** | GitHub Actions, CI/CD, and model promotion between environments |
 
 ---
 
-## 📘 Use Case 1 — Predicting Disk and Server Failures
+## 📘 Use Case 1 — Predicting disk and server failures
 
 **Problem:** Servers fail unexpectedly; disks die without warning.  
 **AI Solution:**
@@ -41,9 +36,7 @@ What remains is simply knowing **where and how to apply it**.
 **Tools:** Azure Monitor • Log Analytics • Azure ML • AutoML • Prophet  
 💡 **Insight:** Your experience in metrics and alerts is already the first step toward predictive failure models.
 
----
-
-## 📘 Use Case 2 — Anomaly Detection in Logs and Metrics
+## 📘 Use Case 2 — Anomaly detection in logs and metrics
 
 **Problem:** How do you spot one failure among millions of log lines?  
 **AI Solution:**
@@ -55,9 +48,8 @@ What remains is simply knowing **where and how to apply it**.
 **Tools:** Azure Anomaly Detector • Kusto Query Language (KQL) + ML • Azure OpenAI (GPT-4)  
 💬 “AI doesn’t replace the SRE — it amplifies their vision.”
 
----
 
-## 📘 Use Case 3 — AI as an Operations Copilot (ChatOps + LLMs)
+## 📘 Use Case 3 — AI as an operations copilot (ChatOps + LLMs)
 
 **Problem:** Teams spend too much time parsing alerts, tickets, and scattered technical documentation.  
 **AI Solution:**
@@ -70,9 +62,7 @@ What remains is simply knowing **where and how to apply it**.
 💡 **Example:**  
 “Copilot, show the last 10 failures in the AKS WestUS3 cluster and GPU usage above 80%.”
 
----
-
-## 📘 Use Case 4 — Automated Incident Response
+## 📘 Use Case 4 — Automated incident response
 
 **Problem:** SRE teams overloaded with repetitive incidents.  
 **AI Solution:**
@@ -82,11 +72,10 @@ What remains is simply knowing **where and how to apply it**.
 - Continuously learn from historical ticket data.
 
 **Tools:** Azure ML • Logic Apps • GitHub Copilot • Power Automate  
-⚙️ **Example:** Failure detected → Model classifies → Logic App fixes → Message sent to Teams.
+**Example:** Failure detected → Model classifies → Logic App fixes → Message sent to Teams.
 
----
 
-## 📘 Use Case 5 — Infrastructure and Cost Optimization
+## 📘 Use Case 5 — Infrastructure and cost optimization
 
 **Problem:** Overprovisioned resources or idle VMs waste money.  
 **AI Solution:**
@@ -98,9 +87,7 @@ What remains is simply knowing **where and how to apply it**.
 **Tools:** Azure Advisor • Cost Management • Power BI • Custom ML Models  
 💡 **Tip:** Combine **AI + FinOps** for automated cost-saving recommendations.
 
----
-
-## 📘 Use Case 6 — Intelligent Monitoring of Hybrid Environments
+## 📘 Use Case 6 — Intelligent monitoring of hybrid environments
 
 **Problem:** Multi-cloud and on-prem environments cause fragmented visibility.  
 **AI Solution:**
@@ -110,11 +97,9 @@ What remains is simply knowing **where and how to apply it**.
 - Generate daily status summaries via GPT.
 
 **Tools:** Azure Arc • Azure OpenAI • Grafana API • Zabbix/Nagios Integration  
-🧠 **Insight:** AI can act as your 24x7 junior analyst — filtering noise and surfacing what matters.
+**Insight:** AI can act as your 24x7 junior analyst — filtering noise and surfacing what matters.
 
----
-
-## 📘 Use Case 7 — AI Architectures for Startups and Small Teams
+## 📘 Use Case 7 — AI architectures for startups and small teams
 
 **Scenario:** Startups want to adopt AI but lack GPU, networking, or cost expertise.  
 **Solution:**
@@ -123,24 +108,21 @@ What remains is simply knowing **where and how to apply it**.
 - Provision reproducible environments using Terraform or Bicep.  
 - Automate inference deployment with GitHub Actions.  
 
-⚙️ **Result:** You become the **AI Infra Partner**, enabling AI securely and efficiently.
+**Result:** You become the **AI Infra Partner**, enabling AI securely and efficiently.
 
----
-
-## 🚀 Advanced Scenarios (For Those Who Want to Go Further)
+## 🚀 Advanced scenarios (for those who want to go further)
 
 | Case | Description |
 |-------|--------------|
 | **Edge AI for IoT** | Train and deploy detection models on physical devices. |
-| **Observable Infra with GPT** | Query metrics and logs via prompts (“show network failures from the last 2 hours”). |
-| **Automatic Ticket Classification** | Use LLMs and embeddings to group similar incidents. |
+| **Observable infra with GPT** | Query metrics and logs via prompts (“show network failures from the last 2 hours”). |
+| **Automatic ticket classification** | Use LLMs and embeddings to group similar incidents. |
 | **Infra-as-Agent** | Autonomous agents that provision, test, and validate resources based on policy. |
 
----
 
-## 🧭 Career Paths and Specializations
+## Career paths and specializations
 
-| Role | Main Focus |
+| Role | Main focus |
 |-------|-------------|
 | **AI Infrastructure Engineer** | GPU, AKS, performance, and scalability |
 | **MLOps Engineer** | Model deployment, monitoring, and automation |
@@ -148,18 +130,13 @@ What remains is simply knowing **where and how to apply it**.
 | **AI Platform Engineer** | Internal platforms for Data Science teams |
 | **FinOps for AI** | Cost, performance, and optimization of inference workloads |
 
----
-
-## 💡 Final Reflection
+## 💡 Final reflection
 
 > “The intersection between infrastructure and AI is the most promising area in technology today.”
 
-You don’t need to wait for the data team to apply AI.  
-You can be the starting point — and the **enabler** who makes the impossible scalable.
+You don’t need to wait for the data team to apply AI.  You can be the starting point — and the **enabler** who makes the impossible scalable.
 
----
-
-## ✅ Conclusion
+## Conclusion
 
 AI is a new demand layer built on top of what you already master: **Compute, Networking, Storage, Security, and Automation.**
 
@@ -171,10 +148,7 @@ With Azure expertise and a curious mindset, you can:
 - Increase availability  
 - Enable entire teams to innovate with confidence  
 
-The future of AI needs those who understand infrastructure —  
-and **that professional can be you.**
-
----
+The future of AI needs those who understand infrastructure and **that professional can be you.**
 
 ### ➡️ Next Chapter
 
