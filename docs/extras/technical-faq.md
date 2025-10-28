@@ -1,4 +1,4 @@
-# 🧠 Technical FAQ: AI infrastructure essentials
+# Technical FAQ: AI infrastructure essentials
 
 A practical reference for infrastructure and cloud engineers adopting Artificial Intelligence in their environments.
 
