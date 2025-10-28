@@ -56,6 +56,7 @@ Each term includes:
 
 ### 2. Simplified infrastructure architecture for AI
 
+![](../images/infrastructure-flow.png)
 ```mermaid
 graph LR
   Data[Blob / Data Lake] --> AML[Azure Machine Learning or AKS]
