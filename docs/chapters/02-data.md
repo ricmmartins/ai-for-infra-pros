@@ -76,6 +76,10 @@ Prefer **local NVMe** for heavy datasets and training workloads.
 
 💡 **Example 1: Simple Training Pipeline**
 
+simple-training-pipeline.png
+
+![](../images/simple-training-pipeline.png)
+
 ```mermaid
 graph LR
   A["Blob Storage"] --> B["Azure Data Prep"]
