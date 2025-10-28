@@ -2,8 +2,6 @@
 
 > “It’s no longer a question of *if* Artificial Intelligence will impact infrastructure - it’s a question of **when, where, and how you’ll adapt**.”
 
-![logo](../images/ai4infrapros.png "logo")
-
 ## The reality of the infrastructure professional
 
 If you work in infrastructure, your journey probably included:
