@@ -78,9 +78,6 @@ Prefer **local NVMe** for heavy datasets and training workloads.
 
 <img src="../images/simple-training-pipeline.png" width="70%">
 
-![](../images/simple-training-pipeline.png)
-
-
 💡 **Example 2: Full Production Pipeline**
 
 ![](../images/full-training-pipeline.png)
