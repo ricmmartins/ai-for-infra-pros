@@ -6,7 +6,6 @@
 - [How to Navigate](README.md#how-to-navigate)
 - [Target Audience](README.md#target-audience)
 - [Mission](README.md#mission)
-- [Credits](README.md#credits)
 
 ## Main chapters
 
