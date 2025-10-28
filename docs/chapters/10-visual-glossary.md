@@ -57,14 +57,6 @@ Each term includes:
 ### 2. Simplified infrastructure architecture for AI
 
 ![](../images/infrastructure-flow.png)
-```mermaid
-graph LR
-  Data[Blob / Data Lake] --> AML[Azure Machine Learning or AKS]
-  AML --> GPU[GPU VM / Container]
-  GPU --> API[Inference API]
-  API --> Observ[Azure Monitor / Prometheus]
-  Observ --> Cost[Azure Cost Management]
-```
 
 ## Quick checklists
 
