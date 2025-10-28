@@ -159,6 +159,6 @@ These metrics bridge the gap between **infrastructure** and **applied AI**, ensu
 
 > “Infrastructure makes AI run — but understanding consumption is what makes AI scale.”
 
-### ➡️ Next Chapter
+### Next chapter
 
-Explore key AI terms and visuals that tie everything together in [**Chapter 10 — Visual Glossary: AI for Infrastructure Professionals**](10-visual-glossary.md).
+Explore key AI terms and visuals that tie everything together in [**Chapter 10 — Visual glossary: AI for infrastructure professionals**](10-visual-glossary.md).
