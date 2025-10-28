@@ -41,12 +41,12 @@ If you want to start quickly:
 
 | Goal | Where to start |
 |-----------|---------------|
-| Understand how AI connects to Infrastructure | [Chapter 1 - AI Fundamentals](docs/chapters/01-introduction.md) |
-| Build an AI environment | [Chapter 4 - IaC and Automation](docs/chapters/04-iac.md) |
-| Measure and observe AI workloads | [Chapter 5 - Monitoring and Observability](docs/chapters/05-monitoring.md) |
-| Ensure security and resilience | [Chapter 6 - Security in AI Environments](docs/chapters/06-security.md) |
-| Get hands-on experience | [Mini-Labs](docs/extras/labs/) |
-| Translate terms and concepts | [Visual Glossary](docs/chapters/10-visual-glossary.md) |
+| Understand how AI connects to Infrastructure | [Chapter 1 - AI fundamentals](docs/chapters/01-introduction.md) |
+| Build an AI environment | [Chapter 4 - IaC and automation](docs/chapters/04-iac.md) |
+| Measure and observe AI workloads | [Chapter 5 - Monitoring and observability](docs/chapters/05-monitoring.md) |
+| Ensure security and resilience | [Chapter 6 - Security in AI environments](docs/chapters/06-security.md) |
+| Get hands-on experience | [Mini-labs](docs/extras/labs/) |
+| Translate terms and concepts | [Visual glossary](docs/chapters/10-visual-glossary.md) |
 ---
 
 ## Repository structure
