@@ -118,17 +118,6 @@ If your app needs **20,000 TPM**, reserve **4 PTUs**.
 
 ![](../images/relationship-tpm-qps-cost.png)
 
-
-```mermaid
-graph LR
-  TPM[Tokens per Minute] --> TPR[Tokens per Request]
-  QPS[Queries per Second] --> TPR
-  TPR --> Cost
-  Model[Model Type] --> Cost
-  TPR --> Throttling
-  QPS --> Latency
-```
-
 ## Planning and tuning checklist
 
 - [x] Calculated total TPM needed  
