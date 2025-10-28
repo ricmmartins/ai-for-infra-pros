@@ -54,7 +54,7 @@ flowchart TD
 
 🔧 **Suggested resources:**
 
-- [Labs](../extra/labs)
+- [Labs](../extra/labs/)
 - [AI-900: Azure AI Fundamentals](https://learn.microsoft.com/en-us/credentials/certifications/azure-ai-fundamentals/)
 - Visual Technical Glossary  
 
