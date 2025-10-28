@@ -1,5 +1,5 @@
 # AI for Infra Pros  
-### The Practical Handbook for Infrastructure Engineers  
+### The practical handbook for infrastructure engineers  
 
 > “You don’t need to be a data scientist to work with AI — but you do need to understand how it runs, scales, and is observed.”
 
@@ -23,23 +23,23 @@ This repository combines foundational knowledge, best practices, and real-world 
 
 Below is a quick list of all chapters included in this handbook. Each chapter is self-contained and can be read independently:
 
-- Chapter 1 – AI Fundamentals: [link](docs/chapters/01-introduction.md)  
-- Chapter 2 – Data: The Fuel of AI: [link](docs/chapters/02-data.md)  
-- Chapter 3 – Infrastructure and Compute for AI: [link](docs/chapters/03-compute.md)  
-- Chapter 4 – IaC and Automation: [link](docs/chapters/04-iac.md)  
-- Chapter 5 – Monitoring and Observability: [link](docs/chapters/05-monitoring.md)  
-- Chapter 6 – Security in AI Environments: [link](docs/chapters/06-security.md)  
-- Chapter 7 – AI Use Cases for Infrastructure Engineers: [link](docs/chapters/07-use-cases.md)  
-- Chapter 8 – AI Adoption Framework: [link](docs/chapters/08-adoption-framework.md)  
+- Chapter 1 – AI fundamentals: [link](docs/chapters/01-introduction.md)  
+- Chapter 2 – Data: The fuel of AI: [link](docs/chapters/02-data.md)  
+- Chapter 3 – Infrastructure and compute for AI: [link](docs/chapters/03-compute.md)  
+- Chapter 4 – IaC and automation: [link](docs/chapters/04-iac.md)  
+- Chapter 5 – Monitoring and observability: [link](docs/chapters/05-monitoring.md)  
+- Chapter 6 – Security in AI environments: [link](docs/chapters/06-security.md)  
+- Chapter 7 – AI use cases for infrastructure engineers: [link](docs/chapters/07-use-cases.md)  
+- Chapter 8 – AI adoption framework: [link](docs/chapters/08-adoption-framework.md)  
 - Chapter 9 – Azure OpenAI: TPM, RPM, and PTU: [link](docs/chapters/09-azure-openai-tpm-ptu.md)  
-- Chapter 10 – Visual Glossary: [link](docs/chapters/10-visual-glossary.md)
+- Chapter 10 – Visual glossary: [link](docs/chapters/10-visual-glossary.md)
 
 ## How to navigate
 
 Each chapter is designed to be **independent and complementary**.  
 If you want to start quickly:
 
-| Goal | Where to Start |
+| Goal | Where to start |
 |-----------|---------------|
 | Understand how AI connects to Infrastructure | [Chapter 1 - AI Fundamentals](docs/chapters/01-introduction.md) |
 | Build an AI environment | [Chapter 4 - IaC and Automation](docs/chapters/04-iac.md) |
