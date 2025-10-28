@@ -77,14 +77,7 @@ If your app needs **20,000 TPM**, reserve **4 PTUs**.
 
 ## Typical architecture with PTU
 
-```mermaid
-graph TD
-  user[User / Application] --> APIM[API Management]
-  APIM --> LB[Azure Front Door / Load Balancer]
-  LB --> AKS[AKS with Inference Pods]
-  AKS --> AOAI[Azure OpenAI PTU Endpoint]
-  AOAI --> Logs[Application Insights / Log Analytics]
-```
+![](../images/typical-architecture-ptu.png)
 
 **Recommended Components:**
 
