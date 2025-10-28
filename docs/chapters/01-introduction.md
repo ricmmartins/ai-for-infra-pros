@@ -142,6 +142,6 @@ In the coming chapters, we’ll explore:
 
 > “AI needs infrastructure — but infrastructure also needs to understand AI.”
 
-### Next chapter
+<!-- ### Next chapter
 
-Next, explore how compute and clusters bring AI workloads to life in [**Chapter 2 — Data: The fuel of Artificial Intelligence**](02-data.md).
+Next, explore how compute and clusters bring AI workloads to life in [**Chapter 2 — Data: The fuel of Artificial Intelligence**](02-data.md). -->
