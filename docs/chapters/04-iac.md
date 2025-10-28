@@ -177,6 +177,6 @@ Did you know you can estimate the **average request size** of your AI models bas
 - [GitHub Actions for Azure](https://learn.microsoft.com/azure/developer/github/)  
 
 
-### Next chapter
+<!-- ### Next chapter
 
-Continue to explore how to monitor and observe your AI infrastructure in [**Chapter 5 — Monitoring and observability for AI workloads**](05-monitoring.md).
+Continue to explore how to monitor and observe your AI infrastructure in [**Chapter 5 — Monitoring and observability for AI workloads**](05-monitoring.md). -->
