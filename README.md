@@ -104,9 +104,9 @@ To show that **you don’t need to be a data scientist to work with AI — but y
 
 ## Extra resources
 
-- [Infrastructure Mini-Labs for AI](docs/extras/labs/)  
-- [Technical FAQ and Cheatsheets](docs/extras/technical-faq.md)  
-- [Real Case Studies](docs/extras/case-studies.md)
+- [Infrastructure mini-labs for AI](docs/extras/labs/)  
+- [Technical FAQ and cheatsheets](docs/extras/technical-faq.md)  
+- [Real case studies](docs/extras/case-studies.md)
 
 ## Credits
 
