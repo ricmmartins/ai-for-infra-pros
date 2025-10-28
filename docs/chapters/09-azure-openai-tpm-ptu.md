@@ -150,7 +150,6 @@ graph LR
 - [Azure OpenAI Service Quotas and Limits](https://learn.microsoft.com/azure/ai-services/openai/quotas-limits)  
 - [PTU Pricing and Throughput](https://learn.microsoft.com/azure/ai-services/openai/concepts/provisioned-throughput)  
 - [Azure Monitor + Application Insights for OpenAI](https://learn.microsoft.com/azure/azure-monitor/app/opentelemetry-enable)  
-- [Token Cost Calculation](https://learn.microsoft.com/azure/ai-services/openai/how-to/costs)  
 
 ## Conclusion
 
