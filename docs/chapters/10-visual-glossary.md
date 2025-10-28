@@ -52,11 +52,11 @@ Each term includes:
 
 ### 1. AI model lifecycle
 
-<img src="../images/model-life-cycle.png" width="40%">
+<img src="../images/model-life-cycle.png" width="30%">
 
 ### 2. Simplified infrastructure architecture for AI
 
-<img src="../images/infrastructure-flow.png" width="40%">
+<img src="../images/infrastructure-flow.png" width="30%">
 
 ## Quick checklists
 
