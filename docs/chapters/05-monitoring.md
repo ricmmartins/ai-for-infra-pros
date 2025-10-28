@@ -7,7 +7,7 @@
 AI environments behave differently from traditional workloads.  
 A model may be *running* and still deliver incorrect results, high latency, or unexpected costs.
 
-**Common Scenarios:**
+**Common scenarios:**
 
 - The model looks fine but predictions are degraded.  
 - The GPU is active but underutilized.  
@@ -16,7 +16,7 @@ A model may be *running* and still deliver incorrect results, high latency, or u
 
 **Conclusion:** Observability isn’t optional — it’s a **core part of AI reliability**.
 
-## What to Monitor in AI Workloads
+## What to monitor in AI workloads
 
 | Layer/Category | Key Metrics | Tools/Sources |
 |------------------|-------------|----------------|
@@ -30,7 +30,7 @@ A model may be *running* and still deliver incorrect results, high latency, or u
 💡 **Tip:** Monitor both the **model behavior** and the **infrastructure** that supports it.  
 Inference without GPU visibility is **incomplete diagnosis**.
 
-## Observability Tools in Azure
+## Observability tools in Azure
 
 | Tool | Main function |
 |------|----------------|
