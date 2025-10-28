@@ -116,6 +116,9 @@ If your app needs **20,000 TPM**, reserve **4 PTUs**.
 
 ## Relationship between TPM, QPS, and cost
 
+![](../images/relationship-tpm-qps-cost.png)
+
+
 ```mermaid
 graph LR
   TPM[Tokens per Minute] --> TPR[Tokens per Request]
