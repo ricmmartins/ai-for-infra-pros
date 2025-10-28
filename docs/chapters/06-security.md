@@ -109,16 +109,7 @@ Strategies for inference workloads and critical pipelines:
 - **Retry and fallback:** With alternate models or cached responses.  
 - **Disaster recovery:** Replicate data and models across secondary regions.  
 
-```mermaid
-graph LR
-  user["User / API Client"] --> APIM["API Management"]
-  APIM --> WAF["Web Application Firewall"]
-  WAF --> AKS["AKS with GPU"]
-  AKS --> OpenAI["Azure OpenAI (Private Endpoint)"]
-  AKS --> KV["Key Vault"]
-  AKS --> Log["Azure Monitor + Log Analytics"]
-  KV --> Storage["Blob with Models / Checkpoints"]
-```
+![](../images/designing-ha.png)
 
 ## Production lessons (real cases)
 
