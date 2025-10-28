@@ -81,7 +81,7 @@ Prefer **local NVMe** for heavy datasets and training workloads.
 
 💡 **Example 2: Full Production Pipeline**
 
-![](../images/sfull-training-pipeline.png)
+![](../images/full-training-pipeline.png)
 
 
 ## Data security and governance
