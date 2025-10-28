@@ -2,7 +2,7 @@
 
 A practical reference for infrastructure and cloud engineers adopting Artificial Intelligence in their environments.
 
-## ❓ 1. Can I run AI workloads without a GPU?
+## 1. Can I run AI workloads without a GPU?
 
 **Yes, but with limitations.**
 
@@ -12,7 +12,7 @@ A practical reference for infrastructure and cloud engineers adopting Artificial
 
 💡 *Tip:* Use ephemeral or spot instances for testing workloads.
 
-## ❓ 2. What’s the difference between training and inference?
+## 2. What’s the difference between training and inference?
 
 | Stage | Purpose | Analogy for Infra Engineers |
 |--------|----------|-----------------------------|
@@ -21,7 +21,7 @@ A practical reference for infrastructure and cloud engineers adopting Artificial
 
 💡 *Infra lens:* Training = heavy batch job; Inference = lightweight request-response workload.
 
-## ❓ 3. How can I auto-scale AI workloads?
+## 3. How can I auto-scale AI workloads?
 
 **Approaches:**
 - Use **GPU metrics (utilization, temperature, queue length)** for autoscaling triggers.  
@@ -31,7 +31,7 @@ A practical reference for infrastructure and cloud engineers adopting Artificial
 💡 *Best practice:* Set a cooldown window between scale events to prevent oscillation.
 
 
-## ❓ 4. How do I secure inference endpoints?
+## 4. How do I secure inference endpoints?
 
 **Recommendations:**
 - Use **Private Endpoints** and **Network Security Groups (NSGs)**.  
@@ -41,7 +41,7 @@ A practical reference for infrastructure and cloud engineers adopting Artificial
 
 💡 *Zero Trust principle:* Assume every request is external — even from inside the VNet.
 
-## ❓ 5. How much does AI cost to run on Azure?
+## 5. How much does AI cost to run on Azure?
 
 **Depends on compute + model type.**
 
@@ -55,7 +55,7 @@ A practical reference for infrastructure and cloud engineers adopting Artificial
 
 💡 *Tip:* Monitor with **Azure Cost Management** and set budgets with alerts.
 
-## ❓ 6. How do I monitor GPU usage and model latency?
+## 6. How do I monitor GPU usage and model latency?
 
 **Use these telemetry tools:**
 - **nvidia-smi** (local GPU metrics)
@@ -66,7 +66,7 @@ A practical reference for infrastructure and cloud engineers adopting Artificial
 
 💡 *Goal:* Measure latency, token usage, and error rates — not just uptime.
 
-## ❓ 7. What are common bottlenecks in AI infrastructure?
+## 7. What are common bottlenecks in AI infrastructure?
 
 | Category | Common Issue | Mitigation |
 |-----------|---------------|------------|
@@ -77,7 +77,7 @@ A practical reference for infrastructure and cloud engineers adopting Artificial
 
 💡 *Tip:* Often the bottleneck isn’t the GPU — it’s the data path.
 
-## ❓ 8. How do I estimate TPM, RPM, and cost for Azure OpenAI?
+## 8. How do I estimate TPM, RPM, and cost for Azure OpenAI?
 
 **Formula:**
 ```
@@ -89,7 +89,7 @@ TPM = (Tokens per Request × Requests per Minute)
 
 💡 *Tip:* For steady traffic, consider **Provisioned Throughput Units (PTUs)**.
 
-## ❓ 9. What’s the best architecture for hybrid environments?
+## 9. What’s the best architecture for hybrid environments?
 
 **Recommended baseline:**
 - **Azure Arc** for hybrid management  
@@ -99,7 +99,7 @@ TPM = (Tokens per Request × Requests per Minute)
 
 💡 *Reality check:* Keep inference close to your data, minimize egress latency.
 
-## ❓ 10. What’s the best way to learn AI for infra engineers?
+## 10. What’s the best way to learn AI for infra engineers?
 
 **Suggested roadmap:**
 1. Earn the **AI-900 Azure AI Fundamentals** certification.  
