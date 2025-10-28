@@ -85,8 +85,7 @@ Network performance is just as critical as GPU performance.
 
 ## Example Azure architecture
 
-<img src="../images/example-architecture.png" width="75%">
-
+!](../images/example-architecture.png)
 
 This architecture is used by companies serving **LLMs** and **real-time inference**, combining **AKS**, **Blob Storage**, and continuous **monitoring**.
 
