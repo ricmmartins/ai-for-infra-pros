@@ -1,10 +1,8 @@
-# Chapter 10 — Visual Glossary: AI for Infrastructure Professionals
+# Chapter 10 — Visual Glossary: AI for infrastructure professionals
 
 > “Infrastructure and AI don’t speak different languages — they just have distinct technical dialects.”
 
----
-
-## 🧠 Overview
+## Overview
 
 This visual glossary was created for professionals who already master **infrastructure, networking, automation, and observability**, and want to understand how those concepts translate into the world of **Artificial Intelligence**.
 
@@ -14,11 +12,9 @@ Each term includes:
 🔄 An **analogy** to the infrastructure world  
 💡 A **real-world application** in technical operations
 
----
+## Terms Table: Infrastructure ↔ Artificial Intelligence
 
-## 📄 Terms Table: Infrastructure ↔ Artificial Intelligence
-
-| AI Term | Technical Definition | Infrastructure Analogy |
+| AI Term | Technical definition | Infrastructure analogy |
 |----------|----------------------|------------------------|
 | **Inference** | Running a trained model with new data to generate a response. | Like a GET request that returns a prediction or computation. |
 | **Training** | Teaching a model using labeled examples. | Like setting a performance baseline through repeated tests. |
@@ -39,11 +35,10 @@ Each term includes:
 | **Inference Endpoint** | Public or private API exposing the model. | Like an App Service or Function — but for AI. |
 | **RAG (Retrieval Augmented Generation)** | Combines AI with local data search. | Like checking a cache before querying a database. |
 
----
 
-## 🔄 If You Already Understand Infrastructure...
+## If You Already Understand Infrastructure...
 
-| What You Already Do | In AI, the Equivalent Is... |
+| What you already do | In AI, the equivalent is... |
 |----------------------|-----------------------------|
 | Provision VMs with specific specs | Create inference endpoints with allocated GPU and memory |
 | Balance traffic with health probes | Scale model APIs using latency and error metrics |
@@ -53,11 +48,9 @@ Each term includes:
 | Use SNMP/telemetry | Monitor GPU usage via Prometheus and DCGM |
 | Create failover with Front Door | Configure multi-region fallback across endpoints |
 
----
+## Visual diagrams
 
-## 🧭 Visual Diagrams
-
-### 🧩 1. AI Model Lifecycle
+### 1. AI model lifecycle
 
 ```mermaid
 graph TD
@@ -69,7 +62,7 @@ graph TD
   F --> G[Inference - Request/Response]
 ```
 
-### ⚙️ 2. Simplified Infrastructure Architecture for AI
+### 2. Simplified infrastructure architecture for AI
 
 ```mermaid
 graph LR
@@ -80,11 +73,9 @@ graph LR
   Observ --> Cost[Azure Cost Management]
 ```
 
----
+## Quick checklists
 
-## 📋 Quick Checklists
-
-### 🧠 AI Environment Readiness
+### AI environment readiness
 
 - [x] Understand token, TPM, and RPM limits  
 - [x] Know how to provision GPUs and AKS using IaC  
@@ -92,9 +83,7 @@ graph LR
 - [x] Automate model updates and versioning via pipelines  
 - [x] Use Key Vault and private access for endpoints  
 
----
-
-### ⚙️ Performance and Cost
+### Performance and cost
 
 - [x] Optimize prompts to reduce token count  
 - [x] Use caching and RAG to prevent recomputation  
@@ -102,9 +91,7 @@ graph LR
 - [x] Evaluate PTU vs Standard based on load  
 - [x] Track cost-per-token metrics in Azure Monitor  
 
----
-
-### 🔒 Security and Governance
+### Security and governance
 
 - [x] Store tokens and secrets in Key Vault  
 - [x] Anonymize inference logs  
@@ -112,11 +99,9 @@ graph LR
 - [x] Enforce RBAC/ABAC access controls  
 - [x] Retain logs for at least 30 days for auditing  
 
----
+## Practical use cases
 
-## 📚 Practical Use Cases
-
-### 🧠 Case 1 — Internal Chat with Azure OpenAI (Standard)
+### Case 1: Internal Chat with Azure OpenAI (Standard)
 
 **Scenario:** Internal chatbot using AKS + Azure OpenAI.  
 **Challenge:** High latency and throttling.  
@@ -126,9 +111,8 @@ graph LR
 - Monitor with Application Insights  
 - Migrate to **PTU-C** for stable latency  
 
----
 
-### ⚙️ Case 2 — Data Extraction on GPU VMs
+### Case 2: Data extraction on GPU VMs
 
 **Scenario:** Automated pipeline for batch inference on PDFs.  
 **Solution:**
@@ -137,9 +121,7 @@ graph LR
 - Execute during off-peak (spot VMs)  
 - Centralized logging in Log Analytics  
 
----
-
-### 🌍 Case 3 — Multi-Region Deploy with Fallback
+### Case 3: Multi-region deploy with fallback
 
 **Scenario:** Global startup using GPT-4 across East US and Sweden Central.  
 **Solution:**
@@ -148,19 +130,16 @@ graph LR
 - Retry logic with API Management  
 - Token quota watchdog per region  
 
----
+## Best practices for infrastructure professionals
 
-## 💡 Best Practices for Infrastructure Professionals
-
-- Training is expensive — inference is constant.  
+- Training is expensive - inference is constant.  
 - Prompt = input; model = brain; response = output.  
 - Idle GPU = wasted cost.  
 - AI logs may contain sensitive data → always encrypt.  
 - Tokens = cost + latency → always optimize.  
 
----
 
-## ✅ Conclusion
+## Conclusion
 
 This glossary was built to help infrastructure professionals feel **confident and fluent** in the applied AI vocabulary.  
 You already master the essentials — now you speak the language too.
