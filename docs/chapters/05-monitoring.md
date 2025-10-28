@@ -157,7 +157,7 @@ Combine with **Application Insights logs** to correlate GPU usage with inference
 
 ## References
 
-- [Monitoring AKS with GPUs](https://learn.microsoft.com/azure/aks/gpu-monitoring)  
+- [Monitoring AKS with GPUs](https://learn.microsoft.com/en-us/azure/aks/monitor-gpu-metrics)  
 - [Azure Monitor Documentation](https://learn.microsoft.com/azure/azure-monitor/)  
 - [OpenTelemetry with Azure](https://learn.microsoft.com/azure/azure-monitor/app/opentelemetry-enable)  
 
