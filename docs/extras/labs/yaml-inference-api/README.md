@@ -1,13 +1,11 @@
-# 🤖 Lab: Deploying an Inference API using Azure Machine Learning (YAML-based)
+# Lab: Deploying an inference API using Azure Machine Learning (YAML-based)
 
-## 🎯 Objective
+## Objective
 This lab walks you through deploying a **machine learning model as an inference endpoint** using **Azure Machine Learning (AML)** via a YAML configuration file.
 
 You’ll deploy a simple example model (such as scikit-learn diabetes regression) and expose it securely as an HTTPS endpoint.
 
----
-
-## 🧰 Prerequisites
+## Prerequisites
 Before starting, make sure you have:
 
 - ✅ [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli)
@@ -20,9 +18,7 @@ Before starting, make sure you have:
 - ✅ Python 3.9+ and the `azureml` SDK if testing locally
 - ✅ Proper RBAC permissions for AML deployments
 
----
-
-## 📁 Folder Structure
+## Folder structure
 ```
 yaml-inference-api/
 ├── endpoint.yml
@@ -31,9 +27,7 @@ yaml-inference-api/
 └── README.md
 ```
 
----
-
-## ⚙️ 1. endpoint.yml — YAML Configuration for the Endpoint
+## 1. endpoint.yml — YAML Configuration for the endpoint
 
 ```yaml
 name: infer-demo
@@ -49,7 +43,7 @@ deployments:
       scoring_script: score.py
 ```
 
-🔍 **Explanation**
+**Explanation**
 | Field | Description |
 |--------|-------------|
 | `name` | The name of your endpoint (unique per workspace) |
@@ -59,9 +53,8 @@ deployments:
 | `instance_type` | VM SKU used to run the endpoint |
 | `scoring_script` | The Python file that defines the inference logic |
 
----
 
-## ⚙️ 2. score.py — Inference Logic
+## 2. score.py — Inference logic
 
 Example `score.py`:
 
@@ -85,9 +78,7 @@ def run(raw_data):
         return json.dumps({"error": str(e)})
 ```
 
----
-
-## ⚙️ 3. requirements.txt — Dependencies
+## 3. requirements.txt — Dependencies
 
 ```text
 numpy
@@ -96,9 +87,7 @@ joblib
 azureml-core
 ```
 
----
-
-## 🚀 Deployment Steps
+## Deployment steps
 
 ### Step 1: Log in and set workspace
 ```bash
@@ -132,16 +121,12 @@ Example `sample.json`:
 ✅ **Expected output:**  
 A JSON response with numeric predictions.
 
----
-
-## 🔐 Security Options
+## Security options
 - Use `auth_mode: aml_token` to integrate with Azure Active Directory  
 - Add **Private Endpoint** for network isolation  
 - Configure **Managed Identity** for secure access to other services (like Blob Storage)
 
----
-
-## 🧠 Troubleshooting
+## Troubleshooting
 
 | Issue | Fix |
 |-------|-----|
@@ -150,17 +135,13 @@ A JSON response with numeric predictions.
 | Slow inference | Try using a GPU-based SKU like `Standard_NC6s_v3` |
 | Endpoint timeout | Increase timeout in AML or optimize model loading |
 
----
-
-## 🧹 Cleanup
+## Cleanup
 To remove the endpoint and resources:
 ```bash
 az ml online-endpoint delete --name infer-demo --yes
 ```
 
----
-
-## 📚 References
+## References
 - [Azure ML Online Endpoints Documentation](https://learn.microsoft.com/en-us/azure/machine-learning/how-to-deploy-online-endpoints)
 - [YAML Schema Reference](https://learn.microsoft.com/en-us/azure/machine-learning/reference-yaml-endpoint)
 - [Azure ML CLI v2](https://learn.microsoft.com/en-us/azure/machine-learning/how-to-configure-cli)
