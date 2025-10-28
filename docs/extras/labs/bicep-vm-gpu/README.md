@@ -1,13 +1,12 @@
-# 💻 Lab: Deploying a GPU Virtual Machine using Azure Bicep
+# Lab: Deploying a GPU virtual machine using Azure Bicep
 
-## 🎯 Objective
+## Objective
 This lab demonstrates how to provision an **Azure Virtual Machine (VM)** with GPU acceleration using **Bicep**, the Azure-native Infrastructure-as-Code (IaC) language.
 
 You’ll deploy a GPU-enabled Ubuntu VM, connect to it via SSH, install the NVIDIA drivers, and validate GPU availability with `nvidia-smi`.
 
----
 
-## 🧰 Prerequisites
+## Prerequisites
 Before starting, ensure you have:
 
 - ✅ [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli)
@@ -16,9 +15,9 @@ Before starting, ensure you have:
 - ✅ SSH key pair generated locally
 - ✅ A **resource group** for your deployment (or Terraform-created one)
 
----
 
-## 📁 Folder Structure
+
+## Folder structure
 ```
 bicep-vm-gpu/
 ├── main.bicep
@@ -26,9 +25,7 @@ bicep-vm-gpu/
 └── README.md
 ```
 
----
-
-## ⚙️ Bicep Template Overview
+## Bicep template overview
 
 ### main.bicep
 Defines the VM configuration, network interface, and OS profile.
@@ -78,9 +75,7 @@ resource vm 'Microsoft.Compute/virtualMachines@2022-11-01' = {
 }
 ```
 
----
-
-## 🚀 Deployment Steps
+## Deployment steps
 
 ### 1. Login and set your subscription
 ```bash
@@ -101,9 +96,7 @@ az deployment group create \
   --parameters @parameters.json
 ```
 
----
-
-## 🔍 Validation
+## Validation
 
 After deployment completes, connect to your VM:
 ```bash
@@ -117,9 +110,7 @@ nvidia-smi
 
 ✅ **Expected output:** A list showing your NVIDIA GPU (e.g., Tesla T4, V100) with active driver and CUDA version.
 
----
-
-## 🧠 Optional: Install NVIDIA Drivers Manually
+## Optional: Install NVIDIA drivers manually
 
 If drivers are not pre-installed:
 ```bash
@@ -135,24 +126,18 @@ sudo reboot
 nvidia-smi
 ```
 
----
-
-## 🧪 Next Steps
+## Next steps
 - Attach a **data disk** or mount a **Blob Storage container** for datasets  
 - Containerize your model inference workload with **Docker + CUDA**  
 - Connect to **Azure ML Workspace** for managed experimentation
 
----
-
-## 🧹 Cleanup
+## Cleanup
 To remove the VM and its resources:
 ```bash
 az group delete --name rg-ai-lab --yes --no-wait
 ```
 
----
-
-## 📚 References
+## References
 - [Azure Bicep Documentation](https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/)
 - [Azure VM GPU Sizes](https://learn.microsoft.com/en-us/azure/virtual-machines/sizes-gpu)
 - [Install NVIDIA Drivers on Linux VMs](https://learn.microsoft.com/en-us/azure/virtual-machines/linux/n-series-driver-setup)
