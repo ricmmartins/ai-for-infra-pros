@@ -1,8 +1,8 @@
-# Chapter 5 — Monitoring and Observability for AI Environments
+# Chapter 5 — Monitoring and observability for AI environments
 
 > “You only control what you can measure — and with AI, that’s even more critical.”
 
-## Why Monitoring AI Is Different
+## Why monitoring AI is different
 
 AI environments behave differently from traditional workloads.  
 A model may be *running* and still deliver incorrect results, high latency, or unexpected costs.
