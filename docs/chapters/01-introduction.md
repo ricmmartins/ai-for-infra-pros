@@ -87,7 +87,7 @@ But understanding AI and its resource demands allows you to:
 ✅ Help **bring AI workloads into production**  
 ✅ Become a **technical leader in AI architecture**
 
-## The Opportunity: The AI-Ready Infra Professional
+## The opportunity: The AI-Ready infra professional
 
 Imagine the value of someone who:
 
@@ -115,7 +115,7 @@ That’s the **AI-ready infrastructure professional** — and this eBook will tu
 - [What is an AI model?](https://microsoft.github.io/Workshop-Interact-with-OpenAI-models/ai-models/)
 - [Large Language Model (LLM)](https://microsoft.github.io/Workshop-Interact-with-OpenAI-models/llms/)
 
-## Suggested mini-lab (No Code Yet)
+## Suggested mini-lab (No code yet)
 
 **Mission:** Discover which GPU VMs are available in your Azure subscription.
 
