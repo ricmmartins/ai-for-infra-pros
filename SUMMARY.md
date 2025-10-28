@@ -8,7 +8,7 @@
 - [Mission](README.md#mission)
 - [Credits](README.md#credits)
 
-## 📖 Main Chapters
+## Main chapters
 
 1. [Foundations of AI for Infrastructure](docs/chapters/01-introduction.md)
 2. [Data - The Fuel of Artificial Intelligence](docs/chapters/02-data.md)
@@ -22,15 +22,16 @@
 10. [Visual Glossary - Translating AI for Infrastructure Engineers](docs/chapters/10-visual-glossary.md)
 
 
-## 🧪 Hands-on Labs
+## Hands-on labs
 
 - [Mini-Labs Overview](docs/extras/labs/README.md)
-  - [Deploying a GPU VM with Bicep](docs/extras/labs/bicep-vm-gpu/README.md)
   - [Creating an AKS Cluster with GPU using Terraform](docs/extras/labs/terraform-aks-gpu/README.md)
+  - [Deploying a GPU VM with Bicep](docs/extras/labs/bicep-vm-gpu/README.md)
   - [Building an Inference API with YAML](docs/extras/labs/yaml-inference-api/README.md)
 
 
-## 🧩 Extras and Reference Material
+## Extras and reference material
 
-- [Technical FAQ and Cheatsheets](docs/extras/technical-faq.md)
 - [Technical Case Studies](docs/extras/case-studies.md)
+- [Cheatsheets](docs/extras/cheatsheets.md)
+- - [Technical FAQ](docs/extras/technical-faq.md)
