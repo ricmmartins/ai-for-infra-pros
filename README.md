@@ -75,16 +75,25 @@ ai-for-infra-pros/
 │   │   │   │   └── README.md
 │   │   │   ├── terraform-aks-gpu/
 │   │   │   │   └── README.md
-│   │   │   └── yaml-inference-api/
-│   │   │       └── README.md
+│   │   │   ├── yaml-inference-api/
+│   │   │   │   └── README.md
 │   │   ├── case-studies.md
 │   │   ├── cheatsheets.md
 │   │   └── technical-faq.md
-│   ├── images/
-│   │   ├── infrastructure-flow.png
-│   │   ├── model-life-cycle.png
-│   │   └── relationship-tpm-qps-cost.png
-│   └── README.md
+│   └── images/
+│       ├── ai4infrapros.png
+│       ├── aiforinfracon.png
+│       ├── designing-ha.png
+│       ├── example-architecture.png
+│       ├── framework-structure.png
+│       ├── full-training-pipeline.png
+│       ├── infrastructure-flow.png
+│       ├── model-life-cycle.png
+│       ├── predictive-analysis.png
+│       ├── relationship-tpm-qps-cost.png
+│       ├── simple-training-pipeline.png
+│       ├── typical-architecture-ptu.png
+│       └── where-to-run.png
 ├── README.md
 └── SUMMARY.md
 ```
