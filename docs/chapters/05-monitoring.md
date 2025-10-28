@@ -111,12 +111,7 @@ Use AI to improve your own observability:
 - Detect latency anomalies using **Azure Anomaly Detector**.  
 - Trigger intelligent autoscaling (**AKS / VMSS**) based on inferred load.  
 
-```mermaid
-graph LR
-  Metrics[Azure Monitor Metrics] --> AD[Anomaly Detector]
-  AD --> Scale[AKS AutoScaler]
-  Scale --> AKS[GPU Cluster]
-```
+![](../images/predictive-analysis.png)
 
 ## Alerts and automated responses
 
