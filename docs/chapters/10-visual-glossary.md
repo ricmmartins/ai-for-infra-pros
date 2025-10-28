@@ -52,15 +52,7 @@ Each term includes:
 
 ### 1. AI model lifecycle
 
-```mermaid
-graph TD
-  A[Training Dataset] --> B[Training Job]
-  B --> C[Trained Model]
-  C --> D[Register in AML or Blob]
-  D --> E[Deploy as Endpoint]
-  E --> F[User or Application]
-  F --> G[Inference - Request/Response]
-```
+![](../images/model-life-cycle.png)
 
 ### 2. Simplified infrastructure architecture for AI
 
