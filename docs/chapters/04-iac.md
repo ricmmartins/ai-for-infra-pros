@@ -176,7 +176,6 @@ Did you know you can estimate the **average request size** of your AI models bas
 - [Terraform on Azure](https://learn.microsoft.com/azure/developer/terraform/)  
 - [GitHub Actions for Azure](https://learn.microsoft.com/azure/developer/github/)  
 
----
 
 ### ➡️ Next Chapter
 
