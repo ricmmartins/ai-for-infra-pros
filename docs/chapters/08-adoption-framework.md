@@ -166,6 +166,6 @@ You now have a complete technical roadmap to lead AI adoption within your organi
 > It’s the responsibility of those who build the foundation. And that person is you.”
 
 
-### Next chapter
+<!-- ### Next chapter
 
-Advance your understanding of Azure AI workloads in [**Chapter 9 — Azure OpenAI for infrastructure: Understanding TPM, RPM, and PTU**](09-azure-openai-tpm-ptu.md).
+Advance your understanding of Azure AI workloads in [**Chapter 9 — Azure OpenAI for infrastructure: Understanding TPM, RPM, and PTU**](09-azure-openai-tpm-ptu.md). -->
