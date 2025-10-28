@@ -94,7 +94,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "gpu_pool" {
 
 💡 *Tip:* Log and analyze TPM, RPM, and QPS to prevent throttling and overprovisioning.
 
-## 🧰 Where to run your model — Decision flow
+## Where to run your model — Decision flow
 
 ```mermaid
 graph TD
