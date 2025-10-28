@@ -111,7 +111,7 @@ Use AI to improve your own observability:
 - Detect latency anomalies using **Azure Anomaly Detector**.  
 - Trigger intelligent autoscaling (**AKS / VMSS**) based on inferred load.  
 
-![](../images/predictive-analysis.png)
+<img src="../images/predictive-analysis.png" width="75%">
 
 ## Alerts and automated responses
 
