@@ -142,7 +142,6 @@ Resilience is built *before* failure.
 | Model backup and versioning | ✅ |
 | Disaster recovery strategy defined | ✅ |
 
----
 
 ## Conclusion
 
@@ -150,7 +149,6 @@ Security and resilience are what sustain AI in production. Without them, even th
 
 You don’t need to understand every layer of the model to be essential in AI, but you must ensure it operates securely, efficiently, and continuously.
 
----
 
 ### ➡️ Next Chapter
 
