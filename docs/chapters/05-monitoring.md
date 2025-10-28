@@ -164,7 +164,7 @@ Combine with **Application Insights logs** to correlate GPU usage with inference
 > “Good infrastructure is invisible when it works — but poorly monitored AI shows up quickly, either in your monthly bill or in the user experience.”
 
 
-### Next chapter
+<!-- ### Next chapter
 
-Continue to learn how to protect and harden your environments in [**Chapter 6 — Security and resilience in AI environments**](06-security.md).
+Continue to learn how to protect and harden your environments in [**Chapter 6 — Security and resilience in AI environments**](06-security.md). -->
 
