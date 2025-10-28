@@ -163,7 +163,6 @@ Combine with **Application Insights logs** to correlate GPU usage with inference
 
 > “Good infrastructure is invisible when it works — but poorly monitored AI shows up quickly, either in your monthly bill or in the user experience.”
 
----
 
 ### ➡️ Next Chapter
 
