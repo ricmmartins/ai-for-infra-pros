@@ -109,7 +109,8 @@ Strategies for inference workloads and critical pipelines:
 - **Retry and fallback:** With alternate models or cached responses.  
 - **Disaster recovery:** Replicate data and models across secondary regions.  
 
-<img src="../images/designing-ha.png" width="100%">
+![](../images/designing-ha.png)
+
 
 ## Production lessons (real cases)
 
