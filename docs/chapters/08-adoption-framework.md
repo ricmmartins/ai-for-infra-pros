@@ -13,14 +13,7 @@ Inspired by Microsoft’s **Cloud Adoption Framework**, this model translates th
 
 The framework consists of **6 phases**, each with clear goals, practical activities, and recommended tools.
 
-```mermaid
-flowchart TD
-  1[Diagnostic and Technical Motivation] --> 2[Enablement and Alignment]
-  2 --> 3[Infrastructure Preparation]
-  3 --> 4[Experimentation and Initial Use Cases]
-  4 --> 5[Scale, Governance, and Resilience]
-  5 --> 6[Continuous Adoption and Feedback]
-```
+![](../images/framework-structure.png)
 
 ## Phase 1: Diagnostic and technical motivation
 
