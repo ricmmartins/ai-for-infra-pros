@@ -1,6 +1,6 @@
-# 🧱 Lab: Deploying an AKS Cluster with GPU Node Pool using Terraform
+# Lab: Deploying an AKS cluster with GPU node pool using Terraform
 
-## 🎯 Objective
+## Objective
 Provision an **Azure Kubernetes Service (AKS)** cluster with a **dedicated GPU node pool** for AI and inference workloads.
 
 This lab demonstrates how to:
@@ -8,9 +8,8 @@ This lab demonstrates how to:
 - Deploy a GPU-enabled AKS node pool
 - Prepare your cluster for AI workloads such as Azure OpenAI, MLflow, or custom inference containers
 
----
 
-## 🧰 Prerequisites
+## Prerequisites
 Before running this lab, make sure you have:
 
 - ✅ [Terraform CLI](https://developer.hashicorp.com/terraform/downloads) installed (v1.5+ recommended)
@@ -18,9 +17,7 @@ Before running this lab, make sure you have:
 - ✅ Access to an Azure subscription with permission to create resource groups and AKS clusters
 - ✅ A quota for **GPU-enabled VM SKUs** (e.g., `Standard_NC6s_v3` or `Standard_NCas_T4_v3`)
 
----
-
-## 📁 Folder Structure
+## Folder Structure
 ```
 terraform-aks-gpu/
 ├── main.tf
@@ -29,9 +26,7 @@ terraform-aks-gpu/
 └── README.md
 ```
 
----
-
-## ⚙️ Configuration
+## Configuration
 
 ### 1. Define environment variables
 Authenticate and set your default subscription:
@@ -55,20 +50,16 @@ terraform plan -out=tfplan
 terraform apply "tfplan"
 ```
 
----
-
-## 💡 What this deployment creates
+## What this deployment creates
 | Resource | Description |
 |-----------|--------------|
-| **Resource Group** | A logical container for all deployed resources |
-| **AKS Cluster** | Managed Kubernetes cluster configured with default node pool |
-| **GPU Node Pool** | A secondary node pool using `Standard_NC6s_v3` (or similar) |
-| **Managed Identity** | Used for AKS and node pool operations |
-| **Network Resources** | VNet, subnets, NSG (if defined) |
+| **Resource group** | A logical container for all deployed resources |
+| **AKS cluster** | Managed Kubernetes cluster configured with default node pool |
+| **GPU node pool** | A secondary node pool using `Standard_NC6s_v3` (or similar) |
+| **Managed identity** | Used for AKS and node pool operations |
+| **Network resources** | VNet, subnets, NSG (if defined) |
 
----
-
-## 🔍 Validation
+## Validation
 After deployment, verify your GPU node pool:
 ```bash
 az aks nodepool list \
@@ -88,24 +79,18 @@ Check that the GPU node pool is labeled and ready:
 kubectl get nodes -l "agentpool=gpu"
 ```
 
----
-
-## 🧪 Next Steps
+## Next steps
 - Install the [NVIDIA device plugin](https://github.com/NVIDIA/k8s-device-plugin) to expose GPU metrics
 - Deploy your first inference workload (see `yaml-inferencia-api/` lab)
 - Integrate monitoring with [Prometheus + DCGM Exporter](https://github.com/NVIDIA/dcgm-exporter)
 
----
-
-## 🧹 Cleanup
+## Cleanup
 To remove all resources:
 ```bash
 terraform destroy
 ```
 
----
-
-## 📚 References
+## References
 - [Terraform AKS Provider Docs](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/kubernetes_cluster)
 - [Azure GPU SKUs](https://learn.microsoft.com/en-us/azure/virtual-machines/sizes-gpu)
 - [AKS GPU Node Pools](https://learn.microsoft.com/en-us/azure/aks/gpu-cluster)
