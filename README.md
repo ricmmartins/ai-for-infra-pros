@@ -55,7 +55,7 @@ If you want to start quickly:
 
 ## Repository structure
 
-```bash
+```text
 ai-for-infra-pros/
 ├── docs/
 │   ├── chapters/
