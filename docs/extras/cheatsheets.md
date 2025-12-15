@@ -82,26 +82,27 @@ az ml online-endpoint create   --name infer-demo   --file endpoint.yml
 
 ---
 
-### Create an AKS cluster with GPU node pool (Terraform)
+### Create an AKS cluster GPU node pool (Terraform)
 
 ```hcl
+# Requires an existing azurerm_kubernetes_cluster resource (aks_ai)
 resource "azurerm_kubernetes_cluster_node_pool" "gpu_pool" {
-  name                = "gpu"
-  vm_size             = "Standard_NC6s_v3"
-  enable_auto_scaling = true
-  min_count           = 1
-  max_count           = 3
+  name                  = "gpu"
+  kubernetes_cluster_id = azurerm_kubernetes_cluster.aks_ai.id
+
+  vm_size               = "Standard_NC6s_v3"
+  mode                  = "User"
+
+  enable_auto_scaling   = true
+  min_count             = 1
+  max_count             = 3
 
   node_labels = {
-    "k8s.azure.com/mode" = "User"
+    "workload" = "gpu"
   }
 
-  taints = [
-    {
-      key    = "nvidia.com/gpu"
-      value  = "true"
-      effect = "NoSchedule"
-    }
+  node_taints = [
+    "nvidia.com/gpu=true:NoSchedule"
   ]
 }
 ```
