@@ -2,109 +2,150 @@
 
 A practical reference for infrastructure and cloud engineers adopting Artificial Intelligence in their environments.
 
+---
+
 ## 1. Can I run AI workloads without a GPU?
 
 **Yes, but with limitations.**
 
-- Lightweight models (e.g., regression, decision trees) can run on CPU.  
-- Large Language Models (LLMs), image, and deep learning tasks need GPUs for performance.  
-- For cost-effective inference, use **Standard_NCas_T4_v3** or **NVads_A10** SKUs on Azure.
+- Lightweight models (regression, decision trees, classical ML) can run efficiently on CPU.
+- Large Language Models (LLMs), computer vision, and deep learning workloads require GPUs for acceptable latency and throughput.
+- For cost‑effective inference on Azure, consider **Standard_NCas_T4_v3** or **NVads_A10** SKUs.
 
-💡 *Tip:* Use ephemeral or spot instances for testing workloads.
+💡 *Tip:* Use **Spot VMs** only for non‑critical inference or batch jobs and always implement checkpointing and retries.
+
+---
 
 ## 2. What’s the difference between training and inference?
 
-| Stage | Purpose | Analogy for Infra Engineers |
-|--------|----------|-----------------------------|
-| **Training** | Teaches the model using historical data | Like running a batch performance benchmark across datasets |
-| **Inference** | Uses the trained model to generate predictions | Like responding to API requests in production |
+| Stage | Purpose | Infrastructure analogy |
+|------|--------|------------------------|
+| **Training** | Builds the model using historical data | Large batch job or offline benchmark |
+| **Inference** | Executes the model for predictions | Stateless API responding to requests |
 
-💡 *Infra lens:* Training = heavy batch job; Inference = lightweight request-response workload.
+💡 *Infra lens:* Training is bursty and compute‑heavy. Inference is latency‑sensitive and continuous.
 
-## 3. How can I auto-scale AI workloads?
+---
 
-**Approaches:**
-- Use **GPU metrics (utilization, temperature, queue length)** for autoscaling triggers.  
-- In **AKS**, combine the **Cluster Autoscaler** with custom metrics from Prometheus.  
-- In **Azure Machine Learning**, configure **min_instances** and **max_instances** on endpoints.  
+## 3. How can I auto‑scale AI workloads?
 
-💡 *Best practice:* Set a cooldown window between scale events to prevent oscillation.
+**Recommended signals:**
 
+- GPU utilization and memory usage
+- Request queue depth
+- P95/P99 inference latency
+- Tokens per minute (TPM) growth rate
+
+**Azure implementations:**
+
+- **AKS:** Cluster Autoscaler + HPA using Prometheus metrics
+- **Azure ML:** `min_instances` / `max_instances` on online endpoints
+- **VMSS:** Autoscale rules based on custom GPU metrics
+
+💡 *Best practice:* Always configure cooldown periods to avoid scale oscillation.
+
+---
 
 ## 4. How do I secure inference endpoints?
 
-**Recommendations:**
-- Use **Private Endpoints** and **Network Security Groups (NSGs)**.  
-- Authenticate via **Azure AD tokens** instead of static keys.  
-- Store secrets in **Azure Key Vault**, never in code.  
-- Enable diagnostic logs in **Application Insights** to detect unauthorized access.
+**Baseline controls:**
 
-💡 *Zero Trust principle:* Assume every request is external — even from inside the VNet.
+- Private Endpoints with VNet integration
+- Authentication using **Entra ID (Azure AD)** where supported
+- API keys only as a fallback, stored in **Azure Key Vault**
+- WAF or API Management for throttling and abuse prevention
+- Diagnostic logs enabled in **Application Insights**
+
+💡 *Zero Trust rule:* Treat inference endpoints like any external‑facing production API.
+
+---
 
 ## 5. How much does AI cost to run on Azure?
 
-**Depends on compute + model type.**
+Costs vary by region, model, and usage profile.
 
-| Resource | Approx. Cost (USD/hr) | Use Case |
-|-----------|----------------------|-----------|
-| Standard_NC6s_v3 | ~$1.20/hr | Entry-level GPU workloads |
-| Standard_NCas_T4_v3 | ~$0.90/hr | Cost-efficient inference |
-| ND_A100_v4 | $25–$35/hr | Training large LLMs |
-| Azure OpenAI (Standard) | Pay-per-token | API-based inference |
-| Azure OpenAI (PTU) | Fixed monthly per unit | Guaranteed throughput |
+| Resource | Typical cost range | Notes |
+|--------|-------------------|------|
+| Standard_NC6s_v3 | ~$1–$1.5/hr | Entry GPU workloads |
+| Standard_NCas_T4_v3 | ~$0.8–$1/hr | Best inference cost efficiency |
+| ND_A100_v4 | $25–$35/hr | High‑end training |
+| Azure OpenAI (Standard) | Pay per token | Variable latency |
+| Azure OpenAI (PTU) | Fixed hourly | Predictable throughput |
 
-💡 *Tip:* Monitor with **Azure Cost Management** and set budgets with alerts.
+💡 *Tip:* Always pair GPU usage with **Azure Cost Management budgets and alerts**.
+
+---
 
 ## 6. How do I monitor GPU usage and model latency?
 
-**Use these telemetry tools:**
-- **nvidia-smi** (local GPU metrics)
-- **NVIDIA DCGM Exporter** (for Prometheus)
-- **Azure Monitor for Containers**
-- **Application Insights** (API latency and errors)
-- **Grafana Dashboards** (custom visualization)
+**Key telemetry sources:**
 
-💡 *Goal:* Measure latency, token usage, and error rates — not just uptime.
+- `nvidia-smi` for node‑level checks
+- **DCGM Exporter** for Prometheus
+- **Azure Monitor for Containers**
+- **Application Insights** for request latency, errors, and dependencies
+- **Grafana** for unified dashboards
+
+💡 *Golden rule:* Correlate GPU utilization, latency, and token throughput.
+
+---
 
 ## 7. What are common bottlenecks in AI infrastructure?
 
-| Category | Common Issue | Mitigation |
-|-----------|---------------|------------|
-| **Storage** | Slow dataset reads | Use NVMe or Premium SSD for training datasets |
-| **Network** | Latency in model API calls | Use Private Link and regional deployments |
-| **Compute** | GPU idle time | Implement autoscaling and caching |
-| **Cost** | Unused resources | Automate shutdown for idle clusters |
+| Area | Bottleneck | Mitigation |
+|-----|-----------|-----------|
+| Storage | Slow dataset reads | NVMe, Premium SSD |
+| Network | Cross‑region latency | Regional inference, Private Link |
+| Compute | GPU idle time | Autoscaling, batching |
+| Cost | Idle clusters | Scheduled shutdowns |
 
-💡 *Tip:* Often the bottleneck isn’t the GPU — it’s the data path.
+💡 *Reality:* The bottleneck is often the data path, not the GPU.
+
+---
 
 ## 8. How do I estimate TPM, RPM, and cost for Azure OpenAI?
 
 **Formula:**
-```
-TPM = (Tokens per Request × Requests per Minute)
-```
-- Start with average prompt size (input + output tokens).  
-- Compare to Azure’s model quota (e.g., 600K TPM / 100 RPM for gpt-4-turbo).  
-- Use **Application Insights** or **Log Analytics** to track consumption.  
 
-💡 *Tip:* For steady traffic, consider **Provisioned Throughput Units (PTUs)**.
+```
+TPM = Tokens per request × Requests per minute
+```
+
+**Important considerations:**
+
+- Tokens include both prompt and response.
+- Retries amplify real TPM consumption.
+- Monitor HTTP 429 and `Retry-After` headers.
+
+💡 *Rule:* For sustained production traffic, evaluate **Provisioned Throughput Units (PTUs)**.
+
+---
 
 ## 9. What’s the best architecture for hybrid environments?
 
-**Recommended baseline:**
-- **Azure Arc** for hybrid management  
-- **Azure Monitor Agent** for telemetry ingestion  
-- **Private Link** to ensure secure hybrid connectivity  
-- **AKS on-prem (Arc-enabled)** for unified control plane  
+**Reference pattern:**
 
-💡 *Reality check:* Keep inference close to your data, minimize egress latency.
+- Azure Arc for resource management
+- Azure Monitor Agent for telemetry
+- Private Link for secure connectivity
+- Arc‑enabled AKS for unified Kubernetes control
+
+💡 *Design principle:* Keep inference close to the data to minimize latency and egress.
+
+---
 
 ## 10. What’s the best way to learn AI for infra engineers?
 
-**Suggested roadmap:**
-1. Earn the **AI-900 Azure AI Fundamentals** certification.  
-2. Complete this handbook’s mini-labs (VM GPU, AKS GPU, AML Inference).  
-3. Explore **Azure OpenAI Service** and **Azure Machine Learning**.  
-4. Build a small internal Copilot (e.g., chatbot or monitoring assistant).  
+**Suggested path:**
 
-💡 *Mindset:* You don’t need to master data science — start by mastering *how AI runs*.
+1. AI‑900: Azure AI Fundamentals
+2. Hands‑on labs (GPU VM, AKS GPU, Azure ML inference)
+3. Azure OpenAI and monitoring deep dives
+4. Build an internal Copilot or automation assistant
+
+💡 *Mindset:* You don’t need to become a data scientist. You need to master **how AI runs**.
+
+---
+
+> Infrastructure doesn’t compete with AI.  
+> It makes AI reliable, secure, and scalable.
