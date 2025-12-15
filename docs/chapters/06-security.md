@@ -38,6 +38,9 @@ That’s your domain as an infrastructure professional.
 az ad sp create-for-rbac --name "ai-aks-service" --role contributor \
   --scopes /subscriptions/{id}/resourceGroups/rg-ai
 ```
+> Note: The command above creates a Service Principal.
+> Prefer Managed Identity where supported to avoid long-lived credentials and reduce secret exposure.
+
 
 **Tip:** Temporary and federated identities drastically reduce credential exposure risks.
 
