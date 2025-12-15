@@ -35,20 +35,6 @@ bicep-vm-gpu/
 
 ---
 
-## What was fixed vs the draft
-
-The original snippet referenced `nic.id` but didn’t define the NIC/VNet/Public IP resources.
-This version includes:
-- VNet, Subnet
-- Public IP
-- NIC
-- NSG with SSH rule
-- Outputs for the public IP so you can SSH without guessing
-
-It also replaces the manual `.run` driver install with the Microsoft-supported **GPU Driver Extension** path.
-
----
-
 ## 1. Login and select the subscription
 
 ```bash
