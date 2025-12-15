@@ -1,0 +1,15 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "adminPublicKey": {
+      "value": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQD...REPLACE_WITH_YOUR_KEY"
+    },
+    "vmSize": {
+      "value": "Standard_NC6s_v3"
+    },
+    "sshSourceCidr": {
+      "value": "*"
+    }
+  }
+}
