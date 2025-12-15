@@ -1,0 +1,13 @@
+$schema: https://azuremlschemasprod.azureedge.net/latest/managedOnlineDeployment.schema.json
+name: blue
+endpoint_name: infer-demo
+
+model: azureml:sklearn-diabetes@latest
+environment: azureml:infer-sklearn-diabetes@latest
+
+code_configuration:
+  code: .
+  scoring_script: score.py
+
+instance_type: Standard_DS2_v2
+instance_count: 1
