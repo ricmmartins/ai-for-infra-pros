@@ -1,67 +1,196 @@
-# Chapter 4 — Infrastructure as Code (IaC) and AI environments
+# Chapter 4. Infrastructure as Code (IaC) and AI environments
 
 > “You don’t scale AI with spreadsheets. You scale it with code.”
 
-## Why IaC Is essential for AI workloads
+---
 
-AI environments are:
+## Why IaC is essential for AI workloads
 
-- **Complex:** Combine GPU, networking, storage, and advanced permissions.  
-- **Costly:** Every GPU hour is expensive.  
-- **Dynamic:** Each experiment may require a unique setup.  
+AI environments are fundamentally different from traditional application stacks.
 
-Manual provisioning is slow, error-prone, and not scalable.  
-That’s why **Infrastructure as Code (IaC)** is the foundation of modern AI — not a luxury.
+They are:
+
+- **Complex.** GPU compute, high-throughput networking, storage tiers, and fine-grained identity.
+- **Costly.** Every GPU minute matters.
+- **Dynamic.** Experiments, models, and scaling patterns change constantly.
+
+Manual provisioning does not scale in this reality.  
+It is slow, error-prone, and impossible to reproduce reliably.
+
+That is why **Infrastructure as Code (IaC)** is not optional for AI. It is the foundation.
+
+---
 
 ## Direct benefits
 
 | Without IaC | With IaC |
-|--------------|----------|
-| Manual configurations | Versioned infrastructure as code |
-| Frequent human errors | Automated testing and validation |
-| Hard to scale quickly | Consistent deployments in minutes |
-| Lack of standardization | Reusable and auditable modules |
+|------------|---------|
+| Click-ops and ad-hoc scripts | Versioned, declarative infrastructure |
+| Configuration drift | Idempotent, repeatable deployments |
+| Slow experimentation | Environments created in minutes |
+| No audit trail | Reviewed, traceable changes |
 
-💬 IaC turns a test environment into something **reproducible, traceable, and secure**.
+IaC turns an AI environment into something **reproducible, auditable, and secure**.
+
+---
 
 ## IaC fundamentals for AI
 
 | Concept | Role in AI environments |
-|----------|--------------------------|
-| **IaC (Infrastructure as Code)** | Defines infrastructure through declarative files |
-| **Idempotency** | Running the same code always produces the same result |
-| **Reusability** | Templates and modules that teams can replicate |
-| **Auditability** | Versioned, reviewed, and traceable code |
+|-------|-------------------------|
+| **Infrastructure as Code** | Infrastructure defined declaratively |
+| **Idempotency** | Same code. Same result. Every time |
+| **Reusability** | Modules reused across teams and projects |
+| **Auditability** | Git history, reviews, and approvals |
 
-### Core Tools
+### Core tools
 
-✅ **Terraform** — Multi-cloud, ideal for reusability and standardization  
-✅ **Bicep** — Azure-native, modern syntax, integrated with ARM  
-✅ **Azure CLI** — For quick tests or simple automation  
-✅ **GitHub Actions** — For CI/CD pipelines for infrastructure
+✅ **Terraform**. Multi-cloud. Strong module ecosystem.  
+✅ **Bicep**. Azure-native. Clean syntax. ARM-integrated.  
+✅ **Azure CLI**. Fast iteration and glue automation.  
+✅ **GitHub Actions**. CI/CD pipelines for infrastructure.
+
+---
 
 ## Common components of an AI environment
 
-- **Networking:** VNets, subnets, NSGs, Peering  
-- **Compute:** GPU VMs, AKS with GPU node pools  
-- **Storage:** Blob, Data Lake, local NVMe disks  
-- **Identity:** RBAC, Managed Identity, Key Vault  
-- **Monitoring:** Log Analytics, Application Insights  
-- **AI Services:** Azure ML, OpenAI, Front Door, Purview  
+- **Networking.** VNets, subnets, NSGs, private endpoints  
+- **Compute.** GPU VMs, AKS with GPU node pools  
+- **Storage.** Blob, Data Lake, ephemeral NVMe  
+- **Identity.** Managed Identity, RBAC, Key Vault  
+- **Observability.** Log Analytics, metrics, alerts  
+- **AI services.** Azure ML, Azure OpenAI, Front Door, Purview  
 
-## Example 1: Creating a GPU VM with Bicep
+---
+
+## Example 1. Creating a GPU VM with Bicep (correct and deployable)
+
+A virtual machine cannot exist in isolation.  
+It needs networking, disks, and authentication.
+
+This example is intentionally **minimal but complete**.
+
+### What this example includes
+
+- VNet and subnet  
+- Network Security Group allowing SSH  
+- Public IP and NIC  
+- Ubuntu 22.04 GPU-capable VM  
+- SSH key authentication  
+
+---
+
+### `main.bicep`
 
 ```bicep
-resource vm 'Microsoft.Compute/virtualMachines@2022-03-01' = {
-  name: 'vm-gpu'
-  location: resourceGroup().location
+param vmName string = 'vm-gpu'
+param location string = resourceGroup().location
+param vmSize string = 'Standard_NC6'
+param adminUsername string = 'azureuser'
+param sshPublicKey string
+
+var vnetName = '${vmName}-vnet'
+var subnetName = '${vmName}-subnet'
+var nsgName = '${vmName}-nsg'
+var nicName = '${vmName}-nic'
+var pipName = '${vmName}-pip'
+
+resource nsg 'Microsoft.Network/networkSecurityGroups@2023-09-01' = {
+  name: nsgName
+  location: location
+  properties: {
+    securityRules: [
+      {
+        name: 'Allow-SSH'
+        properties: {
+          priority: 1000
+          direction: 'Inbound'
+          access: 'Allow'
+          protocol: 'Tcp'
+          sourcePortRange: '*'
+          destinationPortRange: '22'
+          sourceAddressPrefix: '*'
+          destinationAddressPrefix: '*'
+        }
+      }
+    ]
+  }
+}
+
+resource vnet 'Microsoft.Network/virtualNetworks@2023-09-01' = {
+  name: vnetName
+  location: location
+  properties: {
+    addressSpace: {
+      addressPrefixes: ['10.10.0.0/16']
+    }
+    subnets: [
+      {
+        name: subnetName
+        properties: {
+          addressPrefix: '10.10.1.0/24'
+          networkSecurityGroup: {
+            id: nsg.id
+          }
+        }
+      }
+    ]
+  }
+}
+
+resource pip 'Microsoft.Network/publicIPAddresses@2023-09-01' = {
+  name: pipName
+  location: location
+  sku: {
+    name: 'Standard'
+  }
+  properties: {
+    publicIPAllocationMethod: 'Static'
+  }
+}
+
+resource nic 'Microsoft.Network/networkInterfaces@2023-09-01' = {
+  name: nicName
+  location: location
+  properties: {
+    ipConfigurations: [
+      {
+        name: 'ipconfig1'
+        properties: {
+          subnet: {
+            id: vnet.properties.subnets[0].id
+          }
+          publicIPAddress: {
+            id: pip.id
+          }
+          privateIPAllocationMethod: 'Dynamic'
+        }
+      }
+    ]
+  }
+}
+
+resource vm 'Microsoft.Compute/virtualMachines@2023-09-01' = {
+  name: vmName
+  location: location
   properties: {
     hardwareProfile: {
-      vmSize: 'Standard_NC6'
+      vmSize: vmSize
     }
     osProfile: {
-      adminUsername: 'azureuser'
-      computerName: 'gpuvm'
+      computerName: vmName
+      adminUsername: adminUsername
+      linuxConfiguration: {
+        disablePasswordAuthentication: true
+        ssh: {
+          publicKeys: [
+            {
+              path: '/home/${adminUsername}/.ssh/authorized_keys'
+              keyData: sshPublicKey
+            }
+          ]
+        }
+      }
     }
     storageProfile: {
       imageReference: {
@@ -70,24 +199,49 @@ resource vm 'Microsoft.Compute/virtualMachines@2022-03-01' = {
         sku: '22_04-lts-gen2'
         version: 'latest'
       }
+      osDisk: {
+        createOption: 'FromImage'
+        managedDisk: {
+          storageAccountType: 'Premium_LRS'
+        }
+      }
+    }
+    networkProfile: {
+      networkInterfaces: [
+        {
+          id: nic.id
+        }
+      ]
     }
   }
 }
 ```
 
+---
+
 ### Deploy
 
 ```bash
-az deployment group create \
-  --resource-group rg-ai \
-  --template-file main.bicep
+az group create --name rg-ai --location eastus2
+
+az deployment group create   --resource-group rg-ai   --template-file main.bicep   --parameters sshPublicKey="$(cat ~/.ssh/id_rsa.pub)"
 ```
 
-## Example 2: AKS cluster with GPU node pool (Terraform)
+After deployment:
+
+- Connect via SSH  
+- Install NVIDIA drivers  
+- Validate with `nvidia-smi`  
+
+---
+
+## Example 2. AKS cluster with GPU node pool (Terraform)
+
+Terraform is ideal for **composable, multi-environment platforms**, especially when AKS is the control plane.
 
 ```hcl
 resource "azurerm_kubernetes_cluster" "aks_ai" {
-  name                = "aks-ai-cluster"
+  name                = "aks-ai"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
 
@@ -106,16 +260,21 @@ resource "azurerm_kubernetes_cluster" "aks_ai" {
   }
 }
 
-resource "azurerm_kubernetes_cluster_node_pool" "gpu_pool" {
-  name                = "gpu"
-  vm_size             = "Standard_NC6"
-  enable_auto_scaling = true
+resource "azurerm_kubernetes_cluster_node_pool" "gpu" {
+  name                  = "gpu"
+  kubernetes_cluster_id = azurerm_kubernetes_cluster.aks_ai.id
+  vm_size               = "Standard_NC6"
+  enable_auto_scaling   = true
+  min_count             = 0
+  max_count             = 5
 }
 ```
 
-💡 **Tip:** Use `terraform apply -auto-approve` for quick tests and **modules** for complex environments.
+💡 Inline resources are great for learning. Use **modules** in production.
 
-## Automating deployments with GitHub Actions
+---
+
+## Automating IaC with GitHub Actions
 
 ```yaml
 jobs:
@@ -126,57 +285,69 @@ jobs:
       - uses: azure/login@v1
       - uses: azure/arm-deploy@v1
         with:
-          template: ./infra.bicep
+          template: ./infra/main.bicep
 ```
 
-💡 Combine GitHub Actions with **protected environments**, **reviewers**, and **approval policies** for IaC governance.
+💡 Combine with protected branches, reviewers, and environment approvals.
+
+---
 
 ## Recommended patterns
 
-- Separate modules for **network**, **compute**, **storage**, and **observability**.  
-- Configurable parameters (region, SKU, scalability).  
-- Automation for model updates, such as:  
-  Upload new model to Blob → Update AKS pod → Recreate inference endpoint.  
+- Separate modules for **network**, **compute**, **storage**, and **observability**
+- Parameterize region, SKU, and scale limits
+- Automate inference rollouts  
+  New model → Storage update → AKS rollout → Endpoint refresh
 
-##  Pro insight
+---
 
-> “If you can deploy your entire environment with a `terraform apply` or `az deployment`, you’re doing it right.”
+## Pro insight
+
+> “If you can destroy and recreate your entire AI environment safely, you control it.”
+
+---
 
 ## Security and governance with IaC
 
-- **RBAC** for data and MLOps teams  
-- Automated **Key Vault** for secrets  
-- **NSGs** and **Private Link** to isolate endpoints  
-- **Policies** and **Blueprints** for automated compliance  
+- Managed Identity instead of secrets  
+- Key Vault injected via policy  
+- Private networking by default  
+- Azure Policy to enforce SKU, region, and tagging  
 
-## Hands-On: Quick deploy with Azure CLI + Bicep
+---
+
+## Hands-on recap
 
 ```bash
 az group create --name rg-ai-test --location eastus
 
-az deployment group create \
-  --resource-group rg-ai-test \
-  --template-file main.bicep
+az deployment group create   --resource-group rg-ai-test   --template-file main.bicep
 ```
 
-Then:
+Validate:
 
-- Connect via SSH  
-- Install NVIDIA drivers  
-- Validate with `nvidia-smi`  
+- SSH access  
+- GPU visibility  
+- Cost and quota alignment  
+
+---
 
 ## Advanced curiosity
 
-Did you know you can estimate the **average request size** of your AI models based on **TPM (Tokens per Minute)** and **QPS (Queries per Second)**?  
-👉 See **Chapter 8** to learn how to calculate this and prevent throttling in critical AI workloads.
+You can estimate **average request size** using **TPM (Tokens per Minute)** and **QPS (Queries per Second)**.  
+This becomes critical to avoid throttling and over-provisioning.
+
+👉 See **Chapter 8** for deep dives on TPM, RPM, PTUs, and performance modeling.
+
+---
 
 ## References
 
-- [Azure Bicep Docs](https://learn.microsoft.com/azure/azure-resource-manager/bicep/)  
-- [Terraform on Azure](https://learn.microsoft.com/azure/developer/terraform/)  
-- [GitHub Actions for Azure](https://learn.microsoft.com/azure/developer/github/)  
+- Azure Bicep documentation  
+  https://learn.microsoft.com/azure/azure-resource-manager/bicep/
 
+- Terraform on Azure  
+  https://learn.microsoft.com/azure/developer/terraform/
 
-<!-- ### Next chapter
-
-Continue to explore how to monitor and observe your AI infrastructure in [**Chapter 5 — Monitoring and observability for AI workloads**](05-monitoring.md). -->
+- GitHub Actions for Azure  
+  https://learn.microsoft.com/azure/developer/github/
