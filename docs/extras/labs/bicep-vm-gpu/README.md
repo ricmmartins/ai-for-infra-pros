@@ -1,144 +1,160 @@
 # Lab: Deploying a GPU virtual machine using Azure Bicep
 
 ## Objective
-This lab demonstrates how to provision an **Azure Virtual Machine (VM)** with GPU acceleration using **Bicep**, the Azure-native Infrastructure-as-Code (IaC) language.
+This lab provisions an **Azure Virtual Machine (VM)** with GPU acceleration using **Bicep** (Azure-native IaC).
 
-You’ll deploy a GPU-enabled Ubuntu VM, connect to it via SSH, install the NVIDIA drivers, and validate GPU availability with `nvidia-smi`.
+You will:
+1. Deploy a GPU-enabled Ubuntu VM (N-series).
+2. Connect via SSH.
+3. Install NVIDIA drivers using the **supported Azure approach**.
+4. Validate GPU availability with `nvidia-smi`.
+5. Clean up resources.
 
+---
 
 ## Prerequisites
-Before starting, ensure you have:
 
-- ✅ [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli)
-- ✅ [Bicep CLI](https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/install)
-- ✅ Access to an Azure subscription with GPU quotas
-- ✅ SSH key pair generated locally
-- ✅ A **resource group** for your deployment (or Terraform-created one)
+- ✅ Azure CLI installed. https://learn.microsoft.com/cli/azure/install-azure-cli
+- ✅ Bicep installed (or use `az bicep install`). https://learn.microsoft.com/azure/azure-resource-manager/bicep/install
+- ✅ GPU quota available in the target region for your chosen SKU (example: `Standard_NC6s_v3`).
+- ✅ SSH public key available locally.
+- ✅ RBAC permissions: **Owner** or **Contributor** on the target resource group.
 
+Optional but recommended:
+- ✅ Know your outbound IP, so you can restrict SSH access in the NSG rule.
 
+---
 
 ## Folder structure
-```
+```text
 bicep-vm-gpu/
 ├── main.bicep
 ├── parameters.json
 └── README.md
 ```
 
-## Bicep template overview
+---
 
-### main.bicep
-Defines the VM configuration, network interface, and OS profile.
+## What was fixed vs the draft
 
-```bicep
-resource vm 'Microsoft.Compute/virtualMachines@2022-11-01' = {
-  name: 'vm-gpu-inference'
-  location: resourceGroup().location
-  properties: {
-    hardwareProfile: {
-      vmSize: 'Standard_NC6s_v3'
-    }
-    osProfile: {
-      computerName: 'gpuvm'
-      adminUsername: 'azureuser'
-      linuxConfiguration: {
-        disablePasswordAuthentication: true
-        ssh: {
-          publicKeys: [
-            {
-              path: '/home/azureuser/.ssh/authorized_keys'
-              keyData: '<your-public-ssh-key>'
-            }
-          ]
-        }
-      }
-    }
-    storageProfile: {
-      imageReference: {
-        publisher: 'Canonical'
-        offer: '0001-com-ubuntu-server-jammy'
-        sku: '22_04-lts-gen2'
-        version: 'latest'
-      }
-      osDisk: {
-        createOption: 'FromImage'
-      }
-    }
-    networkProfile: {
-      networkInterfaces: [
-        {
-          id: nic.id
-        }
-      ]
-    }
-  }
-}
-```
+The original snippet referenced `nic.id` but didn’t define the NIC/VNet/Public IP resources.
+This version includes:
+- VNet, Subnet
+- Public IP
+- NIC
+- NSG with SSH rule
+- Outputs for the public IP so you can SSH without guessing
 
-## Deployment steps
+It also replaces the manual `.run` driver install with the Microsoft-supported **GPU Driver Extension** path.
 
-### 1. Login and set your subscription
+---
+
+## 1. Login and select the subscription
+
 ```bash
 az login
 az account set --subscription "<your-subscription-id>"
 ```
 
-### 2. Create a resource group
+---
+
+## 2. Create a resource group
+
 ```bash
 az group create --name rg-ai-lab --location eastus
 ```
 
-### 3. Deploy the Bicep template
+---
+
+## 3. Update `parameters.json`
+
+Set your SSH public key and optionally adjust VM size.
+
+- `adminPublicKey`: contents of your `~/.ssh/id_rsa.pub` (or equivalent)
+- `vmSize`: example `Standard_NC6s_v3`
+
+---
+
+## 4. Deploy the Bicep template
+
 ```bash
-az deployment group create \
-  --resource-group rg-ai-lab \
-  --template-file main.bicep \
-  --parameters @parameters.json
+az deployment group create   --resource-group rg-ai-lab   --template-file main.bicep   --parameters @parameters.json
 ```
 
-## Validation
+---
 
-After deployment completes, connect to your VM:
+## 5. SSH into the VM
+
+Get the VM public IP from deployment output:
+
+```bash
+az deployment group show   --resource-group rg-ai-lab   --name <deployment-name>   --query "properties.outputs.publicIpAddress.value" -o tsv
+```
+
+Then connect:
+
 ```bash
 ssh azureuser@<public-ip>
 ```
 
-Check the GPU status:
+---
+
+## 6. Install NVIDIA drivers (recommended, supported path)
+
+### Option A. Install using the NVIDIA GPU Driver Extension (recommended)
+
+Microsoft provides the **NVIDIA GPU Driver Extension for Linux** for N-series VMs. The VM may reboot during installation.  
+Docs. https://learn.microsoft.com/azure/virtual-machines/extensions/hpccompute-gpu-linux
+
+Run from your local machine:
+
+```bash
+az vm extension set   --resource-group rg-ai-lab   --vm-name vm-gpu-inference   --name NvidiaGpuDriverLinux   --publisher Microsoft.HpcCompute
+```
+
+Wait a few minutes. Then SSH back in (VM may reboot).
+
+### Option B. Manual install (only if you have a specific driver requirement)
+
+Follow Microsoft’s supported N-series driver setup guidance for Linux to choose the correct driver for your VM family and distro.  
+Docs. https://learn.microsoft.com/azure/virtual-machines/linux/n-series-driver-setup
+
+---
+
+## 7. Validate
+
+On the VM:
+
 ```bash
 nvidia-smi
 ```
 
-✅ **Expected output:** A list showing your NVIDIA GPU (e.g., Tesla T4, V100) with active driver and CUDA version.
+Expected output:
+- A detected NVIDIA GPU (example: V100 or T4 depending on SKU)
+- A loaded driver and CUDA version (if applicable)
 
-## Optional: Install NVIDIA drivers manually
-
-If drivers are not pre-installed:
-```bash
-sudo apt update && sudo apt install -y build-essential dkms
-wget https://us.download.nvidia.com/XFree86/Linux-x86_64/535.54.03/NVIDIA-Linux-x86_64-535.54.03.run
-chmod +x NVIDIA-Linux-*.run
-sudo ./NVIDIA-Linux-*.run
-```
-
-Reboot and re-check:
-```bash
-sudo reboot
-nvidia-smi
-```
+---
 
 ## Next steps
-- Attach a **data disk** or mount a **Blob Storage container** for datasets  
-- Containerize your model inference workload with **Docker + CUDA**  
-- Connect to **Azure ML Workspace** for managed experimentation
+
+- Attach a **data disk** or mount a **Blob Storage container** for datasets
+- Containerize inference with **Docker + NVIDIA Container Toolkit**
+- Add observability: DCGM exporter, Azure Monitor, Log Analytics
+
+---
 
 ## Cleanup
-To remove the VM and its resources:
+
 ```bash
 az group delete --name rg-ai-lab --yes --no-wait
 ```
 
-## References
-- [Azure Bicep Documentation](https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/)
-- [Azure VM GPU Sizes](https://learn.microsoft.com/en-us/azure/virtual-machines/sizes-gpu)
-- [Install NVIDIA Drivers on Linux VMs](https://learn.microsoft.com/en-us/azure/virtual-machines/linux/n-series-driver-setup)
+---
 
+## References
+
+- Azure Bicep docs. https://learn.microsoft.com/azure/azure-resource-manager/bicep/
+- Quickstart: Bicep Ubuntu VM. https://learn.microsoft.com/azure/virtual-machines/linux/quick-create-bicep
+- GPU VM sizes. https://learn.microsoft.com/azure/virtual-machines/sizes-gpu
+- NVIDIA driver setup for Linux N-series. https://learn.microsoft.com/azure/virtual-machines/linux/n-series-driver-setup
+- NVIDIA GPU Driver Extension for Linux. https://learn.microsoft.com/azure/virtual-machines/extensions/hpccompute-gpu-linux
