@@ -12,29 +12,33 @@ Each term includes:
 🔄 An **analogy** to the infrastructure world  
 💡 A **real-world application** in technical operations
 
+---
+
 ## Terms Table: Infrastructure ↔ Artificial Intelligence
 
 | AI Term | Technical definition | Infrastructure analogy |
 |----------|----------------------|------------------------|
 | **Inference** | Running a trained model with new data to generate a response. | Like a GET request that returns a prediction or computation. |
 | **Training** | Teaching a model using labeled examples. | Like setting a performance baseline through repeated tests. |
-| **Model** | The trained file that represents the AI’s “brain.” | Like a VM image or OVA ready to deploy in production. |
+| **Model** | The trained artifact that represents the AI’s “brain.” | Like a VM image or OVA ready to deploy in production. |
 | **Dataset** | The data used to train or test a model. | Like log input in a SIEM or historical metrics in monitoring. |
-| **GPU** | Graphics card optimized for massive parallel computation. | Like an NVMe SSD — expensive but critical for performance. |
+| **GPU** | Graphics processor optimized for massive parallel computation. | Like an NVMe SSD — expensive but critical for performance. |
 | **TPU** | AI-specific chip (Tensor Processing Unit). | Like a dedicated hardware appliance for acceleration. |
 | **Inference Latency** | Time between model input and response. | Like ping between app and database — just as critical. |
-| **Fine-tuning** | Adjusting an existing model with specific data. | Like editing an ARM template with custom parameters. |
-| **Embedding** | Numeric vector representing meaning of text or image. | Like a semantic hash — searching by “idea,” not word. |
-| **Vector Database** | Database that stores and retrieves embeddings (similarity). | Like a DNS, but for meanings (“find me something similar”). |
-| **LLM (Large Language Model)** | Model trained on billions of natural language parameters. | Like an operating system for AI — the base for other apps. |
+| **Fine-tuning** | Adjusting an existing model with domain-specific data. | Like customizing a base IaC template with environment-specific parameters. |
+| **Embedding** | Numeric vector representing semantic meaning of text or image. | Like a semantic hash — searching by “idea,” not word. |
+| **Vector Database** | Database that stores and retrieves embeddings via similarity search. | Like DNS — but for meanings (“find me something similar”). |
+| **LLM (Large Language Model)** | Model trained on billions of natural language parameters. | Like an operating system for AI — the base for other applications. |
 | **Prompt** | Text sent to the model to guide its output. | Like a SQL query — but for intelligent text. |
-| **Prompt Injection** | Malicious input inserted in a prompt. | Like a SQL Injection on a model API. |
+| **Prompt Injection** | Malicious input designed to override model instructions. | Like a SQL Injection on a model API. |
 | **Token** | Fragment of text processed by the model. | Like a network packet — the model reads in chunks, not words. |
-| **MLOps** | Continuous integration and versioning for AI models. | Like a CI/CD pipeline for machine learning. |
-| **Azure Machine Learning (AML)** | Managed platform for AI development and deployment. | Like Azure DevOps — but for models. |
-| **Inference Endpoint** | Public or private API exposing the model. | Like an App Service or Function — but for AI. |
-| **RAG (Retrieval Augmented Generation)** | Combines AI with local data search. | Like checking a cache before querying a database. |
+| **Rate limiting / Quotas** | Limits on requests or tokens over time. | Like API throttling rules on an ingress or gateway. |
+| **MLOps** | CI/CD, versioning, and lifecycle management for models. | Like a CI/CD pipeline for machine learning. |
+| **Azure Machine Learning (AML)** | Managed platform for AI development and deployment. | Like Azure DevOps — but for models and pipelines. |
+| **Inference Endpoint** | Public or private API exposing a trained model. | Like an App Service or Function — but for AI inference. |
+| **RAG (Retrieval Augmented Generation)** | Combines LLMs with local data retrieval. | Like querying an indexed datastore before generating a response. |
 
+---
 
 ## If You Already Understand Infrastructure...
 
@@ -48,86 +52,97 @@ Each term includes:
 | Use SNMP/telemetry | Monitor GPU usage via Prometheus and DCGM |
 | Create failover with Front Door | Configure multi-region fallback across endpoints |
 
+---
+
 ## Visual diagrams
 
 ### 1. AI model lifecycle
 
 ![](../images/model-life-cycle.png)
 
+> Visualizes how models move from training to inference and continuous improvement.
+
 ### 2. Simplified infrastructure architecture for AI
 
 ![](../images/infrastructure-flow.png)
+
+> Shows how networking, compute, security, and observability support AI workloads.
+
+---
 
 ## Quick checklists
 
 ### AI environment readiness
 
-- [x] Understand token, TPM, and RPM limits  
-- [x] Know how to provision GPUs and AKS using IaC  
-- [x] Have observability with inference metrics and logs  
-- [x] Automate model updates and versioning via pipelines  
-- [x] Use Key Vault and private access for endpoints  
+- [x] Understand token, TPM, and RPM limits
+- [x] Know how to provision GPUs and AKS using IaC
+- [x] Have observability with inference metrics and logs
+- [x] Automate model updates and versioning via pipelines
+- [x] Use Key Vault and private access for endpoints
 
 ### Performance and cost
 
-- [x] Optimize prompts to reduce token count  
-- [x] Use caching and RAG to prevent recomputation  
-- [x] Monitor 429 errors and P95 latency  
-- [x] Evaluate PTU vs Standard based on load  
-- [x] Track cost-per-token metrics in Azure Monitor  
+- [x] Optimize prompts to reduce token count
+- [x] Use caching and RAG to prevent recomputation
+- [x] Monitor HTTP 429 errors and P95 latency
+- [x] Evaluate PTU vs Standard based on load
+- [x] Track cost-per-token metrics in Azure Monitor
 
 ### Security and governance
 
-- [x] Store tokens and secrets in Key Vault  
-- [x] Anonymize inference logs  
-- [x] Disable public endpoints when possible  
-- [x] Enforce RBAC/ABAC access controls  
-- [x] Retain logs for at least 30 days for auditing  
+- [x] Store tokens and secrets in Key Vault
+- [x] Anonymize inference logs
+- [x] Disable public endpoints when possible
+- [x] Enforce RBAC and policy-based access controls
+- [x] Retain logs for at least 30 days for auditing
+
+---
 
 ## Practical use cases
 
-### Case 1: Internal Chat with Azure OpenAI (Standard)
+### Case 1: Internal chat with Azure OpenAI (Standard)
 
-**Scenario:** Internal chatbot using AKS + Azure OpenAI.  
+**Scenario:** Internal chatbot using AKS and Azure OpenAI.  
 **Challenge:** High latency and throttling.  
 **Solution:**
 
-- Implement local cache for repeated prompts  
-- Monitor with Application Insights  
-- Migrate to **PTU-C** for stable latency  
-
+- Implement local caching for repeated prompts
+- Monitor with Application Insights
+- Migrate to **PTU-C** for stable latency
 
 ### Case 2: Data extraction on GPU VMs
 
-**Scenario:** Automated pipeline for batch inference on PDFs.  
+**Scenario:** Automated batch inference on PDFs.  
 **Solution:**
 
-- Automation using Azure CLI + Terraform  
-- Execute during off-peak (spot VMs)  
-- Centralized logging in Log Analytics  
+- Automation using Azure CLI and Terraform
+- Execute during off-peak windows (Spot VMs)
+- Centralized logging in Log Analytics
 
-### Case 3: Multi-region deploy with fallback
+### Case 3: Multi-region deployment with fallback
 
-**Scenario:** Global startup using GPT-4 across East US and Sweden Central.  
+**Scenario:** Global startup using GPT-4 across multiple regions.  
 **Solution:**
 
-- Azure Front Door + health probes  
-- Retry logic with API Management  
-- Token quota watchdog per region  
+- Azure Front Door with health probes
+- Retry logic via API Management
+- Token quota watchdog per region
+
+---
 
 ## Best practices for infrastructure professionals
 
-- Training is expensive - inference is constant.  
-- Prompt = input; model = brain; response = output.  
-- Idle GPU = wasted cost.  
-- AI logs may contain sensitive data → always encrypt.  
-- Tokens = cost + latency → always optimize.  
+- Training is expensive. Inference is constant.
+- Prompt = input. Model = brain. Response = output.
+- Idle GPU equals wasted cost.
+- AI logs may contain sensitive data. Always encrypt.
+- Tokens directly impact both cost and latency. Optimize continuously.
 
+---
 
 ## Conclusion
 
-This glossary was built to help infrastructure professionals feel **confident and fluent** in the applied AI vocabulary.  
+This glossary was built to help infrastructure professionals feel **confident and fluent** in applied AI vocabulary.  
 You already master the essentials — now you speak the language too.
 
 > “From VMs to inference, from logs to tokens — the future of infrastructure is cognitive.”
-
