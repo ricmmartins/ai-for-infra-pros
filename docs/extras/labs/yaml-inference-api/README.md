@@ -28,9 +28,9 @@ This lab is intentionally written step-by-step and assumes you are new to AML en
 - RBAC: Contributor on the resource group, plus permissions for AML operations
 
 References:
-- Online endpoint YAML schema: https://learn.microsoft.com/azure/machine-learning/reference-yaml-endpoint-online?view=azureml-api-2 citeturn0search1
-- Managed online deployment YAML schema: https://learn.microsoft.com/azure/machine-learning/reference-yaml-deployment-managed-online?view=azureml-api-2 citeturn0search0
-- Azure ML inference server guidance: https://learn.microsoft.com/azure/machine-learning/how-to-inference-server-http?view=azureml-api-2 citeturn0search2
+- Online endpoint YAML schema: https://learn.microsoft.com/azure/machine-learning/reference-yaml-endpoint-online?view=azureml-api-2 
+- Managed online deployment YAML schema: https://learn.microsoft.com/azure/machine-learning/reference-yaml-deployment-managed-online?view=azureml-api-2 
+- Azure ML inference server guidance: https://learn.microsoft.com/azure/machine-learning/how-to-inference-server-http?view=azureml-api-2 
 
 ---
 
