@@ -2,18 +2,23 @@
 
 > “You don’t need to be a data scientist to architect AI — but you do need a plan that speaks the language of infrastructure.”
 
-
 ## Overview
 
 The **AI Adoption Framework for Infrastructure** is a technical and strategic guide that helps infrastructure professionals **plan, prepare, and operate AI workloads** with security, efficiency, and governance.
 
-Inspired by Microsoft’s **Cloud Adoption Framework**, this model translates the AI journey into the infrastructure domain — focusing on **automation, scalability, and continuous operation**.
+Inspired by Microsoft’s **Cloud Adoption Framework**, this model translates the AI journey into the infrastructure domain. It applies equally to **enterprises, startups, and internal platform teams**, focusing on **automation, scalability, observability, security, and continuous operation**.
+
+This framework builds directly on the **IaC, observability, and security foundations** covered in Chapters 4, 5, and 6.
+
+---
 
 ## Framework structure
 
 The framework consists of **6 phases**, each with clear goals, practical activities, and recommended tools.
 
 ![](../images/framework-structure.png)
+
+---
 
 ## Phase 1: Diagnostic and technical motivation
 
@@ -23,16 +28,19 @@ The framework consists of **6 phases**, each with clear goals, practical activit
 |-----------|-------------|
 | Identify opportunities | Review operational pain points, bottlenecks, and automation gaps |
 | Map stakeholders | Data, DevOps, security, and business teams |
-| Assess maturity | Is current infra automated? Observable? GPU-ready? |
-| Begin enablement | Complete AI-900 and read this eBook |
+| Assess maturity | Is current infrastructure automated, observable, and GPU-ready |
+| Begin enablement | Complete AI-900 and review this eBook |
 
 🔧 **Useful tools:**
 
-- Technical Maturity Assessment Sheet (Infra + AI)  
-- Azure OpenAI Quota Viewer  
-- Technical Readiness Form  
+- Technical Maturity Assessment Sheet (Infra + AI)
+- Azure OpenAI Quota Viewer
+- Technical Readiness Form
 
-💡 **Ask yourself:** “If I needed to run an AI model tomorrow, would my infrastructure be ready?”
+💡 **Ask yourself:**  
+“If I needed to run an AI model tomorrow, would my infrastructure be ready?”
+
+---
 
 ## Phase 2: Enablement and technical alignment
 
@@ -40,7 +48,7 @@ The framework consists of **6 phases**, each with clear goals, practical activit
 
 | Activity | Description |
 |-----------|-------------|
-| Upskill the infra team | Workshops, labs, and guided reading per chapter |
+| Upskill the infrastructure team | Workshops, labs, and guided reading |
 | Translate AI concepts | Inference, GPU, fine-tuning, tokens, quotas |
 | Build a knowledge base | Visual glossary, cheat sheets, mini-labs |
 | Promote hands-on sessions | Experimentation with scripts and templates |
@@ -49,7 +57,9 @@ The framework consists of **6 phases**, each with clear goals, practical activit
 
 - [Labs](../extras/labs/README.md)
 - [AI-900: Azure AI Fundamentals](https://learn.microsoft.com/en-us/credentials/certifications/azure-ai-fundamentals/)
-- Visual Technical Glossary  
+- Visual Technical Glossary
+
+---
 
 ## Phase 3: Infrastructure preparation
 
@@ -57,19 +67,22 @@ The framework consists of **6 phases**, each with clear goals, practical activit
 
 | Component | Recommended actions |
 |------------|----------------------|
-| **Networking** | Create VNet, subnets, Private Endpoints, NSGs, internal DNS |
-| **Compute** | Deploy GPU VMs, AKS GPU node pools, AML Workspaces |
+| **Networking** | VNets, subnets, Private Endpoints, NSGs, internal DNS |
+| **Compute** | GPU VMs, AKS GPU node pools, Azure ML workspaces |
 | **Storage** | Blob, Data Lake, local NVMe |
-| **Automation** | IaC (Terraform/Bicep), GitHub Actions |
+| **Automation** | IaC with Terraform or Bicep, GitHub Actions |
 | **Observability** | Azure Monitor, Prometheus, Application Insights |
 
 **Templates:**
 
-- [bicep/vm-gpu.bicep](../extras/labs/bicep-vm-gpu/) — GPU VM with NVMe  
-- [terraform/aks-gpu.tf](../extras/labs/terraform-aks-gpu/) — AKS cluster with GPU pool  
-- [yaml/inference-api.yaml](../extras/labs/yaml-inference-api/) — Inference API with health checks  
+- [bicep/vm-gpu.bicep](../extras/labs/bicep-vm-gpu/) — GPU VM with NVMe
+- [terraform/aks-gpu.tf](../extras/labs/terraform-aks-gpu/) — AKS cluster with GPU pool
+- [yaml/inference-api.yaml](../extras/labs/yaml-inference-api/) — Inference API with health checks
 
-💬 **Reminder:** “You don’t scale AI with spreadsheets. You scale it with code.”
+💬 **Reminder:**  
+“You don’t scale AI with spreadsheets. You scale it with code.”
+
+---
 
 ## Phase 4: Guided experimentation and initial use cases
 
@@ -78,16 +91,16 @@ The framework consists of **6 phases**, each with clear goals, practical activit
 | Activity | Description |
 |-----------|-------------|
 | Run pilots | Intelligent logging, copilots, GPT-based alerts |
-| Build inference APIs | Deploy in AKS, AML, or Azure Functions |
+| Build inference APIs | Deploy via AKS, Azure ML, or Azure Functions |
 | Validate security | Test RBAC, prompt injection, and isolation |
 | Document learnings | Capture results and best practices |
 
-**Suggested Starter Use Cases:**
+**Suggested starter use cases:**
 
-- Monitoring with LLM + Prometheus  
-- AI-driven log and alert analysis  
-- ChatOps (internal GPT-based copilots)  
-- Inference pipeline with automated rollback  
+- Monitoring with LLMs and Prometheus
+- AI-driven log and alert analysis
+- ChatOps and internal GPT-based copilots
+- Inference pipelines with automated rollback
 
 ---
 
@@ -97,18 +110,20 @@ The framework consists of **6 phases**, each with clear goals, practical activit
 
 | Area | Recommended actions |
 |-------|----------------------|
-| **Standardization** | Centralized IaC templates, tagging, and conventions |
-| **Costs** | Azure Cost Management, budgets, GPU quotas |
+| **Standardization** | Centralized IaC templates, tagging, conventions |
+| **Costs** | Azure Cost Management, budgets, GPU and token quotas |
 | **Security** | Key Vault, RBAC, federated identity |
-| **Resilience** | Availability Zones, backups, HA via Front Door |
-| **Observability** | Latency, tokens, GPU usage, 429s, cost per model |
+| **Resilience** | Availability Zones, backups, Front Door-based HA |
+| **Observability** | Latency, tokens, GPU usage, HTTP 429s, cost per model |
+
+This phase relies heavily on the **observability and security practices** established in Chapters 5 and 6.
 
 **Tools:**
 
-- Application Insights + Log Analytics  
-- Azure Policy + Defender for Cloud  
-- Grafana (GPU metrics via DCGM)  
-- Autoscaling templates for inference workloads  
+- Application Insights and Log Analytics
+- Azure Policy and Defender for Cloud
+- Grafana (GPU metrics via DCGM)
+- Autoscaling templates for inference workloads
 
 ---
 
@@ -118,13 +133,15 @@ The framework consists of **6 phases**, each with clear goals, practical activit
 
 | Activity | Description |
 |-----------|-------------|
-| Continuous review | Post-mortems with AI and evolving dashboards |
+| Continuous review | Post-mortems supported by AI insights |
 | Learning culture | Internal wiki and “Infra + AI” Teams channels |
-| Continuous improvement | A/B testing models, integrating Vector DBs |
-| Impact measurement | KPIs: MTTR, avoided incidents, reduced cost |
+| Continuous improvement | A/B testing models and integrating vector databases |
+| Impact measurement | KPIs such as MTTR, avoided incidents, reduced cost |
 
-💡 **Tip:** AI isn’t a project — it’s a process. Establish learning and feedback cadence.
+💡 **Tip:**  
+AI isn’t a project. It’s a process. Establish learning and feedback cadence.
 
+---
 
 ## Framework summary
 
@@ -132,33 +149,38 @@ The framework consists of **6 phases**, each with clear goals, practical activit
 |--------|------------------|-------------|
 | **Diagnostic** | Technical readiness plan | Excel, Quota Viewer |
 | **Enablement** | Shared technical knowledge base | AI-900, Labs |
-| **Preparation** | Secure GPU-enabled IaC environments | Terraform, Bicep |
-| **Experimentation** | Use cases and inference APIs | Azure ML, AKS |
-| **Scale** | Standardization, observability, and HA | Cost Mgmt, Prometheus |
-| **Continuous adoption** | Governance and improvement loops | Dashboards, Feedback Loops |
+| **Preparation** | Secure GPU-enabled environments | Terraform, Bicep |
+| **Experimentation** | Validated use cases and APIs | Azure ML, AKS |
+| **Scale** | Standardization, observability, HA | Cost Mgmt, Prometheus |
+| **Continuous adoption** | Governance and improvement loops | Dashboards, feedback |
 
+---
 
 ## Practical applications of the framework
 
 This framework can be used as:
 
-- **Infrastructure Maturity Checklist** for technical teams  
-- **Adoption roadmap** for Azure OpenAI, AML, and AKS  
-- **Onboarding guide** for new infrastructure team members  
-- **Rollout plan** for GPU and distributed inference environments  
+- **Infrastructure maturity checklist** for technical teams
+- **Adoption roadmap** for Azure OpenAI, Azure ML, and AKS
+- **Onboarding guide** for new infrastructure engineers
+- **Rollout plan** for GPU and distributed inference platforms
 
-✅ **Direct Benefit:** Transforms AI from an “experimental concept” into an **operational, scalable, and governed practice.**
+✅ **Direct benefit:**  
+Transforms AI from an experimental concept into an **operational, scalable, and governed practice**.
 
-
+---
 
 ## Chapter conclusion
 
-You now have a complete technical roadmap to lead AI adoption within your organization — starting from what you already know best: **infrastructure**.
+You now have a complete technical roadmap to lead AI adoption within your organization.  
+It starts from what you already know best: **infrastructure**.
 
 > “AI adoption isn’t just the responsibility of data teams.  
-> It’s the responsibility of those who build the foundation. And that person is you.”
-
+> It’s the responsibility of those who build the foundation.  
+> And that person is you.”
 
 <!-- ### Next chapter
 
-Advance your understanding of Azure AI workloads in [**Chapter 9 — Azure OpenAI for infrastructure: Understanding TPM, RPM, and PTU**](09-azure-openai-tpm-ptu.md). -->
+Advance your understanding of Azure AI workloads in  
+[**Chapter 9 — Azure OpenAI for infrastructure: Understanding TPM, RPM, and PTU**](09-azure-openai-tpm-ptu.md).
+-->
