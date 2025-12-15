@@ -1,148 +1,200 @@
 # Lab: Deploying an inference API using Azure Machine Learning (YAML-based)
 
 ## Objective
-This lab walks you through deploying a **machine learning model as an inference endpoint** using **Azure Machine Learning (AML)** via a YAML configuration file.
+Deploy a **scikit-learn** model as a **Managed Online Endpoint** in **Azure Machine Learning (AML)** using **YAML + Azure ML CLI v2**.
 
-You’ll deploy a simple example model (such as scikit-learn diabetes regression) and expose it securely as an HTTPS endpoint.
+You will:
+1. Create or reuse an Azure ML workspace
+2. Train a tiny model locally (diabetes regression), producing `model.pkl`
+3. Register the model in Azure ML
+4. Create a managed online endpoint
+5. Create a deployment from YAML and send all traffic to it
+6. Invoke the endpoint and validate results
+7. Clean up
+
+This lab is intentionally written step-by-step and assumes you are new to AML endpoints.
+
+---
 
 ## Prerequisites
-Before starting, make sure you have:
-
-- ✅ [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli)
-- ✅ Azure CLI ML extension installed:
+- Azure CLI installed
+- Azure ML CLI extension installed:
   ```bash
   az extension add -n ml -y
+  az extension update -n ml
   ```
-- ✅ An **Azure Machine Learning Workspace**
-- ✅ A registered model in the workspace (you can use the sample `sklearn-diabetes`)
-- ✅ Python 3.9+ and the `azureml` SDK if testing locally
-- ✅ Proper RBAC permissions for AML deployments
+- `kubectl` is not required
+- Python 3.9+ locally
+- RBAC: Contributor on the resource group, plus permissions for AML operations
+
+References:
+- Online endpoint YAML schema: https://learn.microsoft.com/azure/machine-learning/reference-yaml-endpoint-online?view=azureml-api-2 citeturn0search1
+- Managed online deployment YAML schema: https://learn.microsoft.com/azure/machine-learning/reference-yaml-deployment-managed-online?view=azureml-api-2 citeturn0search0
+- Azure ML inference server guidance: https://learn.microsoft.com/azure/machine-learning/how-to-inference-server-http?view=azureml-api-2 citeturn0search2
+
+---
 
 ## Folder structure
-```
+```text
 yaml-inference-api/
+├── README.md
 ├── endpoint.yml
+├── deployment.yml
+├── environment.yml
 ├── score.py
 ├── requirements.txt
-└── README.md
+├── sample-request.json
+└── train_model.py
 ```
 
-## 1. endpoint.yml — YAML Configuration for the endpoint
+---
 
-```yaml
-name: infer-demo
-auth_mode: key
-traffic:
-  blue: 100
-deployments:
-  - name: blue
-    model: azureml:sklearn-diabetes:1
-    instance_type: Standard_DS2_v2
-    code_configuration:
-      code: ./src
-      scoring_script: score.py
-```
+## Step 0: Set defaults (subscription, RG, workspace)
 
-**Explanation**
-| Field | Description |
-|--------|-------------|
-| `name` | The name of your endpoint (unique per workspace) |
-| `auth_mode` | Authentication mode (`key` or `aml_token`) |
-| `deployments` | List of model versions and configurations |
-| `model` | Reference to a registered model in your AML workspace |
-| `instance_type` | VM SKU used to run the endpoint |
-| `scoring_script` | The Python file that defines the inference logic |
-
-
-## 2. score.py — Inference logic
-
-Example `score.py`:
-
-```python
-import json
-import joblib
-import numpy as np
-from azureml.core.model import Model
-
-def init():
-    global model
-    model_path = Model.get_model_path("sklearn-diabetes")
-    model = joblib.load(model_path)
-
-def run(raw_data):
-    try:
-        data = np.array(json.loads(raw_data)["data"])
-        result = model.predict(data)
-        return result.tolist()
-    except Exception as e:
-        return json.dumps({"error": str(e)})
-```
-
-## 3. requirements.txt — Dependencies
-
-```text
-numpy
-scikit-learn
-joblib
-azureml-core
-```
-
-## Deployment steps
-
-### Step 1: Log in and set workspace
 ```bash
 az login
 az account set --subscription "<your-subscription-id>"
-az configure --defaults group=<your-rg> workspace=<your-workspace>
 ```
 
-### Step 2: Create the online endpoint
+Set defaults so you can omit `--resource-group` and `--workspace-name` later:
 ```bash
-az ml online-endpoint create --name infer-demo --file endpoint.yml
+az configure --defaults group="<your-rg>" workspace="<your-aml-workspace>"
 ```
 
-### Step 3: Test the endpoint
-Once the deployment finishes, you can test the API with:
+Quick sanity check:
+```bash
+az ml workspace show --query "{name:name,location:location}" -o json
+```
+
+---
+
+## Step 1: Train a tiny sample model locally
+
+Install deps:
+```bash
+python -m pip install -r requirements.txt
+```
+
+Train:
+```bash
+python train_model.py
+```
+
+Expected:
+- `./model/model.pkl` is created
+
+---
+
+## Step 2: Register the model in Azure ML
 
 ```bash
-az ml online-endpoint invoke \
-  --name infer-demo \
-  --request-file sample.json
+az ml model create \
+  --name sklearn-diabetes \
+  --path ./model \
+  --type custom_model \
+  --description "Sklearn diabetes regression sample model for online endpoint lab"
 ```
 
-Example `sample.json`:
-
-```json
-{
-  "data": [[0.038075906, 0.05068012, 0.06169621, 0.02187235, -0.0442235, -0.03482076, -0.04340085, -0.00259226, 0.01990749, -0.01764613]]
-}
+Confirm:
+```bash
+az ml model list --query "[?name=='sklearn-diabetes'] | [0].{name:name,version:version}" -o table
 ```
 
-✅ **Expected output:**  
-A JSON response with numeric predictions.
+---
 
-## Security options
-- Use `auth_mode: aml_token` to integrate with Azure Active Directory  
-- Add **Private Endpoint** for network isolation  
-- Configure **Managed Identity** for secure access to other services (like Blob Storage)
+## Step 3: Create the online endpoint
 
-## Troubleshooting
+The endpoint YAML contains only endpoint-level settings (name, auth, identity). Deployments are created separately.
 
-| Issue | Fix |
-|-------|-----|
-| Endpoint fails to start | Check model dependencies in `requirements.txt` |
-| `HTTP 401 Unauthorized` | Verify endpoint `auth_mode` and key/token |
-| Slow inference | Try using a GPU-based SKU like `Standard_NC6s_v3` |
-| Endpoint timeout | Increase timeout in AML or optimize model loading |
+```bash
+az ml online-endpoint create -f endpoint.yml
+```
+
+Wait until provisioning completes:
+```bash
+az ml online-endpoint show -n infer-demo --query "{name:name,provisioning:provisioning_state,auth:auth_mode}" -o table
+```
+
+---
+
+## Step 4: Create the deployment and route traffic
+
+```bash
+az ml online-deployment create -f deployment.yml --all-traffic
+```
+
+Check status:
+```bash
+az ml online-deployment show \
+  --name blue \
+  --endpoint-name infer-demo \
+  --query "{name:name,state:provisioning_state,instance_type:instance_type}" -o table
+```
+
+If it fails, get logs:
+```bash
+az ml online-deployment get-logs --name blue --endpoint-name infer-demo --lines 200
+```
+
+---
+
+## Step 5: Invoke the endpoint
+
+Get the scoring URI:
+```bash
+az ml online-endpoint show -n infer-demo --query scoring_uri -o tsv
+```
+
+Invoke via CLI (recommended for first test):
+```bash
+az ml online-endpoint invoke -n infer-demo --request-file sample-request.json
+```
+
+Expected output:
+- JSON list of numeric predictions
+
+---
+
+## Step 6: Optional hardening (quick pointers)
+- Switch to Entra-based auth (`aad_token`) for enterprise use cases (instead of `key`). citeturn0search10
+- Add Private Link for private endpoints and lock down public access for production (not covered in this lab)
+- Use managed identity for downstream access (Storage, Key Vault). citeturn0search17
+
+---
 
 ## Cleanup
-To remove the endpoint and resources:
+
+Delete deployment first (optional):
+```bash
+az ml online-deployment delete --name blue --endpoint-name infer-demo --yes
+```
+
+Delete endpoint:
 ```bash
 az ml online-endpoint delete --name infer-demo --yes
 ```
 
-## References
-- [Azure ML Online Endpoints Documentation](https://learn.microsoft.com/en-us/azure/machine-learning/how-to-deploy-online-endpoints)
-- [YAML Schema Reference](https://learn.microsoft.com/en-us/azure/machine-learning/reference-yaml-endpoint)
-- [Azure ML CLI v2](https://learn.microsoft.com/en-us/azure/machine-learning/how-to-configure-cli)
+Optionally delete the resource group:
+```bash
+az group delete --name <your-rg> --yes --no-wait
+```
 
+---
+
+## Troubleshooting quick guide
+
+### Endpoint created but deployment is stuck
+- Check logs:
+  ```bash
+  az ml online-deployment get-logs --name blue --endpoint-name infer-demo --lines 200
+  ```
+
+### 401 Unauthorized
+- If using `auth_mode: key`, fetch keys:
+  ```bash
+  az ml online-endpoint get-credentials -n infer-demo
+  ```
+
+### Import errors in scoring
+- Ensure `environment.yml` and `requirements.txt` include your needed packages
+- Prefer minimal requirements. Large environments slow down deployment startup. citeturn0search2
