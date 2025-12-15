@@ -63,7 +63,7 @@ IaC turns an AI environment into something **reproducible, auditable, and secure
 
 ---
 
-## Example 1. Creating a GPU VM with Bicep (correct and deployable)
+## Example 1. Creating a GPU VM with Bicep
 
 A virtual machine cannot exist in isolation.  
 It needs networking, disks, and authentication.
