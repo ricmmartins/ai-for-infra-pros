@@ -1,0 +1,3 @@
+$schema: https://azuremlschemasprod.azureedge.net/latest/managedOnlineEndpoint.schema.json
+name: infer-demo
+auth_mode: key
