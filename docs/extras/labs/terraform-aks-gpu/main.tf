@@ -50,7 +50,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "gpu" {
   mode                  = "User"
 
   node_taints = [
-    "nvidia.com/gpu=true:NoSchedule"
+    "sku=gpu:NoSchedule"
   ]
 
   tags = {

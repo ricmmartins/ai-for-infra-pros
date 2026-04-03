@@ -36,11 +36,11 @@ Before running any of the labs:
 - Install **Terraform** and/or **Bicep** depending on the lab
 - Ensure GPU quotas are available in your target region  
   - Common SKUs:
-    - `Standard_NCas_T4_v3` (T4 inference)
+    - `Standard_NC4as_T4_v3` (T4 inference)
     - `Standard_NC6s_v3` (V100)
   - Check quotas with:
     ```bash
-    az vm list-usage --location eastus --output table
+    az vm list-usage --location <your-target-region> --output table
     ```
 - Install and update the Azure ML CLI extension:
   ```bash

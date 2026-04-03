@@ -42,8 +42,9 @@ That’s your domain as an infrastructure professional.
 az ad sp create-for-rbac --name "ai-aks-service" --role contributor   --scopes /subscriptions/{id}/resourceGroups/rg-ai
 ```
 
-> **Note:** The command above creates a **Service Principal**.  
-> Prefer **Managed Identity** where supported to avoid long-lived credentials and reduce secret exposure.
+> ⚠️ **Warning:** The command above creates a **Service Principal** with a long-lived client secret.  
+> **In production, prefer Managed Identity or Workload Identity (OIDC)** to avoid static credentials.  
+> This example is shown for learning purposes only.
 
 **Tip:** Temporary and federated identities drastically reduce credential exposure risks.
 
@@ -59,11 +60,19 @@ az ad sp create-for-rbac --name "ai-aks-service" --role contributor   --scopes /
 | **Azure Policy** | Governance for diagnostics and logging | Ensures active logging and compliance |
 
 ```bash
-az keyvault set-policy --name kv-ai --object-id <principalId> --secret-permissions get list
+# Legacy access-policy approach (shown for reference only):
+# az keyvault set-policy --name kv-ai --object-id <principalId> --secret-permissions get list
+
+# Preferred: Use RBAC-based access control
+az role assignment create \
+  --assignee-object-id <principalId> \
+  --assignee-principal-type ServicePrincipal \
+  --role "Key Vault Secrets User" \
+  --scope /subscriptions/{subscriptionId}/resourceGroups/rg-ai/providers/Microsoft.KeyVault/vaults/kv-ai
 ```
 
-> **Note:** Access policies are shown for illustration.  
-> Prefer **RBAC-based access control** where supported.
+> **Note:** RBAC-based access is the recommended approach for Key Vault.  
+> Access policies are legacy and do not integrate with Entra ID Conditional Access or PIM.
 
 ---
 

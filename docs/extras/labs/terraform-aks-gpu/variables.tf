@@ -19,11 +19,11 @@ variable "aks_name" {
 variable "kubernetes_version" {
   description = "AKS Kubernetes version"
   type        = string
-  default     = "1.27.9"
+  default     = "1.30"
 }
 
 variable "gpu_vm_size" {
   description = "GPU VM SKU for node pool"
   type        = string
-  default     = "Standard_NCas_T4_v3"
+  default     = "Standard_NC4as_T4_v3"
 }

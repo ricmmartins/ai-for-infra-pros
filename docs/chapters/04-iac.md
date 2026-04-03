@@ -240,10 +240,16 @@ After deployment:
 Terraform is ideal for **composable, multi-environment platforms**, especially when AKS is the control plane.
 
 ```hcl
+resource "azurerm_resource_group" "rg" {
+  name     = "rg-ai-aks"
+  location = "westus3"
+}
+
 resource "azurerm_kubernetes_cluster" "aks_ai" {
   name                = "aks-ai"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
+  dns_prefix          = "aks-ai"
 
   default_node_pool {
     name       = "system"
@@ -263,7 +269,8 @@ resource "azurerm_kubernetes_cluster" "aks_ai" {
 resource "azurerm_kubernetes_cluster_node_pool" "gpu" {
   name                  = "gpu"
   kubernetes_cluster_id = azurerm_kubernetes_cluster.aks_ai.id
-  vm_size               = "Standard_NC6"
+  vm_size               = "Standard_NC6s_v3"
+  mode                  = "User"
   enable_auto_scaling   = true
   min_count             = 0
   max_count             = 5
@@ -277,14 +284,31 @@ resource "azurerm_kubernetes_cluster_node_pool" "gpu" {
 ## Automating IaC with GitHub Actions
 
 ```yaml
+name: Deploy AI Infrastructure
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: azure/login@v1
-      - uses: azure/arm-deploy@v1
+      - uses: actions/checkout@v4
+
+      - uses: azure/login@v2
         with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - uses: azure/arm-deploy@v2
+        with:
+          resourceGroupName: rg-ai
           template: ./infra/main.bicep
 ```
 

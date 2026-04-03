@@ -9,9 +9,9 @@ A condensed, at-a-glance guide to essential commands, architectures, and Azure r
 | VM SKU | Ideal for | GPU type | Inference | Training | Notes |
 |--------|------------|-----------|------------|-----------|--------|
 | **Standard_NC6s_v3** | General AI workloads | 1× V100 | ✅ | ⚠️ (limited) | Balanced price/performance |
-| **Standard_NCas_T4_v3** | Cost-effective inference | 1× T4 | ✅✅ | ❌ | Best option for production inference |
-| **Standard_ND_A100_v4** | LLM training, deep learning | 1–8× A100 | ✅✅✅ | ✅✅✅ | High cost, top-tier performance |
-| **Standard_NVads_A10** | Visualization + lightweight AI | 1× A10 | ✅ | ❌ | Good for inference, dev/test, and visualization |
+| **Standard_NCas_T4_v3 family** | Cost-effective inference | 1× T4 | ✅✅ | ❌ | Best option for production inference (e.g., `Standard_NC4as_T4_v3`) |
+| **Standard_ND96amsr_A100_v4** | LLM training, deep learning | 1–8× A100 | ✅✅✅ | ✅✅✅ | High cost, top-tier performance |
+| **Standard_NV36ads_A10_v5** | Visualization + lightweight AI | 1× A10 | ✅ | ❌ | Good for inference, dev/test, and visualization |
 
 💡 *Tip:* For inference, prefer **T4 or A10 GPUs**. For large-scale training, use **A100s**.
 

@@ -108,7 +108,7 @@ Each term includes:
 
 - Implement local caching for repeated prompts
 - Monitor with Application Insights
-- Migrate to **PTU-C** for stable latency
+- Migrate to **provisioned deployments (PTU)** for stable latency
 
 ### Case 2: Data extraction on GPU VMs
 

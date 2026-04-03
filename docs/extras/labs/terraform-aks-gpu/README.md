@@ -9,7 +9,7 @@ This lab shows how infrastructure engineers can:
 - Prepare the cluster so GPUs are actually usable by workloads
 
 Region: **West US 3**  
-GPU SKU: **Standard_NCas_T4_v3** (cost‑efficient inference GPU)
+GPU SKU: **Standard_NC4as_T4_v3** (cost‑efficient inference GPU)
 
 ---
 
@@ -51,7 +51,7 @@ az account set --subscription "<your-subscription-id>"
 GPU node pools are **expensive** and bill while nodes exist.
 
 This lab uses:
-- 1 × `Standard_NCas_T4_v3` GPU node
+- 1 × `Standard_NC4as_T4_v3` GPU node
 
 Destroy resources when finished.
 
@@ -97,7 +97,7 @@ kubectl get nodes -l agentpool=gpu
 AKS does not expose GPUs automatically.
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/v0.15.0/nvidia-device-plugin.yml
+kubectl apply -f https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/v0.18.0/deployments/static/nvidia-device-plugin.yml
 ```
 
 Verify:
@@ -109,6 +109,8 @@ kubectl -n kube-system get pods -l name=nvidia-device-plugin-ds
 
 ## GPU validation test
 
+Save the following manifest to a file called `gpu-test.yaml`:
+
 ```yaml
 apiVersion: v1
 kind: Pod
@@ -116,6 +118,11 @@ metadata:
   name: gpu-test
 spec:
   restartPolicy: Never
+  tolerations:
+  - key: "sku"
+    operator: "Equal"
+    value: "gpu"
+    effect: "NoSchedule"
   containers:
   - name: cuda-test
     image: nvidia/cuda:12.2.0-base-ubuntu22.04
@@ -125,8 +132,11 @@ spec:
         nvidia.com/gpu: 1
 ```
 
+Apply and check the logs:
+
 ```bash
 kubectl apply -f gpu-test.yaml
+kubectl wait --for=condition=Ready pod/gpu-test --timeout=120s || true
 kubectl logs gpu-test
 ```
 

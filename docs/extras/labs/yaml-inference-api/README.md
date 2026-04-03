@@ -102,7 +102,13 @@ az ml model list --query "[?name=='sklearn-diabetes'] | [0].{name:name,version:v
 
 ---
 
-## Step 3: Create the online endpoint
+## Step 3: Create the environment and online endpoint
+
+First, register the environment so the deployment can reference it:
+
+```bash
+az ml environment create -f environment.yml
+```
 
 The endpoint YAML contains only endpoint-level settings (name, auth, identity). Deployments are created separately.
 
@@ -157,7 +163,7 @@ Expected output:
 
 ## Step 6: Optional hardening (quick pointers)
 - Switch to Entra-based auth (`aad_token`) for enterprise use cases (instead of `key`). citeturn0search10
-- Add Private Link for private endpoints and lock down public access for production (not covered in this lab)
+- Add Private Link for private endpoints and lock down public access for production (not covered in this lab).
 - Use managed identity for downstream access (Storage, Key Vault). citeturn0search17
 
 ---

@@ -113,7 +113,11 @@ Use **Application Insights** to track:
 - `dependency calls` — external API latency  
 
 ```python
+import os
 from azure.monitor.opentelemetry import configure_azure_monitor
+
+# Requires APPLICATIONINSIGHTS_CONNECTION_STRING environment variable to be set.
+# Example: export APPLICATIONINSIGHTS_CONNECTION_STRING="InstrumentationKey=...;IngestionEndpoint=..."
 configure_azure_monitor()
 ```
 
@@ -141,9 +145,9 @@ configure_azure_monitor()
 ### Monitoring throttling
 
 ```kusto
-requests
-| where resultCode == "429"
-| summarize count() by bin(timestamp, 5m), cloud_RoleName
+AppRequests
+| where ResultCode == "429"
+| summarize count() by bin(TimeGenerated, 5m), AppRoleName
 ```
 
 ---

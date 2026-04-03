@@ -91,6 +91,9 @@ resource publicIp 'Microsoft.Network/publicIPAddresses@2023-11-01' = {
 resource nic 'Microsoft.Network/networkInterfaces@2023-11-01' = {
   name: '${vmName}-nic'
   location: location
+  dependsOn: [
+    vnet
+  ]
   properties: {
     ipConfigurations: [
       {

@@ -113,8 +113,10 @@ az storage blob list \
 
 ```bash
 az storage blob download-batch \
-  --destination /mnt/dataset \
-  --source training-data
+  --account-name youraccount \
+  --auth-mode login \
+  --source training-data \
+  --destination /mnt/dataset
 ```
 
 ## Where infrastructure fits in

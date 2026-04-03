@@ -10,7 +10,7 @@ A practical reference for infrastructure and cloud engineers adopting Artificial
 
 - Lightweight models (regression, decision trees, classical ML) can run efficiently on CPU.
 - Large Language Models (LLMs), computer vision, and deep learning workloads require GPUs for acceptable latency and throughput.
-- For cost‑effective inference on Azure, consider **Standard_NCas_T4_v3** or **NVads_A10** SKUs.
+- For cost‑effective inference on Azure, consider **Standard_NC4as_T4_v3** or **Standard_NV36ads_A10_v5** SKUs.
 
 💡 *Tip:* Use **Spot VMs** only for non‑critical inference or batch jobs and always implement checkpointing and retries.
 
@@ -67,8 +67,8 @@ Costs vary by region, model, and usage profile.
 | Resource | Typical cost range | Notes |
 |--------|-------------------|------|
 | Standard_NC6s_v3 | ~$1–$1.5/hr | Entry GPU workloads |
-| Standard_NCas_T4_v3 | ~$0.8–$1/hr | Best inference cost efficiency |
-| ND_A100_v4 | $25–$35/hr | High‑end training |
+| Standard_NC4as_T4_v3 | ~$0.8–$1/hr | Best inference cost efficiency |
+| Standard_ND96amsr_A100_v4 | $25–$35/hr | High‑end training |
 | Azure OpenAI (Standard) | Pay per token | Variable latency |
 | Azure OpenAI (PTU) | Fixed hourly | Predictable throughput |
 

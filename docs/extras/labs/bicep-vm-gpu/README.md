@@ -64,7 +64,11 @@ Set your SSH public key and optionally adjust VM size.
 ## 4. Deploy the Bicep template
 
 ```bash
-az deployment group create   --resource-group rg-ai-lab   --template-file main.bicep   --parameters @parameters.json
+az deployment group create \
+  --name gpu-vm-deploy \
+  --resource-group rg-ai-lab \
+  --template-file main.bicep \
+  --parameters @parameters.json
 ```
 
 ---
@@ -74,7 +78,10 @@ az deployment group create   --resource-group rg-ai-lab   --template-file main.b
 Get the VM public IP from deployment output:
 
 ```bash
-az deployment group show   --resource-group rg-ai-lab   --name <deployment-name>   --query "properties.outputs.publicIpAddress.value" -o tsv
+az deployment group show \
+  --resource-group rg-ai-lab \
+  --name gpu-vm-deploy \
+  --query "properties.outputs.publicIpAddress.value" -o tsv
 ```
 
 Then connect:

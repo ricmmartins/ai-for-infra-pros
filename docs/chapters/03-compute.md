@@ -91,21 +91,52 @@ This architecture is used by companies serving **LLMs** and **real-time inferenc
 
 ## Hands-On: Create your first GPU VM
 
+First, create a resource group:
+
+```bash
+az group create --name rg-ai-lab --location eastus
+```
+
+Then create the GPU VM:
+
 ```bash
 az vm create \
   --name vm-gpu \
   --resource-group rg-ai-lab \
   --image Ubuntu2204 \
   --size Standard_NC6s_v3 \
-  --admin-username ricardo \
+  --admin-username azureuser \
   --generate-ssh-keys
 ```
 
-After creation:
+After creation, install the NVIDIA GPU drivers. The **recommended approach** is using the Azure VM Extension:
 
 ```bash
+az vm extension set \
+  --resource-group rg-ai-lab \
+  --vm-name vm-gpu \
+  --name NvidiaGpuDriverLinux \
+  --publisher Microsoft.HpcCompute \
+  --version 1.6
+```
+
+Alternatively, SSH into the VM and install manually:
+
+```bash
+# Add the NVIDIA CUDA repository and GPG key
 wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-ubuntu2204.pin
+sudo mv cuda-ubuntu2204.pin /etc/apt/preferences.d/cuda-repository-pin-600
+sudo apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/3bf863cc.pub
+sudo add-apt-repository "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/ /"
+
+# Install CUDA
 sudo apt update && sudo apt install -y cuda
+```
+
+Validate the installation:
+
+```bash
+nvidia-smi
 ```
 
 💡 Also install **NVIDIA DCGM** to collect GPU metrics with **Azure Monitor**.

@@ -65,7 +65,7 @@ A startup wanted to deploy an image classification model trained elsewhere but l
 - Need to run inference efficiently and securely  
 
 **Solution:**  
-- Deployed a **Standard_NCas_T4_v3** VM for GPU-based inference  
+- Deployed a **Standard_NC4as_T4_v3** VM for GPU-based inference  
 - Stored model artifacts in **Azure Blob Storage**  
 - Used **Bicep templates** for repeatable deployment  
 - Secured access with **Microsoft Entra ID** and IP firewall rules  

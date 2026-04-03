@@ -86,9 +86,11 @@ Each PTU provides predictable capacity, for example:
 > Always validate exact TPM/QPS per PTU in the Azure Portal or official documentation.
 
 **Formula:**  
-`PTUs = desired_TPM ÷ 5,000`
+`PTUs = desired_TPM ÷ TPM_per_PTU`
 
-**Example:**  
+> 💡 The TPM-per-PTU ratio varies by model and region. Check the [Azure OpenAI PTU documentation](https://learn.microsoft.com/azure/ai-services/openai/concepts/provisioned-throughput) for current values.
+
+**Example (using GPT-4 Turbo at ~5,000 TPM per PTU):**  
 If your app needs **20,000 TPM**, reserve **4 PTUs**.
 
 ---
