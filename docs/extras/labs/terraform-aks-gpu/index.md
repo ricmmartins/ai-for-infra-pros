@@ -1,6 +1,6 @@
 # Lab 2 — GPU-Enabled AKS Cluster with Terraform
 
-*Applies to: [Chapter 3 — Compute](../../chapters/03-compute.md) · [Chapter 5 — IaC](../../chapters/05-iac.md) · [Chapter 10 — Platform Ops](../../chapters/10-platform-ops.md)*
+*Applies to: [Chapter 3 — Compute](../../../chapters/03-compute.md) · [Chapter 5 — IaC](../../../chapters/05-iac.md) · [Chapter 10 — Platform Ops](../../../chapters/10-platform-ops.md)*
 
 ---
 
@@ -10,7 +10,7 @@ If a standalone GPU VM (Lab 1) is like renting a single workshop, an AKS cluster
 
 Most production AI workloads eventually land on Kubernetes for one simple reason: **orchestration**. You don't just need *a* GPU; you need to schedule dozens of inference jobs, scale them up during peak traffic, roll back bad model versions without downtime, and keep your GPU nodes from running general-purpose cron jobs that could have run on a $0.05/hr CPU node.
 
-AKS gives infrastructure teams a platform they already understand — Kubernetes — with Azure-managed control plane, integrated identity, and native GPU support. In this lab you'll build that foundation from scratch using Terraform, the lingua franca of infrastructure-as-code ([Chapter 5](../../chapters/05-iac.md)).
+AKS gives infrastructure teams a platform they already understand — Kubernetes — with Azure-managed control plane, integrated identity, and native GPU support. In this lab you'll build that foundation from scratch using Terraform, the lingua franca of infrastructure-as-code ([Chapter 5](../../../chapters/05-iac.md)).
 
 ---
 
@@ -43,7 +43,7 @@ AKS gives infrastructure teams a platform they already understand — Kubernetes
 
 | Decision | Choice | Why |
 |---|---|---|
-| GPU SKU | `Standard_NC4as_T4_v3` | NVIDIA T4 — best price/performance for inference (see [Chapter 3](../../chapters/03-compute.md)) |
+| GPU SKU | `Standard_NC4as_T4_v3` | NVIDIA T4 — best price/performance for inference (see [Chapter 3](../../../chapters/03-compute.md)) |
 | Separate node pools | System (CPU) + User (GPU) | Isolates control-plane components from expensive GPU workloads |
 | Network plugin | Azure CNI | Pod-level VNET integration; required for most enterprise network policies |
 | Identity | System-assigned managed identity | No credentials to manage, rotate, or leak |
@@ -218,7 +218,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "gpu" {
 
 2. **Azure CNI network plugin** — The `network_profile` uses `azure` (Azure CNI), which assigns VNET IP addresses directly to pods. This is the preferred choice for enterprise environments where pods need to be addressable from other VNET resources or on-premises networks.
 
-3. **System-assigned managed identity** — No service principals, no client secrets, no rotation policies. The cluster identity is lifecycle-managed by Azure (see [Chapter 10](../../chapters/10-platform-ops.md) on identity strategies).
+3. **System-assigned managed identity** — No service principals, no client secrets, no rotation policies. The cluster identity is lifecycle-managed by Azure (see [Chapter 10](../../../chapters/10-platform-ops.md) on identity strategies).
 
 ### Understanding the GPU taint
 
@@ -445,7 +445,7 @@ This lab deploys a minimal configuration for learning. A production GPU cluster 
 
 ### Network and security
 
-- **Private cluster** — Disable the public API server endpoint (`private_cluster_enabled = true`) so the control plane is only reachable from your VNET. See [Chapter 10](../../chapters/10-platform-ops.md).
+- **Private cluster** — Disable the public API server endpoint (`private_cluster_enabled = true`) so the control plane is only reachable from your VNET. See [Chapter 10](../../../chapters/10-platform-ops.md).
 - **Network policies** — Enable Calico or Azure network policies to restrict pod-to-pod traffic. GPU inference endpoints should not be reachable by every namespace.
 - **Private container registry** — Pull images from Azure Container Registry over a private endpoint, not the public internet.
 
@@ -458,7 +458,7 @@ This lab deploys a minimal configuration for learning. A production GPU cluster 
 
 ### Monitoring
 
-- **Container Insights** — Enable Azure Monitor for containers to track GPU utilization, memory pressure, and throttling. Without it, you're flying blind on your most expensive resource. See [Chapter 7](../../chapters/07-monitoring.md).
+- **Container Insights** — Enable Azure Monitor for containers to track GPU utilization, memory pressure, and throttling. Without it, you're flying blind on your most expensive resource. See [Chapter 7](../../../chapters/07-monitoring.md).
 - **NVIDIA DCGM exporter** — Exposes GPU-level metrics (temperature, power draw, SM clock, memory utilization) to Prometheus. Essential for capacity planning.
 - **Alerts** — Set alerts for GPU utilization consistently below 20% (right-sizing opportunity) or above 95% (scaling needed).
 
@@ -472,7 +472,7 @@ For training workloads or large model inference, consider:
 | Standard_NC24ads_A100_v4 | 1 × A100 | 80 GB | Large model inference, fine-tuning |
 | Standard_ND96asr_v4 | 8 × A100 | 640 GB | Distributed training |
 
-See [Chapter 3 — Compute](../../chapters/03-compute.md) for the complete GPU SKU decision matrix.
+See [Chapter 3 — Compute](../../../chapters/03-compute.md) for the complete GPU SKU decision matrix.
 
 ---
 

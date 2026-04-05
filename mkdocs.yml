@@ -13,8 +13,8 @@ copyright: >
 theme:
   name: material
   language: en
-  logo: images/aiforinfraicon.png
-  favicon: images/aiforinfraicon.png
+  logo: images/favicon.svg
+  favicon: images/favicon.svg
   font:
     text: Inter
     code: JetBrains Mono

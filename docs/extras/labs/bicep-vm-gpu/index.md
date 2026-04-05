@@ -437,4 +437,4 @@ az group show --name rg-ai-lab --query "properties.provisioningState" -o tsv 2>/
 - [NVIDIA driver setup for Linux N-series VMs](https://learn.microsoft.com/azure/virtual-machines/linux/n-series-driver-setup)
 - [NVIDIA GPU Driver Extension for Linux](https://learn.microsoft.com/azure/virtual-machines/extensions/hpccompute-gpu-linux)
 - [Azure Bastion documentation](https://learn.microsoft.com/azure/bastion/bastion-overview)
-- [Azure products by region](https://azure.microsoft.com/explore/global-infrastructure/products-by-region/)
+- [Azure products by region](https://azure.microsoft.com/explore/global-infrastructure/products-by-region/) 
