@@ -1,0 +1,138 @@
+site_name: AI for Infra Pros
+site_url: https://www.ai4infra.com
+site_description: The Practical Handbook for Infrastructure Engineers Entering the AI Era
+site_author: Ricardo Martins
+
+repo_url: https://github.com/ricmmartins/ai-for-infra-pros
+repo_name: ricmmartins/ai-for-infra-pros
+
+copyright: >
+  Created by <a href="https://rmmartins.com">Ricardo Martins</a> —
+  Principal Solutions Engineer @ Microsoft
+
+theme:
+  name: material
+  language: en
+  logo: images/aiforinfraicon.png
+  favicon: images/aiforinfraicon.png
+  font:
+    text: Inter
+    code: JetBrains Mono
+  icon:
+    repo: fontawesome/brands/github
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: teal
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: teal
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - navigation.footer
+    - navigation.indexes
+    - search.suggest
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+    - toc.follow
+
+nav:
+  - Home: index.md
+  - Part I — Foundations:
+    - Why AI Needs You: chapters/01-introduction.md
+    - "Data: The Fuel That Powers Everything": chapters/02-data.md
+    - "Compute: Where Intelligence Comes to Life": chapters/03-compute.md
+    - The GPU Deep Dive: chapters/04-gpu-deep-dive.md
+  - Part II — Building:
+    - Infrastructure as Code for AI: chapters/05-iac.md
+    - MLOps from an Infra Lens: chapters/06-mlops.md
+  - Part III — Operating:
+    - Monitoring and Observability: chapters/07-monitoring.md
+    - Security in AI Environments: chapters/08-security.md
+    - Cost Engineering: chapters/09-cost-engineering.md
+  - Part IV — Scaling:
+    - Platform Operations at Scale: chapters/10-platform-ops.md
+    - "Azure OpenAI: Tokens & Throughput": chapters/11-azure-openai.md
+    - Troubleshooting Playbook: chapters/12-troubleshooting.md
+  - Part V — Strategy:
+    - AI Use Cases for Infra Engineers: chapters/13-ai-use-cases.md
+    - The AI Adoption Framework: chapters/14-adoption-framework.md
+    - "Visual Glossary: Infra to AI": chapters/15-visual-glossary.md
+  - Hands-On Labs:
+    - extras/labs/index.md
+    - GPU VM with Bicep: extras/labs/bicep-vm-gpu/index.md
+    - AKS GPU with Terraform: extras/labs/terraform-aks-gpu/index.md
+    - Inference API with Azure ML: extras/labs/yaml-inference-api/index.md
+  - Extras:
+    - Case Studies: extras/case-studies.md
+    - Cheatsheets: extras/cheatsheets.md
+    - Technical FAQ: extras/technical-faq.md
+
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+      toc_depth: 3
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+
+plugins:
+  - search:
+      separator: '[\s\-\.]+'
+  - minify:
+      minify_html: true
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/ricmmartins
+    - icon: fontawesome/brands/linkedin
+      link: https://linkedin.com/in/yourlinkedin
+    - icon: fontawesome/solid/globe
+      link: https://rmmartins.com
+
+extra_css:
+  - stylesheets/extra.css

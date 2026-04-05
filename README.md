@@ -115,19 +115,18 @@ ai-for-infra-pros/
 │   │   ├── 01-introduction.md          # Part I: Foundations
 │   │   ├── 02-data.md
 │   │   ├── 03-compute.md
-│   │   ├── 04-gpu-deep-dive.md         New
+│   │   ├── 04-gpu-deep-dive.md
 │   │   ├── 05-iac.md                   # Part II: Building
-│   │   ├── 06-mlops.md                 New
+│   │   ├── 06-mlops.md
 │   │   ├── 07-monitoring.md            # Part III: Operating
 │   │   ├── 08-security.md
-│   │   ├── 09-cost-engineering.md      New
-│   │   ├── 10-platform-ops.md          New
-│   │   ├── 11-azure-openai.md          # Part IV: Scaling
-│   │   ├── 12-troubleshooting.md       New
+│   │   ├── 09-cost-engineering.md
+│   │   ├── 10-platform-ops.md          # Part IV: Scaling
+│   │   ├── 11-azure-openai.md
+│   │   ├── 12-troubleshooting.md
 │   │   ├── 13-ai-use-cases.md          # Part V: Strategy
 │   │   ├── 14-adoption-framework.md
-│   │   ├── 15-visual-glossary.md
-│   │   └── v1-original/               # Original chapter backups
+│   │   └── 15-visual-glossary.md
 │   ├── extras/
 │   │   ├── labs/
 │   │   │   ├── bicep-vm-gpu/
@@ -137,6 +136,7 @@ ai-for-infra-pros/
 │   │   ├── cheatsheets.md
 │   │   └── technical-faq.md
 │   └── images/
+├── mkdocs.yml
 ├── README.md
 └── SUMMARY.md
 ```
