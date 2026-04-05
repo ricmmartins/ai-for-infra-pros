@@ -3,34 +3,52 @@
 ## Overview
 
 - [Introduction](README.md)
-- [How to Navigate](README.md#how-to-navigate)
-- [Target Audience](README.md#target-audience)
-- [Mission](README.md#mission)
+- [Quick Start Guide](README.md#quick-start-guide)
+- [Who This Book Is For](README.md#who-this-book-is-for)
 
-## Main chapters
+---
 
-1. [Foundations of AI for Infrastructure](docs/chapters/01-introduction.md)
-2. [Data - The Fuel of Artificial Intelligence](docs/chapters/02-data.md)
-3. [Infrastructure and Compute for AI Workloads](docs/chapters/03-compute.md)
-4. [Infrastructure as Code (IaC) and Automation](docs/chapters/04-iac.md)
-5. [Monitoring and Observability for AI Environments](docs/chapters/05-monitoring.md)
-6. [Security and Resilience in AI Systems](docs/chapters/06-security.md)
-7. [AI Use Cases for Infrastructure Engineers](docs/chapters/07-use-cases.md)
-8. [AI Adoption Framework for Infrastructure](docs/chapters/08-adoption-framework.md)
-9. [Azure OpenAI for Infrastructure - Understanding TPM, RPM, and PTUs](docs/chapters/09-azure-openai-tpm-ptu.md)
-10. [Visual Glossary - Translating AI for Infrastructure Engineers](docs/chapters/10-visual-glossary.md)
+## Part I — Foundations
 
+1. [Why AI Needs You](docs/chapters/01-introduction.md)
+2. [Data: The Fuel That Powers Everything](docs/chapters/02-data.md)
+3. [Compute: Where Intelligence Comes to Life](docs/chapters/03-compute.md)
+4. [The GPU Deep Dive](docs/chapters/04-gpu-deep-dive.md)
 
-## Hands-on labs
+## Part II — Building and Automating
 
-- [Mini-Labs Overview](docs/extras/labs/README.md)
-  - [Creating an AKS Cluster with GPU using Terraform](docs/extras/labs/terraform-aks-gpu/README.md)
-  - [Deploying a GPU VM with Bicep](docs/extras/labs/bicep-vm-gpu/README.md)
-  - [Building an Inference API with YAML](docs/extras/labs/yaml-inference-api/README.md)
+5. [Infrastructure as Code for AI](docs/chapters/05-iac.md)
+6. [Model Lifecycle and MLOps from an Infra Lens](docs/chapters/06-mlops.md)
 
+## Part III — Operating and Securing
 
-## Extras and reference material
+7. [Monitoring and Observability for AI Workloads](docs/chapters/07-monitoring.md)
+8. [Security in AI Environments](docs/chapters/08-security.md)
+9. [Cost Engineering for AI Workloads](docs/chapters/09-cost-engineering.md)
 
-- [Technical Case Studies](docs/extras/case-studies.md)
+## Part IV — Scaling and Troubleshooting
+
+10. [AI Platform Operations at Scale](docs/chapters/10-platform-ops.md)
+11. [Azure OpenAI: Tokens, Throughput, and Provisioned Capacity](docs/chapters/11-azure-openai.md)
+12. [The Production Troubleshooting Playbook](docs/chapters/12-troubleshooting.md)
+
+## Part V — Strategy and Reference
+
+13. [AI Use Cases for Infrastructure Engineers](docs/chapters/13-ai-use-cases.md)
+14. [The AI Adoption Framework](docs/chapters/14-adoption-framework.md)
+15. [Visual Glossary: Infra ↔ AI Translation Guide](docs/chapters/15-visual-glossary.md)
+
+---
+
+## Hands-On Labs
+
+- [Labs Overview](docs/extras/labs/README.md)
+  - [Lab 1: Deploy a GPU VM with Bicep](docs/extras/labs/bicep-vm-gpu/README.md)
+  - [Lab 2: Create an AKS Cluster with GPU using Terraform](docs/extras/labs/terraform-aks-gpu/README.md)
+  - [Lab 3: Build an Inference API with Azure ML](docs/extras/labs/yaml-inference-api/README.md)
+
+## Extras and Reference
+
+- [Case Studies](docs/extras/case-studies.md)
 - [Cheatsheets](docs/extras/cheatsheets.md)
 - [Technical FAQ](docs/extras/technical-faq.md)
