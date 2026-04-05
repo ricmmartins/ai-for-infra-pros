@@ -1,3 +1,43 @@
+/* =========================================
+   Pastel color palette — matched to hero image
+   Navy: #1B3A5C  Medium blue: #5B8DB8
+   Light blue: #8BB8D9  Pale blue: #D6E8F5
+   Background: #EEF5FB  Accent warm: #7AACCC
+   ========================================= */
+
+/* Light mode custom colors */
+[data-md-color-scheme="default"] {
+  --md-primary-fg-color: #2C5F8A;
+  --md-primary-fg-color--light: #5B8DB8;
+  --md-primary-fg-color--dark: #1B3A5C;
+  --md-primary-bg-color: #ffffff;
+  --md-accent-fg-color: #5B8DB8;
+  --md-accent-fg-color--transparent: rgba(91, 141, 184, 0.12);
+  --md-default-bg-color: #F7FAFB;
+  --md-default-bg-color--light: #EEF5FB;
+  --md-typeset-a-color: #2C5F8A;
+}
+
+/* Dark mode custom colors */
+[data-md-color-scheme="slate"] {
+  --md-primary-fg-color: #5B8DB8;
+  --md-primary-fg-color--light: #8BB8D9;
+  --md-primary-fg-color--dark: #3D6F99;
+  --md-accent-fg-color: #8BB8D9;
+  --md-accent-fg-color--transparent: rgba(139, 184, 217, 0.12);
+  --md-typeset-a-color: #8BB8D9;
+}
+
+/* Header — soft navy gradient */
+.md-header {
+  background: linear-gradient(135deg, #1B3A5C 0%, #2C5F8A 100%);
+}
+
+/* Navigation tabs */
+.md-tabs {
+  background: #1B3A5C;
+}
+
 /* Hero section on landing page */
 .md-typeset .hero {
   text-align: center;
@@ -16,6 +56,11 @@
   font-size: 2.8rem;
   font-weight: 700;
   margin-bottom: 0.5rem;
+  color: #1B3A5C;
+}
+
+[data-md-color-scheme="slate"] .md-typeset .hero h1 {
+  color: #8BB8D9;
 }
 
 .md-typeset .hero .subtitle {
@@ -37,6 +82,17 @@
   text-align: center;
   padding: 1.2rem 0.8rem;
   border-radius: 10px;
+  background: #EEF5FB;
+  border: 1px solid #D6E8F5;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.md-typeset .stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(27, 58, 92, 0.08);
+}
+
+[data-md-color-scheme="slate"] .md-typeset .stat-card {
   background: var(--md-code-bg-color);
   border: 1px solid var(--md-default-fg-color--lightest);
 }
@@ -44,8 +100,12 @@
 .md-typeset .stat-card .number {
   font-size: 2rem;
   font-weight: 700;
-  color: var(--md-accent-fg-color);
+  color: #2C5F8A;
   display: block;
+}
+
+[data-md-color-scheme="slate"] .md-typeset .stat-card .number {
+  color: #8BB8D9;
 }
 
 .md-typeset .stat-card .label {
@@ -66,14 +126,19 @@
 .md-typeset .qs-card {
   padding: 1rem 1.2rem;
   border-radius: 8px;
-  background: var(--md-code-bg-color);
-  border-left: 4px solid var(--md-accent-fg-color);
+  background: #EEF5FB;
+  border-left: 4px solid #5B8DB8;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .md-typeset .qs-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(27, 58, 92, 0.1);
+}
+
+[data-md-color-scheme="slate"] .md-typeset .qs-card {
+  background: var(--md-code-bg-color);
+  border-left-color: #8BB8D9;
 }
 
 .md-typeset .qs-card strong {
@@ -81,14 +146,14 @@
   margin-bottom: 0.3rem;
 }
 
-/* Chapter callout styling */
-.md-typeset .callout-tip,
-.md-typeset .callout-warning,
-.md-typeset .callout-info,
-.md-typeset .callout-matrix {
-  padding: 0.8rem 1rem;
-  border-radius: 6px;
-  margin: 1rem 0;
+/* Sidebar active item */
+.md-nav__link--active {
+  color: #2C5F8A !important;
+  font-weight: 600;
+}
+
+[data-md-color-scheme="slate"] .md-nav__link--active {
+  color: #8BB8D9 !important;
 }
 
 /* Part labels in navigation */
@@ -106,8 +171,13 @@ html {
   font-size: 0.82rem;
 }
 
-/* Footer credit styling */
+/* Footer */
+.md-footer {
+  background: #1B3A5C;
+}
+
 .md-footer-meta {
+  background: #152D47;
   font-size: 0.8rem;
 }
 
@@ -119,6 +189,23 @@ html {
 .md-typeset table:not([class]) th {
   font-weight: 600;
   white-space: nowrap;
+  background: #EEF5FB;
+  color: #1B3A5C;
+}
+
+[data-md-color-scheme="slate"] .md-typeset table:not([class]) th {
+  background: var(--md-default-fg-color--lightest);
+  color: var(--md-default-fg-color);
+}
+
+/* Search highlight */
+.md-search__highlight {
+  background: rgba(91, 141, 184, 0.25);
+}
+
+/* Blockquote styling — softer blue left border */
+.md-typeset blockquote {
+  border-left-color: #8BB8D9;
 }
 
 /* Responsive adjustments */
