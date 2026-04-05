@@ -2,7 +2,11 @@
 
 ### The Practical Handbook for Infrastructure Engineers Entering the AI Era
 
+[![Deploy MkDocs](https://github.com/ricmmartins/ai-for-infra-pros/actions/workflows/deploy-mkdocs.yml/badge.svg)](https://github.com/ricmmartins/ai-for-infra-pros/actions/workflows/deploy-mkdocs.yml)
+
 > *"You don't need to be a data scientist to work with AI — but you do need to understand how it runs, scales, breaks, and costs money."*
+
+**Read online at [www.ai4infra.com](https://www.ai4infra.com)**
 
 ![AI for Infra Pros](/docs/images/ai4infrapros.png "AI for Infra Pros")
 
@@ -106,43 +110,6 @@ Each chapter is self-contained. Pick your starting point based on what you need:
 
 ---
 
-## Repository Structure
-
-```text
-ai-for-infra-pros/
-├── docs/
-│   ├── chapters/
-│   │   ├── 01-introduction.md          # Part I: Foundations
-│   │   ├── 02-data.md
-│   │   ├── 03-compute.md
-│   │   ├── 04-gpu-deep-dive.md
-│   │   ├── 05-iac.md                   # Part II: Building
-│   │   ├── 06-mlops.md
-│   │   ├── 07-monitoring.md            # Part III: Operating
-│   │   ├── 08-security.md
-│   │   ├── 09-cost-engineering.md
-│   │   ├── 10-platform-ops.md          # Part IV: Scaling
-│   │   ├── 11-azure-openai.md
-│   │   ├── 12-troubleshooting.md
-│   │   ├── 13-ai-use-cases.md          # Part V: Strategy
-│   │   ├── 14-adoption-framework.md
-│   │   └── 15-visual-glossary.md
-│   ├── extras/
-│   │   ├── labs/
-│   │   │   ├── bicep-vm-gpu/
-│   │   │   ├── terraform-aks-gpu/
-│   │   │   └── yaml-inference-api/
-│   │   ├── case-studies.md
-│   │   ├── cheatsheets.md
-│   │   └── technical-faq.md
-│   └── images/
-├── mkdocs.yml
-├── README.md
-└── SUMMARY.md
-```
-
----
-
 ## Who This Book Is For
 
 This handbook is written for professionals with **5+ years of infrastructure experience** who are new to AI but technically sharp:
@@ -163,7 +130,6 @@ No prior AI/ML knowledge is required. Every concept is explained through infrast
 | Metric | Value |
 |--------|-------|
 | Chapters | 15 (organized in 5 parts) |
-| New chapters | 5 (GPU Deep Dive, MLOps, Cost Engineering, Platform Ops, Troubleshooting) |
 | Total words | ~61,000 |
 | Estimated pages | 220+ |
 | Hands-on labs | 3 |
@@ -173,12 +139,54 @@ No prior AI/ML knowledge is required. Every concept is explained through infrast
 
 ---
 
+## Running Locally
+
+This book is built with [MkDocs Material](https://squidfunk.github.io/mkdocs-material/) and deployed automatically to GitHub Pages on every push.
+
+```bash
+# Install dependencies
+pip install -r requirements-docs.txt
+
+# Start local development server
+mkdocs serve
+
+# Build the site
+mkdocs build
+```
+
+Visit `http://127.0.0.1:8000` to preview locally.
+
+---
+
+## Repository Structure
+
+```text
+ai-for-infra-pros/
+├── docs/
+│   ├── chapters/              # 15 chapters organized in 5 parts
+│   ├── extras/
+│   │   ├── labs/              # 3 hands-on labs (Bicep, Terraform, Azure ML)
+│   │   ├── case-studies.md
+│   │   ├── cheatsheets.md
+│   │   └── technical-faq.md
+│   ├── images/
+│   ├── stylesheets/           # Custom CSS for the website
+│   └── index.md               # Website landing page
+├── .github/workflows/         # GitHub Actions for auto-deploy
+├── mkdocs.yml                 # MkDocs Material configuration
+├── requirements-docs.txt      # Python dependencies
+├── README.md
+└── SUMMARY.md
+```
+
+---
+
 ## Credits
 
 Created by **Ricardo Martins**
-📍 Principal Solutions Engineer @ Microsoft
-📖 Author of [*Azure Governance Made Simple*](https://book.azgovernance.com/) and [*Linux Hackathon*](https://linuxhackathon.com/)
-🌐 [rmmartins.com](https://rmmartins.com)
+Principal Solutions Engineer @ Microsoft
+Author of [*Azure Governance Made Simple*](https://book.azgovernance.com/) and [*Linux Hackathon*](https://linuxhackathon.com/)
+[rmmartins.com](https://rmmartins.com)
 
 ---
 
