@@ -20,16 +20,16 @@ This handbook was born from years of bridging the gap between systems engineerin
 
 ## What You'll Learn
 
-- :building_construction: **GPU architecture and compute** — VM families, CUDA cores vs Tensor Cores, nvidia-smi interpretation, and the memory math behind OOM errors
-- :package: **Data pipelines for AI** — storage architecture, BlobFuse2, NVMe staging, and why I/O is the hidden bottleneck
-- :wrench: **Infrastructure as Code** — production-ready Terraform and Bicep for GPU clusters, AKS node pools, and CI/CD with OIDC
-- :arrows_counterclockwise: **MLOps from an infra lens** — model registries, CI/CD for models, A/B testing infrastructure, and supply chain security
-- :bar_chart: **Monitoring and observability** — DCGM, Managed Prometheus, KQL queries, and the six dimensions of AI observability
-- :lock: **AI security** — prompt injection defense, private endpoints, managed identities, and content safety guardrails
-- :moneybag: **Cost engineering** — GPU cost modeling, spot VMs for training, PTU economics, and FinOps practices
-- :rocket: **Platform operations at scale** — multi-tenancy, GPU scheduling (Kueue, Volcano), SLA design, and fleet management
-- :mag: **Production troubleshooting** — 10 real-world failure scenarios with step-by-step diagnosis and resolution
-- :world_map: **Career paths** — AI Infra Engineer, MLOps Engineer, AI Platform Engineer, and more
+- **GPU architecture and compute** — VM families, CUDA cores vs Tensor Cores, nvidia-smi interpretation, and the memory math behind OOM errors
+- **Data pipelines for AI** — storage architecture, BlobFuse2, NVMe staging, and why I/O is the hidden bottleneck
+- **Infrastructure as Code** — production-ready Terraform and Bicep for GPU clusters, AKS node pools, and CI/CD with OIDC
+- **MLOps from an infra lens** — model registries, CI/CD for models, A/B testing infrastructure, and supply chain security
+- **Monitoring and observability** — DCGM, Managed Prometheus, KQL queries, and the six dimensions of AI observability
+- **AI security** — prompt injection defense, private endpoints, managed identities, and content safety guardrails
+- **Cost engineering** — GPU cost modeling, spot VMs for training, PTU economics, and FinOps practices
+- **Platform operations at scale** — multi-tenancy, GPU scheduling (Kueue, Volcano), SLA design, and fleet management
+- **Production troubleshooting** — 10 real-world failure scenarios with step-by-step diagnosis and resolution
+- **Career paths** — AI Infra Engineer, MLOps Engineer, AI Platform Engineer, and more
 
 ---
 
