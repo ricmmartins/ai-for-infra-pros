@@ -15,7 +15,7 @@ param adminUsername string = 'azureuser'
 param adminPublicKey string
 
 @description('GPU VM size. Ensure quota exists in the chosen region.')
-param vmSize string = 'Standard_NC6s_v3'
+param vmSize string = 'Standard_NC4as_T4_v3'
 
 @description('Virtual network name.')
 param vnetName string = 'vnet-ai-lab'

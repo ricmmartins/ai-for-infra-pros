@@ -6,7 +6,7 @@
 
 ## Why this lab matters
 
-In **Chapter 3** you learned that AI compute isn't about raw horsepower — it's about choosing the *right* GPU SKU for the workload. In **Chapter 5** you saw why Infrastructure as Code is a survival mechanism when a single typo can burn through thousands of dollars on the wrong VM family. This lab brings both lessons together. You'll define a complete GPU-enabled VM environment in Bicep — networking, security, and compute — deploy it with a single command, and validate that the GPU is ready for real inference work. Think of it as provisioning a high-performance API server, except the "application" is a neural network and the "CPU" is an NVIDIA V100.
+In **Chapter 3** you learned that AI compute isn't about raw horsepower — it's about choosing the *right* GPU SKU for the workload. In **Chapter 5** you saw why Infrastructure as Code is a survival mechanism when a single typo can burn through thousands of dollars on the wrong VM family. This lab brings both lessons together. You'll define a complete GPU-enabled VM environment in Bicep — networking, security, and compute — deploy it with a single command, and validate that the GPU is ready for real inference work. Think of it as provisioning a high-performance API server, except the "application" is a neural network and the "CPU" is an NVIDIA T4 GPU.
 
 By the end of this lab you will have a repeatable, version-controlled template you can adapt for any GPU workload — from running a pre-trained model to hosting a containerized inference API.
 
@@ -28,7 +28,7 @@ The Bicep template provisions five Azure resources that form a minimal but funct
 │  │  │     Subnet  10.20.1.0/24            │  │  │
 │  │  │     ┌─────────────────────────────┐ │  │  │
 │  │  │     │   NIC ──► GPU VM            │ │  │  │
-│  │  │     │   (Standard_NC6s_v3)        │ │  │  │
+│  │  │     │   (Standard_NC4as_T4_v3)     │ │  │  │
 │  │  │     └─────────────────────────────┘ │  │  │
 │  │  └─────────────────────────────────────┘  │  │
 │  └───────────────────────────────────────────┘  │
@@ -44,7 +44,7 @@ The Bicep template provisions five Azure resources that form a minimal but funct
 | **Virtual Network + Subnet** | Provides isolated networking; the NSG is associated at the subnet level |
 | **Public IP (Standard SKU)** | Gives the VM a static, internet-routable address for SSH access |
 | **Network Interface** | Connects the VM to the subnet and attaches the public IP |
-| **Virtual Machine** | Ubuntu 22.04 LTS Gen2 on a GPU-enabled N-series SKU with Premium SSD, SSH-key authentication |
+| **Virtual Machine** | Ubuntu 22.04 LTS Gen2 on a GPU-enabled NCas_T4_v3 SKU with Premium SSD, SSH-key authentication |
 
 💡 **Pro Tip**: The template uses `Standard` SKU for the public IP, which is zone-redundant by default. The older `Basic` SKU is being retired — always use Standard for new deployments.
 
@@ -66,13 +66,13 @@ GPU quota is allocated per VM family per region. The default for most subscripti
 
 ```bash
 az vm list-usage --location eastus \
-  --query "[?contains(name.value, 'Standard NCSv3')]" \
+  --query "[?contains(name.value, 'Standard NCASv3')]" \
   --output table
 ```
 
-You need at least **6 vCPUs** available for `Standard_NC6s_v3`. If the `currentValue` equals the `limit`, request an increase through the Azure portal under **Subscriptions → Usage + quotas**.
+You need at least **4 vCPUs** available for `Standard_NC4as_T4_v3`. If the `currentValue` equals the `limit`, request an increase through the Azure portal under **Subscriptions → Usage + quotas**.
 
-⚠️ **Important — NCv3 Retirement**: The NCv3-series (including `Standard_NC6s_v3`) is scheduled for retirement on **September 30, 2025**. For new deployments, consider using `Standard_NC4as_T4_v3` (T4 GPU, better price/performance for inference) or `Standard_NC24ads_A100_v4` (A100 GPU, for larger models). Update the `vmSize` parameter accordingly and adjust your quota check to match the new SKU family. See the [NCv3 retirement page](https://learn.microsoft.com/azure/virtual-machines/ncv3-retirement) for migration guidance.
+⚠️ **Important — NCv3 Retirement**: The NCv3-series (including `Standard_NC6s_v3`) was retired on **September 30, 2025**. This lab now defaults to `Standard_NC4as_T4_v3` (T4 GPU, better price/performance for inference). If you need more GPU memory or compute power, consider `Standard_NC24ads_A100_v4` (A100 GPU). See the [NCv3 retirement page](https://learn.microsoft.com/azure/virtual-machines/ncv3-retirement) for migration guidance.
 
 ⚠️ **Production Gotcha**: Quota requests for GPU SKUs can take hours or even days for approval, depending on the region and your subscription type. Always check quota *before* starting a deployment — not after a cryptic `QuotaExceeded` error.
 
@@ -82,13 +82,13 @@ You need at least **6 vCPUs** available for `Standard_NC6s_v3`. If the `currentV
 
 | Resource | SKU | Approximate cost (pay-as-you-go) |
 |----------|-----|----------------------------------|
-| GPU VM | Standard_NC6s_v3 (V100) | ~$3.06/hr |
+| GPU VM | Standard_NC4as_T4_v3 (T4) | ~$0.53/hr |
 | Public IP | Standard, static | ~$0.005/hr |
 | Premium SSD (OS disk) | 30 GiB P4 | ~$5.28/month |
 | VNet / NSG / NIC | — | Free |
-| **Total (1-hour lab)** | | **~$3.10** |
+| **Total (1-hour lab)** | | **~$0.54** |
 
-Deallocate or delete the VM immediately after completing the lab. A forgotten GPU VM running over a weekend costs roughly **$150**.
+Deallocate or delete the VM immediately after completing the lab. A forgotten GPU VM running over a weekend costs roughly **$25**.
 
 ---
 
@@ -111,7 +111,7 @@ Before deploying, let's walk through the key sections of `main.bicep` so you kno
 
 ```bicep
 @description('GPU VM size. Ensure quota exists in the chosen region.')
-param vmSize string = 'Standard_NC6s_v3'
+param vmSize string = 'Standard_NC4as_T4_v3'
 
 @description('Restrict SSH to this CIDR (use your public IP /32).')
 param sshSourceCidr string = '*'
@@ -248,7 +248,7 @@ Edit `parameters.json` with your values:
       "value": "ssh-rsa AAAAB3...your-full-public-key"
     },
     "vmSize": {
-      "value": "Standard_NC6s_v3"
+      "value": "Standard_NC4as_T4_v3"
     },
     "sshSourceCidr": {
       "value": "203.0.113.50/32"
@@ -323,7 +323,7 @@ Don't stop at `nvidia-smi`. A proper validation confirms the driver, the CUDA to
 nvidia-smi
 ```
 
-Expected output: one **Tesla V100** (for NC6s_v3) with driver version and CUDA version displayed. If `nvidia-smi` returns `command not found`, the extension hasn't finished — wait and retry.
+Expected output: one **Tesla T4** (for NC4as_T4_v3) with driver version and CUDA version displayed. If `nvidia-smi` returns `command not found`, the extension hasn't finished — wait and retry.
 
 ### Check 2 — Driver version details
 

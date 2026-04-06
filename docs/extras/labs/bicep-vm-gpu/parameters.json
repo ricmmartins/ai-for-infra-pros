@@ -6,7 +6,7 @@
       "value": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQD...REPLACE_WITH_YOUR_KEY"
     },
     "vmSize": {
-      "value": "Standard_NC6s_v3"
+      "value": "Standard_NC4as_T4_v3"
     },
     "sshSourceCidr": {
       "value": "*"
