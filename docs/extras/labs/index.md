@@ -23,9 +23,9 @@ The goal is to help infrastructure engineers confidently **run AI workloads**, n
 
 | Lab | Description | Technologies |
 |-----|--------------|---------------|
-| [**Terraform AKS GPU Cluster**](./terraform-aks-gpu/index.md) | Provision an Azure Kubernetes Service cluster with a dedicated GPU node pool for AI workloads. | Terraform, AKS, GPU, IaC |
-| [**Bicep VM with GPU**](./bicep-vm-gpu/index.md) | Deploy a single GPU-enabled VM using Azure Bicep to host AI inference workloads. | Bicep, Azure CLI, NVIDIA Drivers |
-| [**YAML Inference API (Azure ML)**](./yaml-inference-api/index.md) | Publish a trained model as an inference endpoint using Azure Machine Learning and YAML configuration. | Azure ML, YAML, CLI, REST API |
+| [**Lab 1 — Bicep VM with GPU**](./bicep-vm-gpu/index.md) | Deploy a single GPU-enabled VM using Azure Bicep to host AI inference workloads. | Bicep, Azure CLI, NVIDIA Drivers |
+| [**Lab 2 — Terraform AKS GPU Cluster**](./terraform-aks-gpu/index.md) | Provision an Azure Kubernetes Service cluster with a dedicated GPU node pool for AI workloads. | Terraform, AKS, GPU, IaC |
+| [**Lab 3 — YAML Inference API (Azure ML)**](./yaml-inference-api/index.md) | Publish a trained model as an inference endpoint using Azure Machine Learning and YAML configuration. | Azure ML, YAML, CLI, REST API |
 
 ## Prerequisites
 
