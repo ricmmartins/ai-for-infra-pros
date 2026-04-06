@@ -64,7 +64,7 @@ Most organizations land on a hybrid: one or two shared clusters with per-team na
 
 ### RBAC Scoping for Multi-Team GPU Access
 
-In AKS, RBAC should scope each team to their own namespace. Use Azure AD groups mapped to Kubernetes ClusterRoles for consistent access control.
+In AKS, RBAC should scope each team to their own namespace. Use Microsoft Entra ID groups mapped to Kubernetes ClusterRoles for consistent access control.
 
 ```yaml
 # team-data-science-role.yaml
@@ -85,7 +85,7 @@ rules:
     verbs: ["get", "list", "create", "update", "delete"]
 ```
 
-Bind this role to the team's Azure AD group. They can deploy workloads in their namespace but can't touch other teams' resources or cluster-level objects.
+Bind this role to the team's Microsoft Entra ID group. They can deploy workloads in their namespace but can't touch other teams' resources or cluster-level objects.
 
 ### Resource Quota Enforcement
 
@@ -569,7 +569,7 @@ New team onboarding should be a pull request, not a ticket. Build Terraform modu
 A team onboarding module should provision:
 
 - Kubernetes namespace with resource quotas
-- RBAC bindings for the team's Azure AD group
+- RBAC bindings for the team's Microsoft Entra ID group
 - Network policies
 - Kueue LocalQueue linked to the cluster queue
 - Azure Container Registry access
@@ -604,7 +604,7 @@ Data scientists don't want to build Docker images or write Kubernetes manifests.
 
 - ✅ Defined isolation boundaries for each team (namespace, node pool, cluster, or subscription)
 - ✅ Implemented ResourceQuotas to cap GPU, CPU, and memory per namespace
-- ✅ Set up RBAC scoping with Azure AD groups mapped to Kubernetes roles
+- ✅ Set up RBAC scoping with Microsoft Entra ID groups mapped to Kubernetes roles
 - ✅ Applied network policies to prevent cross-namespace traffic
 - ✅ Created priority classes separating production inference, training, and exploratory workloads
 - ✅ Deployed Kueue for job queueing and fair-share scheduling

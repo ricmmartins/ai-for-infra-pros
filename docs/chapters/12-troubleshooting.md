@@ -312,8 +312,7 @@ Your application dashboard shows 30%+ of Azure OpenAI requests returning HTTP 42
 {
   "error": {
     "code": "429",
-    "message": "Requests to the ChatCompletions_Create Operation under Azure OpenAI API
-    have exceeded the token rate limit of your current deployment. Please retry after 6 seconds."
+    "message": "Requests to the ChatCompletions_Create Operation under Azure OpenAI API have exceeded the token rate limit of your current deployment. Please retry after 6 seconds."
   }
 }
 ```
@@ -581,6 +580,7 @@ done
 **Set NCCL timeout so jobs fail fast instead of hanging:**
 
 ```python
+import datetime
 import torch.distributed as dist
 
 dist.init_process_group(

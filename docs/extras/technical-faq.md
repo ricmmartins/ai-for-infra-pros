@@ -12,7 +12,7 @@ However, anything involving large matrix multiplications at scale — LLM infere
 
 **Rule of thumb**: If your model has more than 100M parameters, you almost certainly need a GPU. If it's under 10M parameters and uses tabular data, CPU is likely fine.
 
-�� **Pro Tip**: Before requesting GPU quota, benchmark your model on a `Standard_D8s_v5` (CPU) first. If latency meets your SLA, you just saved 5× on compute costs.
+**Pro Tip**: Before requesting GPU quota, benchmark your model on a `Standard_D8s_v5` (CPU) first. If latency meets your SLA, you just saved 5× on compute costs.
 
 ---
 
@@ -185,7 +185,7 @@ Follow the same zero-trust principles you'd apply to any production API, plus AI
 
 **Identity layer:**
 - **Managed Identity** for service-to-service auth (Azure ML, AKS pods, Functions)
-- **Entra ID (Azure AD)** for user-facing applications
+- **Microsoft Entra ID** for user-facing applications
 - API keys as last resort — rotate every 90 days, store in **Key Vault**
 
 **AI-specific controls:**

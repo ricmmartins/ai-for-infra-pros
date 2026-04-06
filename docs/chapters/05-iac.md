@@ -577,7 +577,7 @@ Infrastructure changes to AI environments should never be applied from a laptop.
 
 ### GitHub Actions with OIDC Authentication
 
-Modern CI/CD for Azure uses OpenID Connect (OIDC) — no client secrets stored in GitHub. The workflow exchanges a short-lived token with Azure AD at runtime. This is the current best practice.
+Modern CI/CD for Azure uses OpenID Connect (OIDC) — no client secrets stored in GitHub. The workflow exchanges a short-lived token with Microsoft Entra ID at runtime. This is the current best practice.
 
 ```yaml
 name: "AI Infrastructure — Plan & Apply"

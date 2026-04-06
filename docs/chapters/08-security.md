@@ -102,7 +102,7 @@ Azure RBAC provides granular control over who can do what with your AI resources
 
 ### Service Principals vs. Managed Identity — When to Use Each
 
-Use managed identities whenever possible. They're the default answer for any Azure-to-Azure authentication. Service principals are for scenarios where managed identity isn't available — CI/CD pipelines running in GitHub Actions or GitLab, third-party tools that can't use Azure managed identity, or multi-tenant applications that need to authenticate across Azure AD tenants.
+Use managed identities whenever possible. They're the default answer for any Azure-to-Azure authentication. Service principals are for scenarios where managed identity isn't available — CI/CD pipelines running in GitHub Actions or GitLab, third-party tools that can't use Azure managed identity, or multi-tenant applications that need to authenticate across Microsoft Entra ID tenants.
 
 If you must use a service principal, use federated credentials (OIDC) instead of client secrets. GitHub Actions, for example, supports workload identity federation — your pipeline authenticates to Azure without any stored secret at all.
 

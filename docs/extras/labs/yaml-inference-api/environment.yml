@@ -1,4 +1,4 @@
-$schema: https://azuremlschemasprod.azureedge.net/latest/environment.schema.json
+$schema: https://azuremlschemas.azureedge.net/latest/environment.schema.json
 name: infer-sklearn-diabetes
 image: mcr.microsoft.com/azureml/minimal-ubuntu22.04-py310-cpu-inference:latest
 inference_config:

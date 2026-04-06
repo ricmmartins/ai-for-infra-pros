@@ -92,7 +92,7 @@ Choosing the right GPU VM family is the single highest-impact decision you'll ma
 
 **For dev/test** — use `Standard_NV6ads_A10_v5` (fractional A10 GPU) or even CPU-only VMs. Don't burn ND-series quota on Jupyter notebooks.
 
-�� **Pro Tip**: GPU SKUs have limited regional availability. Always check before your deployment pipeline runs:
+**Pro Tip**: GPU SKUs have limited regional availability. Always check before your deployment pipeline runs:
 
 ```bash
 az vm list-skus \

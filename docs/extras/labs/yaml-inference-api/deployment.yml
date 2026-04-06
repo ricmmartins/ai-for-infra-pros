@@ -1,4 +1,4 @@
-$schema: https://azuremlschemasprod.azureedge.net/latest/managedOnlineDeployment.schema.json
+$schema: https://azuremlschemas.azureedge.net/latest/managedOnlineDeployment.schema.json
 name: blue
 endpoint_name: infer-demo
 

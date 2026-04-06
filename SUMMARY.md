@@ -42,10 +42,10 @@
 
 ## Hands-On Labs
 
-- [Labs Overview](docs/extras/labs/README.md)
-  - [Lab 1: Deploy a GPU VM with Bicep](docs/extras/labs/bicep-vm-gpu/README.md)
-  - [Lab 2: Create an AKS Cluster with GPU using Terraform](docs/extras/labs/terraform-aks-gpu/README.md)
-  - [Lab 3: Build an Inference API with Azure ML](docs/extras/labs/yaml-inference-api/README.md)
+- [Labs Overview](docs/extras/labs/index.md)
+  - [Lab 1: Deploy a GPU VM with Bicep](docs/extras/labs/bicep-vm-gpu/index.md)
+  - [Lab 2: Create an AKS Cluster with GPU using Terraform](docs/extras/labs/terraform-aks-gpu/index.md)
+  - [Lab 3: Build an Inference API with Azure ML](docs/extras/labs/yaml-inference-api/index.md)
 
 ## Extras and Reference
 

@@ -78,7 +78,7 @@ helm repo update
 helm install dcgm-exporter nvidia/dcgm-exporter \
   --namespace gpu-monitoring \
   --create-namespace \
-  --set nodeSelector."kubernetes\.io/gpu"="true"
+  --set nodeSelector."agentpool"="gpu"
 ```
 
 DCGM Exporter exposes metrics on port 9400 by default. Once running, Prometheus can scrape these metrics automatically.

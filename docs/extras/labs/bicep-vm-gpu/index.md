@@ -72,6 +72,8 @@ az vm list-usage --location eastus \
 
 You need at least **6 vCPUs** available for `Standard_NC6s_v3`. If the `currentValue` equals the `limit`, request an increase through the Azure portal under **Subscriptions → Usage + quotas**.
 
+⚠️ **Important — NCv3 Retirement**: The NCv3-series (including `Standard_NC6s_v3`) is scheduled for retirement on **September 30, 2025**. For new deployments, consider using `Standard_NC4as_T4_v3` (T4 GPU, better price/performance for inference) or `Standard_NC24ads_A100_v4` (A100 GPU, for larger models). Update the `vmSize` parameter accordingly and adjust your quota check to match the new SKU family. See the [NCv3 retirement page](https://learn.microsoft.com/azure/virtual-machines/ncv3-retirement) for migration guidance.
+
 ⚠️ **Production Gotcha**: Quota requests for GPU SKUs can take hours or even days for approval, depending on the region and your subscription type. Always check quota *before* starting a deployment — not after a cryptic `QuotaExceeded` error.
 
 ---
@@ -153,7 +155,7 @@ The NSG is the first resource defined because the subnet depends on it. By defau
 ### The VM — where the GPU lives
 
 ```bicep
-resource vm 'Microsoft.Compute/virtualMachines@2022-11-01' = {
+resource vm 'Microsoft.Compute/virtualMachines@2024-07-01' = {
   name: vmName
   location: location
   properties: {

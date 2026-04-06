@@ -426,7 +426,7 @@ Or GPU processes crash intermittently with `CUDA error: uncorrectable ECC error 
 **What to do:**
 1. Confirm with `nvidia-smi -q -d ECC` for detailed ECC status.
 2. Stop all workloads on the affected GPU.
-3. On Azure, open a support request for hardware replacement. Azure will live-migrate your VM to healthy hardware.
+3. On Azure, open a support request for hardware replacement. Azure will redeploy your VM to healthy hardware (note: GPU VMs do not support live migration — expect downtime during the move).
 4. If using AKS, cordon the node to prevent new GPU workloads from scheduling.
 
 ### 5. Thermal Throttling

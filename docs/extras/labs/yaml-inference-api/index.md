@@ -84,7 +84,7 @@ Before running anything, let's inspect the three YAML files that define the enti
 ### `endpoint.yml` — The front door
 
 ```yaml
-$schema: https://azuremlschemasprod.azureedge.net/latest/managedOnlineEndpoint.schema.json
+$schema: https://azuremlschemas.azureedge.net/latest/managedOnlineEndpoint.schema.json
 name: infer-demo
 auth_mode: key
 ```
@@ -96,7 +96,7 @@ This is deliberately minimal. The endpoint is the **network-facing resource** �
 ### `deployment.yml` — The backend pool
 
 ```yaml
-$schema: https://azuremlschemasprod.azureedge.net/latest/managedOnlineDeployment.schema.json
+$schema: https://azuremlschemas.azureedge.net/latest/managedOnlineDeployment.schema.json
 name: blue
 endpoint_name: infer-demo
 
@@ -123,7 +123,7 @@ This is where the compute decisions live. Key fields:
 ### `environment.yml` — The golden container image
 
 ```yaml
-$schema: https://azuremlschemasprod.azureedge.net/latest/environment.schema.json
+$schema: https://azuremlschemas.azureedge.net/latest/environment.schema.json
 name: infer-sklearn-diabetes
 image: mcr.microsoft.com/azureml/minimal-ubuntu22.04-py310-cpu-inference:latest
 inference_config:

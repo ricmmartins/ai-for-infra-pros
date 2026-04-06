@@ -451,7 +451,7 @@ This lab deploys a minimal configuration for learning. A production GPU cluster 
 
 ### Scaling
 
-- **Cluster autoscaler** — Set `auto_scaling_enabled = true`, `min_count = 0`, and `max_count = N` on the GPU node pool. Scaling to zero when idle eliminates GPU costs during off-hours.
+- **Cluster autoscaler** — Set `enable_auto_scaling = true`, `min_count = 0`, and `max_count = N` on the GPU node pool. Scaling to zero when idle eliminates GPU costs during off-hours. *(Note: In azurerm provider v4.x, this argument was renamed to `auto_scaling_enabled`.)*
 - **KEDA** — For event-driven scaling of inference workloads based on queue depth or HTTP request rate.
 
 💡 **Pro Tip**: Setting `min_count = 0` on GPU node pools is the single highest-impact cost optimization for non-24/7 workloads. A T4 node sitting idle overnight costs ~$4.25 for nothing. The autoscaler takes 3–5 minutes to provision a new GPU node — acceptable for batch inference, too slow for real-time APIs. Know your latency budget.

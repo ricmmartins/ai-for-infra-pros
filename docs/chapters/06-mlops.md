@@ -481,8 +481,7 @@ az storage account create \
   --resource-group ml-prod-rg \
   --sku Standard_LRS \
   --kind StorageV2 \
-  --hns true \
-  --enable-hierarchical-namespace true
+  --hns true
 
 # Set lifecycle policy to archive old checkpoints
 az storage account management-policy create \
