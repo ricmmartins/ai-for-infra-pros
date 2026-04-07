@@ -30,7 +30,7 @@ Before you build anything, you need an honest assessment of where your organizat
 
 Survey your team's capabilities across four dimensions: cloud platform fluency (Azure services, networking, identity), AI/ML fundamentals (inference, GPU scheduling, token economics), automation maturity (IaC adoption, CI/CD practices), and security operations (managed identity, secret management). You're not looking for data scientists — you're looking for whether your team can provision, secure, and monitor AI infrastructure.
 
-🔄 **Infra ↔ AI Translation:** A "skills assessment" in AI adoption isn't about knowing how transformers work. It's about whether your team can answer: "What's the difference between an A100 and a T4, and when would you choose each?" See Chapter 4 for the GPU deep dive.
+**Infra ↔ AI Translation:** A "skills assessment" in AI adoption isn't about knowing how transformers work. It's about whether your team can answer: "What's the difference between an A100 and a T4, and when would you choose each?" See Chapter 4 for the GPU deep dive.
 
 ### Infrastructure Readiness
 
@@ -97,7 +97,7 @@ Build templates for your common AI patterns: GPU VM clusters for training (see C
 
 Your pipelines need to handle infrastructure changes (Bicep/Terraform through GitOps) and model deployments (container images, model artifacts, endpoint configurations). Different workflows, different testing, but the same governance — pull request reviews, automated validation, staged rollouts.
 
-🔄 **Infra ↔ AI Translation:** "Model deployment" is analogous to "application deployment." The model is the application, the inference endpoint is the service, the model version is the release. Your existing CI/CD patterns apply — extend them for new artifact types.
+**Infra ↔ AI Translation:** "Model deployment" is analogous to "application deployment." The model is the application, the inference endpoint is the service, the model version is the release. Your existing CI/CD patterns apply — extend them for new artifact types.
 
 ### Monitoring and Observability Stack
 
@@ -155,7 +155,7 @@ Namespace or resource group isolation per team, GPU quota enforcement per tenant
 
 Define SLOs for availability, latency (p99), throughput, and error budget. AI endpoints have unique failure modes — model loading delays, GPU memory exhaustion, token rate limiting — that your SLO design must account for.
 
-🔄 **Infra ↔ AI Translation:** An "inference endpoint SLA" is exactly like a web API SLA. The difference: "cold start" might be 30 seconds (loading gigabytes of model weights into GPU memory), and "resource exhaustion" usually means GPU memory, not CPU. Same discipline, different resources.
+**Infra ↔ AI Translation:** An "inference endpoint SLA" is exactly like a web API SLA. The difference: "cold start" might be 30 seconds (loading gigabytes of model weights into GPU memory), and "resource exhaustion" usually means GPU memory, not CPU. Same discipline, different resources.
 
 ### Fleet Management and Operations Runbooks
 
@@ -221,7 +221,7 @@ These are the five most common ways AI adoption fails from an infrastructure per
 
 Each phase transition should be an explicit decision, not a gradual drift.
 
-📊 **Decision Matrix: Phase Advancement Criteria**
+**Decision Matrix: Phase Advancement Criteria**
 
 | Gate | Required Deliverables | Approval Authority | Rollback Criteria |
 |---|---|---|---|
@@ -262,15 +262,15 @@ Track metrics across three dimensions to evaluate your framework's effectiveness
 
 ## Chapter Checklist
 
-- ✅ You understand the 6-phase model: Diagnostic → Enablement → Infrastructure Preparation → Experimentation → Scale and Governance → Continuous Adoption
-- ✅ You've identified which phase your organization is currently in — be honest about it
-- ✅ You can articulate the deliverables required to exit your current phase
-- ✅ You've reviewed the anti-patterns and identified which ones are present in your environment
-- ✅ You know the decision gate criteria for advancing to the next phase
-- ✅ You've selected infrastructure, business, and team metrics to track
-- ✅ You have a plan for shadow AI discovery — or you've already conducted one
-- ✅ You understand that AI adoption is a continuous process, not a one-time project
-- ✅ You've connected this framework to earlier chapters: IaC (Chapter 5), monitoring (Chapter 7), security (Chapter 8), cost engineering (Chapter 9), and platform operations (Chapter 10)
+- You understand the 6-phase model: Diagnostic → Enablement → Infrastructure Preparation → Experimentation → Scale and Governance → Continuous Adoption
+- You've identified which phase your organization is currently in — be honest about it
+- You can articulate the deliverables required to exit your current phase
+- You've reviewed the anti-patterns and identified which ones are present in your environment
+- You know the decision gate criteria for advancing to the next phase
+- You've selected infrastructure, business, and team metrics to track
+- You have a plan for shadow AI discovery — or you've already conducted one
+- You understand that AI adoption is a continuous process, not a one-time project
+- You've connected this framework to earlier chapters: IaC (Chapter 5), monitoring (Chapter 7), security (Chapter 8), cost engineering (Chapter 9), and platform operations (Chapter 10)
 
 ---
 
