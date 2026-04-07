@@ -161,21 +161,6 @@ A production-grade model pipeline has three stages, each with distinct infrastru
   Tracking                            SLA-bound
 ```
 
-```
- ┌───────────┐     ┌─────────────┐     ┌────────────────┐
- │    DEV    │────▶│   STAGING   │────▶│   PRODUCTION   │
- │           │     │             │     │                │
- │  Train    │     │  Validate   │     │  Serve         │
- │  Track    │     │  Benchmark  │     │  Monitor       │
- │  Version  │     │  Security   │     │  Auto-rollback │
- └─────┬─────┘     └──────┬──────┘     └───────┬────────┘
-       │                  │                    │
-  GPU Compute      Inference Infra       Load Balanced
-  Blob Storage     Test Data Access      Multi-replica
-  Experiment       Isolated Network      Prod Network
-  Tracking                               SLA-bound
-```
-
 **Dev**: Data scientists train models using GPU compute. Your responsibility is providing the compute environment (GPU VMs or AKS GPU node pools), storage for training data and checkpoints, and experiment tracking infrastructure. Models that pass initial evaluation get registered in the model registry.
 
 **Staging**: Registered models are deployed to a staging environment that mirrors production infrastructure — same VM SKUs, same network configuration, same inference server. Automated tests validate accuracy against a holdout dataset, measure latency under load, and run security scans. This stage is where most models fail, and that's by design.
@@ -533,20 +518,20 @@ From your perspective, a feature store is a system with two data paths and a con
 A feature store deployment typically includes:
 
 ```
-┌────────────────────────────────────────────┐
+┌─────────────────────────────────────────────┐
 │              Feature Store                  │
 │                                             │
-│  ┌──────────┐    Sync    ┌──────────────┐  │
+│  ┌──────────┐    Sync    ┌──────────────┐   │
 │  │ Offline  │ ─────────▶ │   Online     │  │
-│  │ Store    │            │   Store      │  │
-│  │ (ADLS)   │            │ (Redis/      │  │
-│  │          │            │  Cosmos DB)  │  │
-│  └──────────┘            └──────────────┘  │
-│       ▲                        │           │
-│       │                        ▼           │
-│  Training                  Inference       │
-│  Pipelines                 Endpoints       │
-└────────────────────────────────────────────┘
+│  │ Store    │            │   Store      │   │
+│  │ (ADLS)   │            │ (Redis/      │   │
+│  │          │            │  Cosmos DB)  │   │
+│  └──────────┘            └──────────────┘   │
+│       ▲                        │            │
+│       │                        ▼            │
+│  Training                  Inference        │
+│  Pipelines                 Endpoints        │
+└─────────────────────────────────────────────┘
 ```
 
 - **Azure Data Lake Storage Gen2** for the offline store — batch access, schema evolution, and cost-effective storage for historical feature data.
@@ -557,7 +542,7 @@ A feature store deployment typically includes:
 
 ---
 
-## ✅ Chapter Checklist
+## Chapter Checklist
 
 Before moving to Chapter 7, verify that your model lifecycle management covers these essentials:
 
