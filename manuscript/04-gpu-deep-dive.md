@@ -1,4 +1,4 @@
-# Chapter 4 — The GPU Deep Dive <span class="badge-free">Free Chapter</span>
+# Chapter 4 — The GPU Deep Dive
 
 *"The GPU has 40 gigs of memory — why can't it fit a 14 GB model?"*
 
