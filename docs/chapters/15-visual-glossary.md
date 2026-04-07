@@ -10,7 +10,7 @@ The glossary is organized into six categories — Core AI Concepts, Data and Sto
 
 ---
 
-## 🔄 Category 1: Core AI Concepts
+## Category 1: Core AI Concepts
 
 | AI Term | Infra Analogy | Definition | When You'll See It |
 |---------|---------------|------------|--------------------|
@@ -32,7 +32,7 @@ The glossary is organized into six categories — Core AI Concepts, Data and Sto
 
 ---
 
-## 🔄 Category 2: Data and Storage
+## Category 2: Data and Storage
 
 | AI Term | Infra Analogy | Definition | When You'll See It |
 |---------|---------------|------------|--------------------|
@@ -47,7 +47,7 @@ The glossary is organized into six categories — Core AI Concepts, Data and Sto
 
 ---
 
-## 🔄 Category 3: Compute and Hardware
+## Category 3: Compute and Hardware
 
 | AI Term | Infra Analogy | Definition | When You'll See It |
 |---------|---------------|------------|--------------------|
@@ -62,7 +62,7 @@ The glossary is organized into six categories — Core AI Concepts, Data and Sto
 
 ---
 
-## 🔄 Category 4: Model Operations
+## Category 4: Model Operations
 
 | AI Term | Infra Analogy | Definition | When You'll See It |
 |---------|---------------|------------|--------------------|
@@ -77,7 +77,7 @@ The glossary is organized into six categories — Core AI Concepts, Data and Sto
 
 ---
 
-## 🔄 Category 5: Deployment and Serving
+## Category 5: Deployment and Serving
 
 | AI Term | Infra Analogy | Definition | When You'll See It |
 |---------|---------------|------------|--------------------|
@@ -92,7 +92,7 @@ The glossary is organized into six categories — Core AI Concepts, Data and Sto
 
 ---
 
-## 🔄 Category 6: Advanced Concepts
+## Category 6: Advanced Concepts
 
 | AI Term | Infra Analogy | Definition | When You'll See It |
 |---------|---------------|------------|--------------------|
@@ -107,11 +107,11 @@ The glossary is organized into six categories — Core AI Concepts, Data and Sto
 
 ---
 
-## 🔄 Quick Reference Card — Top 20 Terms
+## Quick Reference Card — Top 20 Terms
 
 *Pin this page. Screenshot it. Print it out.*
 
-| # | AI Term | 🔄 Infra Translation |
+| # | AI Term | Infra Translation |
 |---|---------|----------------------|
 | 1 | **Model** | A compiled binary — the deployable output of training |
 | 2 | **Training** | A long-running batch job that produces a model |
