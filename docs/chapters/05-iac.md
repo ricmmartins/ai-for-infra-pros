@@ -36,7 +36,7 @@ Machine learning experiments must be repeatable. If a model achieves breakthroug
 
 Regulated industries need to know who changed what, when, and why. When your infrastructure is defined in code and stored in Git, you get that audit trail for free. Every change is a pull request. Every pull request has a reviewer. Every deployment is traceable to a commit hash. Try getting that from a portal session.
 
-🔄 **Infra ↔ AI Translation**: When an ML engineer says "I need the same environment as last week's experiment," they're asking for infrastructure reproducibility. When a compliance officer says "show me what changed," they're asking for an audit trail. IaC answers both questions with the same artifact: a versioned configuration file.
+**Infra ↔ AI Translation**: When an ML engineer says "I need the same environment as last week's experiment," they're asking for infrastructure reproducibility. When a compliance officer says "show me what changed," they're asking for an audit trail. IaC answers both questions with the same artifact: a versioned configuration file.
 
 ---
 
@@ -44,7 +44,7 @@ Regulated industries need to know who changed what, when, and why. When your inf
 
 Not every tool is right for every job. The AI infrastructure space has four primary approaches, each with distinct strengths.
 
-📊 **Decision Matrix: Choosing Your IaC Tool**
+**Decision Matrix: Choosing Your IaC Tool**
 
 | Criteria | Terraform | Bicep | Azure CLI | Pulumi |
 |----------|-----------|-------|-----------|--------|
@@ -771,7 +771,7 @@ locals {
 }
 ```
 
-🔄 **Infra ↔ AI Translation**: The `experiment` tag bridges the gap between infrastructure and ML workflows. When a data scientist asks "how much did experiment X cost?", you can answer with a single Azure Cost Management query filtered by that tag. Without it, you're manually correlating timestamps and resource groups.
+**Infra ↔ AI Translation**: The `experiment` tag bridges the gap between infrastructure and ML workflows. When a data scientist asks "how much did experiment X cost?", you can answer with a single Azure Cost Management query filtered by that tag. Without it, you're manually correlating timestamps and resource groups.
 
 ### Module Registries
 
@@ -898,18 +898,18 @@ Type `yes` when prompted. Terraform will remove all resources in reverse depende
 
 Before moving on, verify you can answer "yes" to each of these:
 
-- ✅ All AI infrastructure is defined in code (Terraform or Bicep) — no portal-only resources
-- ✅ GPU VM SKUs are validated in variable definitions to prevent non-GPU deployments
-- ✅ AKS GPU node pools use the `sku=gpu:NoSchedule` taint
-- ✅ Terraform state is stored remotely in Azure Storage with locking enabled
-- ✅ CI/CD pipelines use OIDC authentication — no client secrets in GitHub
-- ✅ The plan → approve → apply pattern is enforced with environment protection rules
-- ✅ Azure Policy blocks GPU VMs without required tags
-- ✅ All resources follow a consistent naming convention
-- ✅ Every resource carries tags for environment, project, team, cost-center, and experiment
-- ✅ Reusable modules are published to a registry for cross-team consumption
-- ✅ GPU quota is verified before deployment
-- ✅ Destruction is automated and tested — you can `terraform destroy` with confidence
+- All AI infrastructure is defined in code (Terraform or Bicep) — no portal-only resources
+- GPU VM SKUs are validated in variable definitions to prevent non-GPU deployments
+- AKS GPU node pools use the `sku=gpu:NoSchedule` taint
+- Terraform state is stored remotely in Azure Storage with locking enabled
+- CI/CD pipelines use OIDC authentication — no client secrets in GitHub
+- The plan → approve → apply pattern is enforced with environment protection rules
+- Azure Policy blocks GPU VMs without required tags
+- All resources follow a consistent naming convention
+- Every resource carries tags for environment, project, team, cost-center, and experiment
+- Reusable modules are published to a registry for cross-team consumption
+- GPU quota is verified before deployment
+- Destruction is automated and tested — you can `terraform destroy` with confidence
 
 ---
 
