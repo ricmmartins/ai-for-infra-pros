@@ -1082,18 +1082,18 @@ Three common causes:
 
 Before you close this chapter, make sure you have:
 
-- ✅ **GPU driver monitoring** in place — alerts on `nvidia-smi` failures, not just GPU utilization
-- ✅ **Kernel pinning** configured on GPU VMs to prevent unattended upgrade breakage
-- ✅ **Memory calculations** done before training jobs start — use the formula from Chapter 4
-- ✅ **GPU pod templates** with correct `sku=gpu:NoSchedule` tolerations as defaults
-- ✅ **Exponential backoff with jitter** implemented in all Azure OpenAI client code
-- ✅ **Readiness probes** with adequate `initialDelaySeconds` on model-serving containers
-- ✅ **NCCL timeout** configured for distributed training jobs (don't let hangs run forever)
-- ✅ **Container memory limits** set to 2× model weight size for inference pods
-- ✅ **GPU quota monitoring** with alerts at 80% usage per VM family per region
-- ✅ **Storage RBAC and firewall rules** provisioned alongside storage accounts in IaC
-- ✅ **Model quality monitoring** separate from infrastructure monitoring
-- ✅ **Checkpoint frequency** set for distributed training (every 15–30 minutes minimum)
+- **GPU driver monitoring** in place — alerts on `nvidia-smi` failures, not just GPU utilization
+- **Kernel pinning** configured on GPU VMs to prevent unattended upgrade breakage
+- **Memory calculations** done before training jobs start — use the formula from Chapter 4
+- **GPU pod templates** with correct `sku=gpu:NoSchedule` tolerations as defaults
+- **Exponential backoff with jitter** implemented in all Azure OpenAI client code
+- **Readiness probes** with adequate `initialDelaySeconds` on model-serving containers
+- **NCCL timeout** configured for distributed training jobs (don't let hangs run forever)
+- **Container memory limits** set to 2× model weight size for inference pods
+- **GPU quota monitoring** with alerts at 80% usage per VM family per region
+- **Storage RBAC and firewall rules** provisioned alongside storage accounts in IaC
+- **Model quality monitoring** separate from infrastructure monitoring
+- **Checkpoint frequency** set for distributed training (every 15–30 minutes minimum)
 
 ---
 
