@@ -135,8 +135,8 @@ AI Infra Engineer, MLOps Engineer, AI Platform Engineer, and a 30-day plan
 
 **AI for Infra Pros — Full Book**
 
-<span class="price">$19+</span>
-<span class="price-sub">Suggested price: $29 · Minimum: $19</span>
+<span class="price">$35</span>
+<span class="price-sub">PDF, ePub, and MOBI · Free lifetime updates</span>
 
 <ul class="pricing-includes">
 <li>All 15 chapters (220+ pages)</li>
