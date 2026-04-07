@@ -7,7 +7,7 @@ repo_url: https://github.com/ricmmartins/ai-for-infra-pros
 repo_name: ricmmartins/ai-for-infra-pros
 
 copyright: >
-  Created by <a href="https://rmmartins.com">Ricardo Martins</a> ΓÇö
+  Created by <a href="https://rmmartins.com">Ricardo Martins</a> —
   Principal Solutions Engineer @ Microsoft
 
 theme:
@@ -51,23 +51,23 @@ theme:
 
 nav:
   - Home: index.md
-  - Part I ΓÇö Foundations:
+  - Part I — Foundations:
     - Why AI Needs You: chapters/01-introduction.md
     - "Data: The Fuel That Powers Everything": chapters/02-data.md
     - "Compute: Where Intelligence Comes to Life": chapters/03-compute.md
     - The GPU Deep Dive: chapters/04-gpu-deep-dive.md
-  - Part II ΓÇö Building:
+  - Part II — Building:
     - Infrastructure as Code for AI: chapters/05-iac.md
     - MLOps from an Infra Lens: chapters/06-mlops.md
-  - Part III ΓÇö Operating:
+  - Part III — Operating:
     - Monitoring and Observability: chapters/07-monitoring.md
     - Security in AI Environments: chapters/08-security.md
     - Cost Engineering: chapters/09-cost-engineering.md
-  - Part IV ΓÇö Scaling:
+  - Part IV — Scaling:
     - Platform Operations at Scale: chapters/10-platform-ops.md
     - "Azure OpenAI: Tokens & Throughput": chapters/11-azure-openai.md
     - Troubleshooting Playbook: chapters/12-troubleshooting.md
-  - Part V ΓÇö Strategy:
+  - Part V — Strategy:
     - AI Use Cases for Infra Engineers: chapters/13-ai-use-cases.md
     - The AI Adoption Framework: chapters/14-adoption-framework.md
     - "Visual Glossary: Infra to AI": chapters/15-visual-glossary.md
