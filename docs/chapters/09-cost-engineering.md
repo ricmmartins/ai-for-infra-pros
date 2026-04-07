@@ -34,7 +34,7 @@ When your teams consume Azure OpenAI services, costs scale with usage in a way t
 
 Data scientists need to experiment — that's how models improve. But experimentation means spinning up resources on short notice, trying different configurations, and sometimes abandoning approaches midway. Telling the ML team "submit a purchase order before provisioning any GPU" kills velocity. The solution isn't less experimentation; it's better guardrails around experimentation.
 
-🔄 **Infra ↔ AI Translation**: GPU idle time is like leaving every light on in a stadium after the game ends. The hourly electricity bill is enormous, nobody's benefiting from it, and the fix is a simple timer — but someone has to install the timer before the first game.
+**Infra ↔ AI Translation**: GPU idle time is like leaving every light on in a stadium after the game ends. The hourly electricity bill is enormous, nobody's benefiting from it, and the fix is a simple timer — but someone has to install the timer before the first game.
 
 ---
 
@@ -114,7 +114,7 @@ That's a 94% cost reduction for queries where GPT-4o-mini delivers acceptable qu
 
 > **Note**: Token prices shown are approximate and subject to change. Always verify current pricing on the [Azure OpenAI pricing page](https://azure.microsoft.com/pricing/details/cognitive-services/openai-service/).
 
-### 📊 Decision Matrix: Compute Purchasing Models
+### Decision Matrix: Compute Purchasing Models
 
 | Factor | Pay-as-you-go | 1-Year Reserved | 3-Year Reserved | Spot VMs |
 |---|---|---|---|---|
@@ -202,7 +202,7 @@ Before scaling up, measure what you're actually using. Run `nvidia-smi` or use A
 - **GPU Memory Utilization (%)**: If below 50%, a smaller GPU may work. If above 90%, you may need more memory or to enable gradient checkpointing
 - **GPU Memory Used (GB)**: Compare to the GPU's total memory to understand headroom
 
-🔄 **Infra ↔ AI Translation**: Right-sizing GPUs is exactly like right-sizing VMs in traditional infrastructure. You wouldn't run a static website on a 64-core VM. Same principle — but the cost of getting it wrong is 100× higher because GPU VMs are 100× more expensive.
+**Infra ↔ AI Translation**: Right-sizing GPUs is exactly like right-sizing VMs in traditional infrastructure. You wouldn't run a static website on a 64-core VM. Same principle — but the cost of getting it wrong is 100× higher because GPU VMs are 100× more expensive.
 
 ### Auto-Shutdown Policies for Dev/Test
 
@@ -253,7 +253,7 @@ PTU makes sense when:
 
 The break-even point depends on your model, region, and traffic pattern, but as a general guideline: if your standard deployment is consistently utilized at **60–70% or above** of what a PTU allocation would provide, PTU typically becomes cheaper. Below that utilization, you're paying for reserved capacity you're not using.
 
-### 📊 Decision Matrix: Standard vs PTU
+### Decision Matrix: Standard vs PTU
 
 | Factor | Standard (Pay-per-Token) | Provisioned Throughput (PTU) |
 |---|---|---|
@@ -397,22 +397,22 @@ Use the **cluster autoscaler** to scale GPU node pools to zero when no GPU pods 
 
 ---
 
-## ✅ Chapter Checklist
+## Chapter Checklist
 
 Before moving on, confirm you have these cost engineering practices in place:
 
-- ✅ **Cost model documented** for both training (GPU-hours) and inference (tokens) workloads
-- ✅ **Tagging policy enforced** via Azure Policy — all GPU resources tagged with cost-center, project, team, and environment
-- ✅ **Budget alerts configured** at 50%, 75%, and 90% thresholds with escalating actions
-- ✅ **Auto-shutdown enabled** on all dev/test GPU VMs
-- ✅ **Spot VMs evaluated** for fault-tolerant training workloads with checkpointing implemented
-- ✅ **Right-sizing validated** — GPU utilization benchmarked before provisioning larger SKUs
-- ✅ **Azure OpenAI pricing model selected** — Standard vs PTU evaluated based on utilization data
-- ✅ **Token optimization implemented** — prompt caching, system prompt trimming, response length limits, multi-model routing
-- ✅ **GPU quota governance** centralized with approval workflow
-- ✅ **Monthly cost review meeting** scheduled with infra, data science, and finance stakeholders
-- ✅ **Namespace-level cost tracking** enabled for shared AKS clusters
-- ✅ **Weekly idle resource report** running to catch forgotten experiments
+- **Cost model documented** for both training (GPU-hours) and inference (tokens) workloads
+- **Tagging policy enforced** via Azure Policy — all GPU resources tagged with cost-center, project, team, and environment
+- **Budget alerts configured** at 50%, 75%, and 90% thresholds with escalating actions
+- **Auto-shutdown enabled** on all dev/test GPU VMs
+- **Spot VMs evaluated** for fault-tolerant training workloads with checkpointing implemented
+- **Right-sizing validated** — GPU utilization benchmarked before provisioning larger SKUs
+- **Azure OpenAI pricing model selected** — Standard vs PTU evaluated based on utilization data
+- **Token optimization implemented** — prompt caching, system prompt trimming, response length limits, multi-model routing
+- **GPU quota governance** centralized with approval workflow
+- **Monthly cost review meeting** scheduled with infra, data science, and finance stakeholders
+- **Namespace-level cost tracking** enabled for shared AKS clusters
+- **Weekly idle resource report** running to catch forgotten experiments
 
 ---
 
