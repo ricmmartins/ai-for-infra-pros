@@ -18,7 +18,7 @@ Every AI system, from a simple image classifier to a trillion-parameter large la
 
 Remove any one of these and you have nothing. But here is the insight that most infrastructure engineers miss early on: of those three components, data is the one that touches infrastructure at *every single stage*. The model is code. Compute is provisioned and (mostly) left running. But data must be ingested, stored, prepared, served for training, and delivered at inference — and every one of those stages is an infrastructure problem.
 
-🔄 **Infra ↔ AI Translation**
+**Infra ↔ AI Translation**
 
 | Infrastructure Concept | AI Equivalent | Why It Matters |
 |------------------------|---------------|----------------|
@@ -85,7 +85,7 @@ Raw data is rarely model-ready. It needs cleaning, normalization, deduplication,
 - **Azure Synapse Analytics** — Integrated analytics with serverless SQL and Spark pools
 - **Azure Data Factory** — ETL/ELT pipeline orchestration
 
-🔄 **Infra ↔ AI Translation**: Data preparation in AI is the equivalent of ETL in traditional data warehousing — but the volumes are larger and the output format is different. Instead of loading into a SQL warehouse, you are producing Parquet files, TFRecord files, or preprocessed image directories.
+**Infra ↔ AI Translation**: Data preparation in AI is the equivalent of ETL in traditional data warehousing — but the volumes are larger and the output format is different. Instead of loading into a SQL warehouse, you are producing Parquet files, TFRecord files, or preprocessed image directories.
 
 ### Training
 
@@ -112,7 +112,7 @@ At inference time, data flows in the opposite direction — individual requests 
 
 This is where your infrastructure expertise becomes critical. Choosing the right storage backend is the single most impactful decision you will make for AI workload performance.
 
-📊 **Decision Matrix: Storage for AI Workloads**
+**Decision Matrix: Storage for AI Workloads**
 
 | Storage Type | Best For | Throughput | Latency | Cost | Key Feature |
 |---|---|---|---|---|---|
@@ -270,7 +270,7 @@ In the simplest form, data flows linearly from storage through preprocessing int
 ```
 ┌──────────────────┐     ┌──────────────────┐     ┌──────────────────┐     ┌──────────────────┐
 │  Azure Blob      │     │  Preprocessing   │     │  GPU VM          │     │  Trained Model   │
-│  Storage         │────▶│  (Clean +        │────▶│  (Model          │────▶│  (Checkpoint)    │
+│  Storage         │────▶│  (Clean +       │────▶│  (Model          │────▶│  (Checkpoint)    │
 │  (Raw Data)      │     │   Transform)     │     │   Training)      │     │                  │
 └──────────────────┘     └──────────────────┘     └──────────────────┘     └──────────────────┘
 ```
@@ -297,7 +297,7 @@ Production AI systems add ingestion orchestration, data versioning, model regist
 
 In this architecture, data is ingested through Event Hubs or Data Factory, stored in Data Lake Gen2 with hierarchical namespaces for organization, processed through Databricks or Synapse pipelines, and versioned for reproducibility. Training reads from the versioned dataset, writes checkpoints to Blob Storage, and registers completed models for deployment to inference endpoints.
 
-🔄 **Infra ↔ AI Translation**: If you have built CI/CD pipelines before, a production ML pipeline is the same concept — but instead of code artifacts, you are moving data artifacts through build stages. The "source code" is the dataset, the "build" is training, and the "deployment" is model serving.
+**Infra ↔ AI Translation**: If you have built CI/CD pipelines before, a production ML pipeline is the same concept — but instead of code artifacts, you are moving data artifacts through build stages. The "source code" is the dataset, the "build" is training, and the "deployment" is model serving.
 
 ---
 
@@ -415,21 +415,21 @@ azcopy copy './local-dataset/' \
 
 ## Chapter checklist
 
-✅ **I/O is the hidden bottleneck** — Low GPU utilization during training is almost always a storage problem, not a GPU problem.
+**I/O is the hidden bottleneck** — Low GPU utilization during training is almost always a storage problem, not a GPU problem.
 
-✅ **Match storage to workload** — Use Blob/Data Lake Gen2 for durable storage, local NVMe for training scratch space, and Cosmos DB for low-latency inference features.
+**Match storage to workload** — Use Blob/Data Lake Gen2 for durable storage, local NVMe for training scratch space, and Cosmos DB for low-latency inference features.
 
-✅ **Use BlobFuse2 wisely** — Mount Blob Storage as a filesystem with file cache mode for training. Always point the cache to the VM's local NVMe temp disk.
+**Use BlobFuse2 wisely** — Mount Blob Storage as a filesystem with file cache mode for training. Always point the cache to the VM's local NVMe temp disk.
 
-✅ **Stage data for training** — Copy datasets from Blob Storage to local NVMe before training starts. Write checkpoints back to Blob for durability.
+**Stage data for training** — Copy datasets from Blob Storage to local NVMe before training starts. Write checkpoints back to Blob for durability.
 
-✅ **Never use Standard HDD for training** — The throughput gap between Standard HDD and NVMe is 100× or more. Premium storage or local NVMe is required for GPU workloads.
+**Never use Standard HDD for training** — The throughput gap between Standard HDD and NVMe is 100× or more. Premium storage or local NVMe is required for GPU workloads.
 
-✅ **Secure by default** — Use managed identities and RBAC instead of storage keys. Classify data before it enters any pipeline.
+**Secure by default** — Use managed identities and RBAC instead of storage keys. Classify data before it enters any pipeline.
 
-✅ **Plan for growth** — Training datasets multiply through augmentation, versioning, and experimentation. Size your storage for 10× current needs.
+**Plan for growth** — Training datasets multiply through augmentation, versioning, and experimentation. Size your storage for 10× current needs.
 
-✅ **Use AzCopy for bulk transfers** — It is the fastest way to move data into, out of, and between Azure Storage accounts.
+**Use AzCopy for bulk transfers** — It is the fastest way to move data into, out of, and between Azure Storage accounts.
 
 ---
 
