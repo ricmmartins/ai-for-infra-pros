@@ -491,6 +491,19 @@ html {
   display: block;
 }
 
+/* =========================================
+   Disclaimer
+   ========================================= */
+.md-typeset .disclaimer {
+  margin: 2rem auto;
+  padding: 1rem 1.5rem;
+  max-width: 700px;
+  font-size: 0.78rem;
+  opacity: 0.7;
+  text-align: center;
+  border-top: 1px solid #D6E8F5;
+}
+
 /* Responsive adjustments */
 @media screen and (max-width: 76.1875em) {
   .md-typeset .hero h1 {
