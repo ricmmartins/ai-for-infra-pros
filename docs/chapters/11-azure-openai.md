@@ -56,7 +56,7 @@ Each model has a maximum context window — the upper limit on total tokens in a
 
 A large context window doesn't mean you should fill it. Every token in the context window counts against your TPM quota. A single 100K-token request with a RAG-stuffed prompt consumes as much throughput as 62 shorter 1,600-token requests.
 
-🔄 **Infra ↔ AI Translation**: Think of tokens as the packet payload of AI. TPM is your bandwidth ceiling — the total data throughput you can push through per minute. RPM is your packets-per-second limit. Just like networking, you can be bandwidth-constrained (large payloads, few requests) or PPS-constrained (small payloads, many requests). Same diagnostic thinking, different units.
+**Infra ↔ AI Translation**: Think of tokens as the packet payload of AI. TPM is your bandwidth ceiling — the total data throughput you can push through per minute. RPM is your packets-per-second limit. Just like networking, you can be bandwidth-constrained (large payloads, few requests) or PPS-constrained (small payloads, many requests). Same diagnostic thinking, different units.
 
 ---
 
@@ -64,7 +64,7 @@ A large context window doesn't mean you should fill it. Every token in the conte
 
 When you create an Azure OpenAI deployment, you're making an architectural decision that determines your cost model, throughput guarantees, and failure modes. Azure OpenAI offers several deployment types, and choosing the wrong one is the most common capacity planning mistake teams make.
 
-### 📊 Decision Matrix: Standard vs Global Standard vs Provisioned (PTU)
+### Decision Matrix: Standard vs Global Standard vs Provisioned (PTU)
 
 | Characteristic | Standard | Global Standard | Provisioned (PTU) |
 |---|---|---|---|
@@ -235,13 +235,13 @@ The most common production pattern combines PTU and Standard deployments:
 
 ```
 ┌─────────────────┐
-│   Application    │
+│   Application   │
 └────────┬────────┘
          │
-┌────────▼────────┐
+┌────────▼─────────┐
 │  API Management  │
 │  (Smart Router)  │
-└───┬─────────┬───┘
+└───┬─────────┬────┘
     │         │
     ▼         ▼
 ┌───────┐ ┌──────────┐
@@ -382,7 +382,7 @@ Azure OpenAI's Batch API processes requests asynchronously at a 50% discount com
 
 Streaming doesn't reduce total token consumption or cost, but it dramatically improves perceived latency. Instead of waiting for the entire response to generate before displaying anything, the client receives tokens as they're produced. Time to First Token (TTFT) drops from seconds to milliseconds. For interactive applications, always enable streaming.
 
-🔄 **Infra ↔ AI Translation**: Model routing is the AI equivalent of tiered storage. You don't store every file on premium NVMe — you tier based on access patterns and performance requirements. Similarly, you don't route every prompt to GPT-4o. Hot requests (complex, user-facing) get the premium model. Warm requests (simple, background) get the cost-effective one.
+**Infra ↔ AI Translation**: Model routing is the AI equivalent of tiered storage. You don't store every file on premium NVMe — you tier based on access patterns and performance requirements. Similarly, you don't route every prompt to GPT-4o. Hot requests (complex, user-facing) get the premium model. Warm requests (simple, background) get the cost-effective one.
 
 ---
 
@@ -390,16 +390,16 @@ Streaming doesn't reduce total token consumption or cost, but it dramatically im
 
 Before moving on, verify you've addressed these capacity planning fundamentals:
 
-- ✅ **Token estimation**: You can estimate tokens per request for your workload (system prompt + input + output)
-- ✅ **Deployment type selected**: Standard, Global Standard, or PTU — chosen based on workload predictability and SLA requirements
-- ✅ **TPM/RPM quotas sized**: Calculated for peak, not average, with headroom
-- ✅ **Throttling understood**: You know whether your workload is TPM-bound or RPM-bound, and have retry logic with exponential backoff and jitter
-- ✅ **Capacity plan documented**: Concurrent users × requests/min × tokens/request = required TPM, with peak multiplier applied
-- ✅ **Multi-region failover configured**: At least two deployments in different regions with API Management routing
-- ✅ **Monitoring enabled**: Diagnostic logs flowing to Log Analytics, alerts on 429 rate, latency, and token utilization
-- ✅ **Optimization applied**: System prompts trimmed, max_tokens set, model routing implemented for cost-appropriate model selection
-- ✅ **Batch API evaluated**: Non-real-time workloads moved to Batch API for 50% cost savings
-- ✅ **PTU sizing validated**: If using PTU, throughput tested with real traffic patterns — never relying on hardcoded TPM-per-PTU ratios
+- **Token estimation**: You can estimate tokens per request for your workload (system prompt + input + output)
+- **Deployment type selected**: Standard, Global Standard, or PTU — chosen based on workload predictability and SLA requirements
+- **TPM/RPM quotas sized**: Calculated for peak, not average, with headroom
+- **Throttling understood**: You know whether your workload is TPM-bound or RPM-bound, and have retry logic with exponential backoff and jitter
+- **Capacity plan documented**: Concurrent users × requests/min × tokens/request = required TPM, with peak multiplier applied
+- **Multi-region failover configured**: At least two deployments in different regions with API Management routing
+- **Monitoring enabled**: Diagnostic logs flowing to Log Analytics, alerts on 429 rate, latency, and token utilization
+- **Optimization applied**: System prompts trimmed, max_tokens set, model routing implemented for cost-appropriate model selection
+- **Batch API evaluated**: Non-real-time workloads moved to Batch API for 50% cost savings
+- **PTU sizing validated**: If using PTU, throughput tested with real traffic patterns — never relying on hardcoded TPM-per-PTU ratios
 
 ---
 
