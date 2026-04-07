@@ -161,13 +161,19 @@ A production-grade model pipeline has three stages, each with distinct infrastru
   Tracking                            SLA-bound
 ```
 
-```mermaid
- graph LR
-     DEV["<b>DEV</b><br/><br/>Train<br/>Track<br/>Version<br/><br/><i>GPU Compute<br/>Blob Storage<br/>Experiment Tracking</i>"]
-     STAGING["<b>STAGING</b><br/><br/>Validate<br/>Benchmark<br/>Security<br/><br/><i>Inference Infra<br/>Test Data Access<br/>Isolated Network</i>"]
-     PROD["<b>PRODUCTION</b><br/><br/>Serve<br/>Monitor<br/>Auto-rollback<br/><br/><i>Load Balanced<br/>Multi-replica<br/>Prod Network<br/>SLA-bound</i>"]
- 
-     DEV --> STAGING --> PROD
+```
+ ┌───────────┐     ┌─────────────┐     ┌────────────────┐
+ │    DEV    │────▶│   STAGING   │────▶│   PRODUCTION   │
+ │           │     │             │     │                │
+ │  Train    │     │  Validate   │     │  Serve         │
+ │  Track    │     │  Benchmark  │     │  Monitor       │
+ │  Version  │     │  Security   │     │  Auto-rollback │
+ └─────┬─────┘     └──────┬──────┘     └───────┬────────┘
+       │                  │                    │
+  GPU Compute      Inference Infra       Load Balanced
+  Blob Storage     Test Data Access      Multi-replica
+  Experiment       Isolated Network      Prod Network
+  Tracking                               SLA-bound
 ```
 
 **Dev**: Data scientists train models using GPU compute. Your responsibility is providing the compute environment (GPU VMs or AKS GPU node pools), storage for training data and checkpoints, and experiment tracking infrastructure. Models that pass initial evaluation get registered in the model registry.
