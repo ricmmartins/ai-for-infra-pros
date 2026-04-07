@@ -18,7 +18,7 @@ You've seen this movie before — just with different actors. Developers used to
 
 If you've ever pulled an image from a container registry, tagged a release in Git, or promoted a build from staging to production, you already understand the core concepts of model lifecycle management. The vocabulary changes, but the patterns are nearly identical.
 
-🔄 **Infra ↔ AI Translation**:
+**Infra ↔ AI Translation**:
 
 | Infra Concept | ML Equivalent |
 |---|---|
@@ -122,7 +122,7 @@ az acr repository show-tags \
 
 This approach works well when you want a single artifact (the container) to encapsulate model weights, dependencies, and serving code. It simplifies deployment because your existing container orchestration tooling (AKS, Container Apps) handles everything downstream.
 
-### 📊 Decision Matrix: Choosing a Model Registry
+### Decision Matrix: Choosing a Model Registry
 
 | Criteria | Azure ML Registry | MLflow Registry | ACR (Container) |
 |---|---|---|---|
@@ -159,6 +159,15 @@ A production-grade model pipeline has three stages, each with distinct infrastru
   Blob Storage   Test Data Access     Multi-replica
   Experiment     Isolated Network     Prod Network
   Tracking                            SLA-bound
+```
+
+```mermaid
+ graph LR
+     DEV["<b>DEV</b><br/><br/>Train<br/>Track<br/>Version<br/><br/><i>GPU Compute<br/>Blob Storage<br/>Experiment Tracking</i>"]
+     STAGING["<b>STAGING</b><br/><br/>Validate<br/>Benchmark<br/>Security<br/><br/><i>Inference Infra<br/>Test Data Access<br/>Isolated Network</i>"]
+     PROD["<b>PRODUCTION</b><br/><br/>Serve<br/>Monitor<br/>Auto-rollback<br/><br/><i>Load Balanced<br/>Multi-replica<br/>Prod Network<br/>SLA-bound</i>"]
+ 
+     DEV --> STAGING --> PROD
 ```
 
 **Dev**: Data scientists train models using GPU compute. Your responsibility is providing the compute environment (GPU VMs or AKS GPU node pools), storage for training data and checkpoints, and experiment tracking infrastructure. Models that pass initial evaluation get registered in the model registry.
@@ -282,7 +291,7 @@ jobs:
             --workspace-name ${{ env.AZURE_ML_WS }}
 ```
 
-🔄 **Infra ↔ AI Translation**: This is your blue/green deployment pipeline, but for model weights instead of container images. The `--traffic` flag works exactly like weighted routing in Azure Front Door or Application Gateway — you're shifting a percentage of production requests to the new model version while the old one continues serving.
+**Infra ↔ AI Translation**: This is your blue/green deployment pipeline, but for model weights instead of container images. The `--traffic` flag works exactly like weighted routing in Azure Front Door or Application Gateway — you're shifting a percentage of production requests to the new model version while the old one continues serving.
 
 ### Infrastructure Responsibilities at Each Stage
 
