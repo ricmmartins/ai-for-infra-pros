@@ -22,7 +22,7 @@ Platform engineering isn't new. You've been doing it for years with web apps, da
 
 AI infrastructure follows the same principle. Instead of provisioning GPU VMs ad hoc, you build templates. Instead of manually creating Kubernetes namespaces, you offer a self-service portal. Instead of answering "how do I deploy a model?", you provide a pipeline that does it.
 
-🔄 **Infra ↔ AI Translation:** Platform engineering is the same discipline you already know — now applied to GPU compute, model registries, and inference endpoints instead of web apps and SQL databases. The abstraction layers change; the thinking doesn't.
+**Infra ↔ AI Translation:** Platform engineering is the same discipline you already know — now applied to GPU compute, model registries, and inference endpoints instead of web apps and SQL databases. The abstraction layers change; the thinking doesn't.
 
 ### What to Automate vs. What to Manage
 
@@ -374,7 +374,7 @@ Set alerts when any quota crosses 80% utilization. At 80%, you still have time t
 
 Every inference endpoint needs clear service-level objectives. Without them, every latency spike is a fire drill and every team's workload is equally "critical."
 
-### 📊 Decision Matrix: SLO Tiers for AI Services
+### Decision Matrix: SLO Tiers for AI Services
 
 | Tier | Latency (P99) | Availability | Throughput | Example Use Cases |
 |---|---|---|---|---|
@@ -596,29 +596,29 @@ Data scientists don't want to build Docker images or write Kubernetes manifests.
 - **VS Code Dev Containers:** Provide `.devcontainer` configurations with GPU passthrough. Data scientists clone a repo and get a fully configured development environment.
 - **Training job templates:** Offer a simple CLI or web form: "I want to fine-tune a model. Here's my script, here's my dataset, here's how many GPUs I need." The template generates the Kubernetes Job manifest, submits it through Kueue, and sends the scientist a link to the logs.
 
-🔄 **Infra ↔ AI Translation:** This is the same abstraction pattern you've used for years. VMs became containers. Containers became serverless functions. Now, GPU access becomes a profile dropdown. Every generation of infrastructure goes through this arc from manual to self-service.
+**Infra ↔ AI Translation:** This is the same abstraction pattern you've used for years. VMs became containers. Containers became serverless functions. Now, GPU access becomes a profile dropdown. Every generation of infrastructure goes through this arc from manual to self-service.
 
 ---
 
 ## Chapter Checklist
 
-- ✅ Defined isolation boundaries for each team (namespace, node pool, cluster, or subscription)
-- ✅ Implemented ResourceQuotas to cap GPU, CPU, and memory per namespace
-- ✅ Set up RBAC scoping with Microsoft Entra ID groups mapped to Kubernetes roles
-- ✅ Applied network policies to prevent cross-namespace traffic
-- ✅ Created priority classes separating production inference, training, and exploratory workloads
-- ✅ Deployed Kueue for job queueing and fair-share scheduling
-- ✅ Evaluated Volcano for distributed training with gang scheduling
-- ✅ Set up Azure capacity reservations for production inference GPU VMs
-- ✅ Configured quota usage alerts at 80% thresholds
-- ✅ Defined SLO tiers (real-time, near-real-time, batch) for inference endpoints
-- ✅ Implemented health probes with startup probe timeouts that cover model load time
-- ✅ Built a GitOps repository structure for multi-cluster fleet management
-- ✅ Established a canary strategy for GPU driver upgrades
-- ✅ Centralized observability with cross-cluster GPU monitoring dashboards
-- ✅ Implemented cost attribution with consistent Kubernetes labels
-- ✅ Automated team onboarding via Terraform modules or platform templates
-- ✅ Provided self-service environments (JupyterHub, training templates) for data scientists
+- Defined isolation boundaries for each team (namespace, node pool, cluster, or subscription)
+- Implemented ResourceQuotas to cap GPU, CPU, and memory per namespace
+- Set up RBAC scoping with Microsoft Entra ID groups mapped to Kubernetes roles
+- Applied network policies to prevent cross-namespace traffic
+- Created priority classes separating production inference, training, and exploratory workloads
+- Deployed Kueue for job queueing and fair-share scheduling
+- Evaluated Volcano for distributed training with gang scheduling
+- Set up Azure capacity reservations for production inference GPU VMs
+- Configured quota usage alerts at 80% thresholds
+- Defined SLO tiers (real-time, near-real-time, batch) for inference endpoints
+- Implemented health probes with startup probe timeouts that cover model load time
+- Built a GitOps repository structure for multi-cluster fleet management
+- Established a canary strategy for GPU driver upgrades
+- Centralized observability with cross-cluster GPU monitoring dashboards
+- Implemented cost attribution with consistent Kubernetes labels
+- Automated team onboarding via Terraform modules or platform templates
+- Provided self-service environments (JupyterHub, training templates) for data scientists
 
 ---
 
