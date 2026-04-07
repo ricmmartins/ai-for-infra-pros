@@ -76,61 +76,51 @@ This handbook was born from years of bridging the gap between systems engineerin
 <div class="whats-inside-grid" markdown>
 
 <div class="inside-card" markdown>
-<span class="icon">:fontawesome-solid-microchip:</span>
 **GPU & Compute**
 VM families, CUDA vs Tensor Cores, nvidia-smi, and the memory math behind OOM errors
 </div>
 
 <div class="inside-card" markdown>
-<span class="icon">:fontawesome-solid-database:</span>
 **Data Pipelines**
 Storage architecture, BlobFuse2, NVMe staging, and why I/O is the hidden bottleneck
 </div>
 
 <div class="inside-card" markdown>
-<span class="icon">:fontawesome-solid-code:</span>
 **Infrastructure as Code**
 Production-ready Terraform and Bicep for GPU clusters, AKS node pools, and CI/CD
 </div>
 
 <div class="inside-card" markdown>
-<span class="icon">:fontawesome-solid-gears:</span>
 **MLOps**
 Model registries, CI/CD for models, A/B testing infrastructure, and supply chain security
 </div>
 
 <div class="inside-card" markdown>
-<span class="icon">:fontawesome-solid-chart-line:</span>
 **Monitoring & Observability**
 DCGM, Managed Prometheus, KQL queries, and the six dimensions of AI observability
 </div>
 
 <div class="inside-card" markdown>
-<span class="icon">:fontawesome-solid-shield-halved:</span>
 **Security**
 Prompt injection defense, private endpoints, managed identities, and content safety
 </div>
 
 <div class="inside-card" markdown>
-<span class="icon">:fontawesome-solid-money-bill-trend-up:</span>
 **Cost Engineering**
 GPU cost modeling, spot VMs for training, PTU economics, and FinOps practices
 </div>
 
 <div class="inside-card" markdown>
-<span class="icon">:fontawesome-solid-server:</span>
 **Platform Ops at Scale**
 Multi-tenancy, GPU scheduling (Kueue, Volcano), SLA design, and fleet management
 </div>
 
 <div class="inside-card" markdown>
-<span class="icon">:fontawesome-solid-wrench:</span>
 **Troubleshooting**
 10 real-world failure scenarios with step-by-step diagnosis and resolution
 </div>
 
 <div class="inside-card" markdown>
-<span class="icon">:fontawesome-solid-road:</span>
 **Career Paths**
 AI Infra Engineer, MLOps Engineer, AI Platform Engineer, and a 30-day plan
 </div>
@@ -170,28 +160,24 @@ Start reading now — these chapters are available for free right here on the si
 <div class="free-chapters-grid" markdown>
 
 <div class="free-chapter-card" markdown>
-:fontawesome-solid-rocket:
 **Chapter 1**
 [Why AI Needs You](chapters/01-introduction.md)
 The infrastructure engineer's case for entering the AI world
 </div>
 
 <div class="free-chapter-card" markdown>
-:fontawesome-solid-microchip:
 **Chapter 4**
 [The GPU Deep Dive](chapters/04-gpu-deep-dive.md)
 CUDA, memory hierarchy, multi-GPU strategies, and debugging
 </div>
 
 <div class="free-chapter-card" markdown>
-:fontawesome-solid-book-open:
 **Chapter 15**
 [Visual Glossary](chapters/15-visual-glossary.md)
 55+ AI terms explained through infrastructure analogies
 </div>
 
 <div class="free-chapter-card" markdown>
-:fontawesome-solid-flask:
 **Hands-On Labs**
 [All 3 Labs](extras/labs/index.md)
 GPU VM with Bicep, AKS with Terraform, Inference API with Azure ML
@@ -213,29 +199,6 @@ This handbook is written for professionals with **5+ years of infrastructure exp
 - **Data Engineers** who want to understand the infrastructure side of AI
 
 No prior AI/ML knowledge is required. Every concept is explained through infrastructure analogies you already know.
-
----
-
-## What Readers Are Saying
-
-<div class="testimonial-grid" markdown>
-
-<div class="testimonial-card" markdown>
-"Replace this with a real testimonial from a reader or reviewer."
-<span class="author">— Name, Title @ Company</span>
-</div>
-
-<div class="testimonial-card" markdown>
-"Replace this with a real testimonial from a reader or reviewer."
-<span class="author">— Name, Title @ Company</span>
-</div>
-
-<div class="testimonial-card" markdown>
-"Replace this with a real testimonial from a reader or reviewer."
-<span class="author">— Name, Title @ Company</span>
-</div>
-
-</div>
 
 ---
 
