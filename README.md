@@ -109,25 +109,6 @@ No prior AI/ML knowledge is required. Every concept is explained through infrast
 
 ---
 
-## Running Locally
-
-This book is built with [MkDocs Material](https://squidfunk.github.io/mkdocs-material/) and deployed automatically to [Netlify](https://www.netlify.com/) on every push.
-
-```bash
-# Install dependencies
-pip install -r requirements-docs.txt
-
-# Start local development server
-mkdocs serve
-
-# Build the site
-mkdocs build
-```
-
-Visit `http://127.0.0.1:8000` to preview locally.
-
----
-
 ## Repository Structure
 
 ```text
