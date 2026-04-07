@@ -24,7 +24,7 @@ The opening story isn't fiction. Microsoft's own datacenters use ML models to pr
 
 The approach is straightforward: collect telemetry (SMART data for disks, ECC error counts for memory, voltage fluctuations for power supplies), establish baseline patterns, and train a model to recognize the trajectory that precedes failure. Azure Machine Learning's AutoML can handle the model training — you don't need to hand-tune hyperparameters. Your job is what you're already good at: getting clean telemetry into the pipeline and building the automation that acts on predictions.
 
-🔄 **Infra ↔ AI Translation**: Think of predictive failure as proactive monitoring on steroids. Instead of alerting when a threshold is crossed (reactive), you're alerting when a *trend* predicts a future threshold crossing (predictive). Same data sources, same alerting pipeline, fundamentally different outcome.
+**Infra ↔ AI Translation**: Think of predictive failure as proactive monitoring on steroids. Instead of alerting when a threshold is crossed (reactive), you're alerting when a *trend* predicts a future threshold crossing (predictive). Same data sources, same alerting pipeline, fundamentally different outcome.
 
 **Quantified impact**: Organizations running predictive disk replacement typically see a 40–60% reduction in unplanned storage incidents and near-elimination of the 3 AM replacement scenario.
 
@@ -127,7 +127,7 @@ For known failure patterns, close the loop entirely. Azure Logic Apps integrated
 4. Automated action: Roll back to v2.14.2, notify the dev team, create a ticket for memory limit review
 5. Total human involvement: reading the notification over coffee
 
-🔄 **Infra ↔ AI Translation**: This is the same pattern as auto-scaling or self-healing infrastructure — automation that responds to conditions. The difference is that the "condition matching" is done by an ML model instead of a static rule, so it can handle fuzzy, ambiguous, or novel patterns that would require dozens of if/else branches to encode manually.
+**Infra ↔ AI Translation**: This is the same pattern as auto-scaling or self-healing infrastructure — automation that responds to conditions. The difference is that the "condition matching" is done by an ML model instead of a static rule, so it can handle fuzzy, ambiguous, or novel patterns that would require dozens of if/else branches to encode manually.
 
 ### Intelligent Escalation and Post-Incident Reports
 
@@ -167,7 +167,7 @@ Infrastructure-as-Code promises consistency, but drift happens. Someone makes a 
 
 Your infrastructure background positions you for some of the highest-demand roles in the industry. The AI boom didn't create a demand for more data scientists alone — it created a massive demand for people who can make AI work reliably at scale. That's you.
 
-📊 **Decision Matrix: AI + Infrastructure Career Paths**
+**Decision Matrix: AI + Infrastructure Career Paths**
 
 | Role | What You Do | Skills to Add | How Your Infra Background Helps |
 |---|---|---|---|
@@ -225,18 +225,18 @@ Pick one project that solves a real problem for your team:
 
 ---
 
-## ✅ Chapter Checklist
+## Chapter Checklist
 
 Before moving on, confirm you understand these concepts:
 
-- ✅ AI can predict hardware failures by analyzing SMART data trends, ECC errors, and telemetry patterns — turning reactive replacements into planned maintenance
-- ✅ Log anomaly detection in Azure Monitor uses ML to surface unusual patterns without requiring you to define every possible failure scenario
-- ✅ Intelligent alerting with dynamic thresholds and alert correlation reduces noise by 60–80% while maintaining incident coverage
-- ✅ RAG over existing runbooks is the highest-ROI AI project for ops teams — no model training required, just index your documentation
-- ✅ Automated incident response with Logic Apps + Azure OpenAI can classify, remediate, and report on known failure patterns without human intervention
-- ✅ Right-sizing recommendations powered by ML analysis of utilization patterns catch optimization opportunities that static threshold tools miss
-- ✅ Five distinct career paths combine infrastructure expertise with AI skills — and all of them value your production operations experience
-- ✅ A 30-day plan with weekly milestones can take you from "AI-curious" to "running an AI-powered ops project"
+- AI can predict hardware failures by analyzing SMART data trends, ECC errors, and telemetry patterns — turning reactive replacements into planned maintenance
+- Log anomaly detection in Azure Monitor uses ML to surface unusual patterns without requiring you to define every possible failure scenario
+- Intelligent alerting with dynamic thresholds and alert correlation reduces noise by 60–80% while maintaining incident coverage
+- RAG over existing runbooks is the highest-ROI AI project for ops teams — no model training required, just index your documentation
+- Automated incident response with Logic Apps + Azure OpenAI can classify, remediate, and report on known failure patterns without human intervention
+- Right-sizing recommendations powered by ML analysis of utilization patterns catch optimization opportunities that static threshold tools miss
+- Five distinct career paths combine infrastructure expertise with AI skills — and all of them value your production operations experience
+- A 30-day plan with weekly milestones can take you from "AI-curious" to "running an AI-powered ops project"
 
 ---
 
