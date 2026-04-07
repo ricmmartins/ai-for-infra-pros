@@ -267,12 +267,11 @@ Understanding how these components fit together is easier with visual references
 
 In the simplest form, data flows linearly from storage through preprocessing into training:
 
-```
-┌──────────────────┐     ┌──────────────────┐     ┌──────────────────┐     ┌──────────────────┐
- │  Azure Blob      │     │  Preprocessing   │     │  GPU VM          │     │  Trained Model   │
- │  Storage         │────▶│  (Clean +        │────▶│  (Model          │────▶│  (Checkpoint)    │
- │  (Raw Data)      │     │   Transform)     │     │   Training)      │     │                  │
- └──────────────────┘     └──────────────────┘     └──────────────────┘     └──────────────────┘
+```mermaid
+ graph LR
+     A["Azure Blob Storage<br/>(Raw Data)"] -->|Clean + Transform| B["Preprocessing"]
+     B -->|Train| C["GPU VM<br/>(Model Training)"]
+     C -->|Save| D["Trained Model<br/>(Checkpoint)"]
 ```
 
 This pattern works for small teams running experiments with datasets under 1 TB. Data lives in Blob Storage, a preprocessing script cleans and transforms it, and the training framework reads directly from the processed output.
