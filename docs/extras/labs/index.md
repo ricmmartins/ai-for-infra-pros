@@ -1,4 +1,4 @@
-# 🧪 AI infrastructure labs
+# 🧪 AI infrastructure labs <span class="badge-free">Free</span>
 
 Welcome to the **hands-on labs** section of the _AI for Infra Pros — The Practical Handbook for Infrastructure Engineers_.  
 Each lab demonstrates how to apply the infrastructure concepts from the book in real-world Azure environments.

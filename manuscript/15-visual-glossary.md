@@ -1,4 +1,4 @@
-# Chapter 15 — Visual Glossary: Infra ↔ AI Translation Guide <span class="badge-free">Free Chapter</span>
+# Chapter 15 — Visual Glossary: Infra ↔ AI Translation Guide
 
 > "You already speak infrastructure fluently. AI isn't a foreign language — it's a dialect."
 

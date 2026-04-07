@@ -6,7 +6,7 @@
 
 > *"You don't need to be a data scientist to work with AI — but you do need to understand how it runs, scales, breaks, and costs money."*
 
-**Read online at [www.ai4infra.com](https://www.ai4infra.com)**
+**Read free chapters at [www.ai4infra.com](https://www.ai4infra.com)** · **[Get the full book on Leanpub](https://leanpub.com/ai-for-infra-pros)**
 
 ![AI for Infra Pros](/docs/images/ai4infrapros.png "AI for Infra Pros")
 
@@ -19,6 +19,25 @@ Every AI model that reaches production sits on top of infrastructure someone had
 This handbook was born from years of bridging the gap between systems engineering and machine learning. It translates AI concepts into the language infrastructure, cloud, and DevOps engineers already speak — and gives you the practical depth to architect, deploy, monitor, and operate AI workloads at production scale.
 
 **This is not an AI/ML textbook.** It's a practitioner's handbook. Every chapter includes production-grade examples, decision matrices, hands-on labs, and the kind of hard-won lessons that only come from running AI infrastructure in the real world.
+
+---
+
+## 📖 Read for Free
+
+The following chapters are available for free at [www.ai4infra.com](https://www.ai4infra.com):
+
+| Chapter | Description |
+|---------|-------------|
+| [Chapter 1 — Why AI Needs You](docs/chapters/01-introduction.md) | The infrastructure engineer's case for entering the AI world |
+| [Chapter 4 — The GPU Deep Dive](docs/chapters/04-gpu-deep-dive.md) | CUDA, memory hierarchy, multi-GPU strategies, nvidia-smi, and debugging |
+| [Chapter 15 — Visual Glossary](docs/chapters/15-visual-glossary.md) | 55+ AI terms explained through infrastructure analogies |
+| [Hands-On Labs](docs/extras/labs/) | GPU VM with Bicep, AKS GPU with Terraform, Inference API with Azure ML |
+
+---
+
+## 📕 Get the Full Book
+
+The complete book with all 15 chapters, case studies, cheatsheets, and technical FAQ is available on **[Leanpub](https://leanpub.com/ai-for-infra-pros)** in PDF, ePub, and MOBI formats — with free lifetime updates.
 
 ---
 
@@ -39,74 +58,25 @@ This handbook was born from years of bridging the gap between systems engineerin
 
 ## Table of Contents
 
-### Part I — Foundations
+| # | Chapter | Available |
+|---|---------|-----------|
+| 1 | Why AI Needs You | ✦ Free |
+| 2 | Data: The Fuel That Powers Everything | Full Book |
+| 3 | Compute: Where Intelligence Comes to Life | Full Book |
+| 4 | The GPU Deep Dive | ✦ Free |
+| 5 | Infrastructure as Code for AI | Full Book |
+| 6 | Model Lifecycle and MLOps from an Infra Lens | Full Book |
+| 7 | Monitoring and Observability for AI Workloads | Full Book |
+| 8 | Security in AI Environments | Full Book |
+| 9 | Cost Engineering for AI Workloads | Full Book |
+| 10 | AI Platform Operations at Scale | Full Book |
+| 11 | Azure OpenAI: Tokens, Throughput, and Provisioned Capacity | Full Book |
+| 12 | The Production Troubleshooting Playbook | Full Book |
+| 13 | AI Use Cases for Infrastructure Engineers | Full Book |
+| 14 | The AI Adoption Framework | Full Book |
+| 15 | Visual Glossary: Infra to AI Translation Guide | ✦ Free |
 
-| # | Chapter | Description |
-|---|---------|-------------|
-| 1 | [Why AI Needs You](docs/chapters/01-introduction.md) | The infrastructure engineer's case for entering the AI world |
-| 2 | [Data: The Fuel That Powers Everything](docs/chapters/02-data.md) | Storage architecture, I/O bottlenecks, and data lifecycle for AI |
-| 3 | [Compute: Where Intelligence Comes to Life](docs/chapters/03-compute.md) | GPU VM families, clustering, InfiniBand, and distributed training |
-| 4 | [The GPU Deep Dive](docs/chapters/04-gpu-deep-dive.md) | CUDA, memory hierarchy, multi-GPU strategies, nvidia-smi, and debugging |
-
-### Part II — Building and Automating
-
-| # | Chapter | Description |
-|---|---------|-------------|
-| 5 | [Infrastructure as Code for AI](docs/chapters/05-iac.md) | Terraform, Bicep, GitHub Actions, and governance for AI infrastructure |
-| 6 | [Model Lifecycle and MLOps from an Infra Lens](docs/chapters/06-mlops.md) | Model registries, CI/CD for models, A/B testing, and supply chain security |
-
-### Part III — Operating and Securing
-
-| # | Chapter | Description |
-|---|---------|-------------|
-| 7 | [Monitoring and Observability for AI Workloads](docs/chapters/07-monitoring.md) | GPU metrics, Azure OpenAI monitoring, KQL queries, and alerting strategy |
-| 8 | [Security in AI Environments](docs/chapters/08-security.md) | Identity, secrets, network isolation, content safety, and resilience |
-| 9 | [Cost Engineering for AI Workloads](docs/chapters/09-cost-engineering.md) | GPU cost modeling, spot VMs, PTU economics, and FinOps practices |
-
-### Part IV — Scaling and Troubleshooting
-
-| # | Chapter | Description |
-|---|---------|-------------|
-| 10 | [AI Platform Operations at Scale](docs/chapters/10-platform-ops.md) | Multi-tenancy, GPU scheduling, SLA design, and fleet management |
-| 11 | [Azure OpenAI: Tokens, Throughput, and Provisioned Capacity](docs/chapters/11-azure-openai.md) | TPM, RPM, PTU, throttling mitigation, and high-availability patterns |
-| 12 | [The Production Troubleshooting Playbook](docs/chapters/12-troubleshooting.md) | 10 real failure scenarios with symptoms, diagnosis, and resolution |
-
-### Part V — Strategy and Reference
-
-| # | Chapter | Description |
-|---|---------|-------------|
-| 13 | [AI Use Cases for Infrastructure Engineers](docs/chapters/13-ai-use-cases.md) | Predictive failure, ops copilots, career paths, and a 30-day plan |
-| 14 | [The AI Adoption Framework](docs/chapters/14-adoption-framework.md) | A 6-phase roadmap from AI-curious to AI-capable |
-| 15 | [Visual Glossary: Infra to AI Translation Guide](docs/chapters/15-visual-glossary.md) | 55+ AI terms explained through infrastructure analogies |
-
----
-
-## Quick Start Guide
-
-Each chapter is self-contained. Pick your starting point based on what you need:
-
-| Your Goal | Start Here |
-|-----------|------------|
-| Understand how AI connects to your skills | [Chapter 1 — Why AI Needs You](docs/chapters/01-introduction.md) |
-| Provision your first GPU VM | [Chapter 3 — Compute](docs/chapters/03-compute.md) |
-| Understand GPU memory and OOM errors | [Chapter 4 — The GPU Deep Dive](docs/chapters/04-gpu-deep-dive.md) |
-| Automate AI infrastructure with IaC | [Chapter 5 — Infrastructure as Code](docs/chapters/05-iac.md) |
-| Set up monitoring for AI workloads | [Chapter 7 — Monitoring and Observability](docs/chapters/07-monitoring.md) |
-| Control AI costs before they control you | [Chapter 9 — Cost Engineering](docs/chapters/09-cost-engineering.md) |
-| Fix a production issue right now | [Chapter 12 — Troubleshooting Playbook](docs/chapters/12-troubleshooting.md) |
-| Translate an AI term you just heard | [Chapter 15 — Visual Glossary](docs/chapters/15-visual-glossary.md) |
-| Get hands-on with labs | [Hands-On Labs](docs/extras/labs/) |
-
----
-
-## Extras
-
-| Resource | Description |
-|----------|-------------|
-| [Hands-On Labs](docs/extras/labs/) | GPU VM with Bicep, AKS GPU cluster with Terraform, inference API with Azure ML |
-| [Case Studies](docs/extras/case-studies.md) | 5 production scenarios with quantified outcomes |
-| [Cheatsheets](docs/extras/cheatsheets.md) | GPU SKU comparison, security checklist, monitoring metrics, deploy commands |
-| [Technical FAQ](docs/extras/technical-faq.md) | Answers to the most common questions from infra engineers entering AI |
+**Extras:** Hands-On Labs (✦ Free) · Case Studies · Cheatsheets · Technical FAQ
 
 ---
 
@@ -164,6 +134,7 @@ Visit `http://127.0.0.1:8000` to preview locally.
 ai-for-infra-pros/
 ├── docs/
 │   ├── chapters/              # 15 chapters organized in 5 parts
+│   ├── previews/              # Teaser pages for paid chapters
 │   ├── extras/
 │   │   ├── labs/              # 3 hands-on labs (Bicep, Terraform, Azure ML)
 │   │   ├── case-studies.md
@@ -171,7 +142,14 @@ ai-for-infra-pros/
 │   │   └── technical-faq.md
 │   ├── images/
 │   ├── stylesheets/           # Custom CSS for the website
-│   └── index.md               # Website landing page
+│   └── index.md               # Sales landing page
+├── manuscript/                # Leanpub manuscript files
+│   ├── Book.txt               # Chapter order for full book
+│   ├── Sample.txt             # Free sample chapter list
+│   ├── frontmatter.md
+│   ├── backmatter.md
+│   ├── *.md                   # Leanpub-formatted chapters
+│   └── resources/             # Images for Leanpub
 ├── .github/workflows/         # GitHub Actions for auto-deploy
 ├── mkdocs.yml                 # MkDocs Material configuration
 ├── requirements-docs.txt      # Python dependencies
