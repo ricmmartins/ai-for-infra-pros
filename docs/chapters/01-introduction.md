@@ -36,7 +36,7 @@ Every AI system rests on three pillars, and you'll recognize them immediately:
 
 The model is the application. The data is what it consumes and produces. The infrastructure is everything that makes it run reliably, securely, and at scale. That last part? That's you.
 
-### 🔄 Infra ↔ AI Translation
+### Infra ↔ AI Translation
 
 This is the mental model that will carry you through the entire book. When someone on the AI team uses unfamiliar jargon, map it back to what you know:
 
@@ -160,7 +160,7 @@ This isn't a niche. It's a rapidly growing field with multiple trajectories:
 | **AI Cloud Architect** | Designing end-to-end AI platforms, reference architectures, governance frameworks | Azure AI services, cost optimization, security architecture |
 | **AI Platform Engineer** | Building internal platforms that enable data science teams to self-serve | Kubernetes, developer experience, API management, quotas |
 
-📊 **Decision Matrix — Where to Start**:
+**Decision Matrix — Where to Start**:
 - If you're strong in **compute and networking** → start with AI Infrastructure Engineer
 - If you're strong in **automation and CI/CD** → start with MLOps Engineer
 - If you're strong in **architecture and governance** → start with AI Cloud Architect
@@ -190,7 +190,7 @@ Here's an expanded glossary with infrastructure analogies for every term. Bookma
 | **Epoch** | One complete pass through the training dataset | Like a full backup cycle — the job processes every record once |
 | **Inference endpoint** | An API that serves model predictions | A web service endpoint — same concepts of scaling, load balancing, and health probes |
 
-🔄 **Infra ↔ AI Translation — The One-Liner Cheat Sheet**: A trained model is a compiled binary. Training is a batch job. Inference is an API call. A dataset is a database. A training pipeline is a CI/CD pipeline. If you can hold this mental model, you can navigate any AI architecture conversation.
+**Infra ↔ AI Translation — The One-Liner Cheat Sheet**: A trained model is a compiled binary. Training is a batch job. Inference is an API call. A dataset is a database. A training pipeline is a CI/CD pipeline. If you can hold this mental model, you can navigate any AI architecture conversation.
 
 ---
 
