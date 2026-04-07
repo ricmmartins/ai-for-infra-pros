@@ -41,6 +41,6 @@ Website: [rmmartins.com](https://rmmartins.com)
 
 ## Disclaimer
 
-This is a personal project by Ricardo Martins and is not an official Microsoft publication. The views, opinions, and content expressed in this book are solely those of the author and do not represent the views of Microsoft. While examples and labs reference Azure services, this book is not endorsed, sponsored, or affiliated with Microsoft in any official capacity. All trademarks, service marks, and product names referenced belong to their respective owners.
+This is an independent, personal project — not an official Microsoft publication. The views and content are solely the author's own. While many examples use Azure, the concepts, architectures, and operational practices in this book apply to any cloud platform — AWS, GCP, or on-premises. If you manage infrastructure, this book was written for you, regardless of your cloud provider. All trademarks and product names belong to their respective owners.
 
 {mainmatter}
