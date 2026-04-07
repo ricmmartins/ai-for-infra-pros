@@ -245,14 +245,14 @@ Now that you have the output, try answering these:
 
 Before moving on, make sure you're comfortable with these concepts:
 
-- ✅ **AI is an infrastructure workload**, not a data science mystery. It consumes compute, storage, and network — your domain.
-- ✅ **The AI stack has three layers**: data (storage), model (the application), and infrastructure (your responsibility).
-- ✅ **A trained model is a compiled binary.** Training is a batch job. Inference is an API call. You already know these patterns.
-- ✅ **AI infrastructure changes some things** (GPUs instead of CPUs, InfiniBand instead of Ethernet, tokens instead of requests) **but keeps the fundamentals** (security, networking, IaC, monitoring, cost governance).
-- ✅ **Infrastructure engineers are critically needed** in AI — data scientists can build models but struggle with production operations, security, and cost management.
-- ✅ **You don't need to learn Python or ML theory.** You need to learn what AI workloads demand from infrastructure.
-- ✅ **GPU VMs come in families**: NC (compute/training), ND (distributed deep learning), NV (visualization). Quota must be requested in advance.
-- ✅ **Career paths exist**: AI Infrastructure Engineer, MLOps Engineer, AI Cloud Architect, AI Platform Engineer — all build on your current skills.
+- **AI is an infrastructure workload**, not a data science mystery. It consumes compute, storage, and network — your domain.
+- **The AI stack has three layers**: data (storage), model (the application), and infrastructure (your responsibility).
+- **A trained model is a compiled binary.** Training is a batch job. Inference is an API call. You already know these patterns.
+- **AI infrastructure changes some things** (GPUs instead of CPUs, InfiniBand instead of Ethernet, tokens instead of requests) **but keeps the fundamentals** (security, networking, IaC, monitoring, cost governance).
+- **Infrastructure engineers are critically needed** in AI — data scientists can build models but struggle with production operations, security, and cost management.
+- **You don't need to learn Python or ML theory.** You need to learn what AI workloads demand from infrastructure.
+- **GPU VMs come in families**: NC (compute/training), ND (distributed deep learning), NV (visualization). Quota must be requested in advance.
+- **Career paths exist**: AI Infrastructure Engineer, MLOps Engineer, AI Cloud Architect, AI Platform Engineer — all build on your current skills.
 
 ---
 
