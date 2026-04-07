@@ -267,7 +267,13 @@ Understanding how these components fit together is easier with visual references
 
 In the simplest form, data flows linearly from storage through preprocessing into training:
 
-![Simple Training Pipeline](../images/simple-training-pipeline.png)
+```
+┌──────────────────┐     ┌──────────────────┐     ┌──────────────────┐     ┌──────────────────┐
+│  Azure Blob      │     │  Preprocessing   │     │  GPU VM          │     │  Trained Model   │
+│  Storage         │────▶│  (Clean +        │────▶│  (Model          │────▶│  (Checkpoint)    │
+│  (Raw Data)      │     │   Transform)     │     │   Training)      │     │                  │
+└──────────────────┘     └──────────────────┘     └──────────────────┘     └──────────────────┘
+```
 
 This pattern works for small teams running experiments with datasets under 1 TB. Data lives in Blob Storage, a preprocessing script cleans and transforms it, and the training framework reads directly from the processed output.
 
@@ -275,7 +281,19 @@ This pattern works for small teams running experiments with datasets under 1 TB.
 
 Production AI systems add ingestion orchestration, data versioning, model registries, and inference endpoints:
 
-![Full Production Pipeline](../images/full-training-pipeline.png)
+```
+┌──────────────┐     ┌──────────────┐     ┌──────────────┐     ┌──────────────┐     ┌──────────────┐     ┌──────────────┐
+│ Event Hubs / │     │ Data Lake    │     │ Databricks / │     │  Azure ML    │     │    Model     │     │  Inference   │
+│ Data Factory │────▶│ Gen2         │────▶│ Synapse      │────▶│  (Training)  │────▶│  Registry    │────▶│  Endpoint    │
+│ (Ingestion)  │     │ (Versioned)  │     │ (Processing) │     │              │     │              │     │              │
+└──────────────┘     └──────────────┘     └──────────────┘     └──────┬───────┘     └──────────────┘     └──────────────┘
+                                                                      │
+                                                                      ▼
+                                                               ┌──────────────┐
+                                                               │ Blob Storage │
+                                                               │ (Checkpoints)│
+                                                               └──────────────┘
+```
 
 In this architecture, data is ingested through Event Hubs or Data Factory, stored in Data Lake Gen2 with hierarchical namespaces for organization, processed through Databricks or Synapse pipelines, and versioned for reproducibility. Training reads from the versioned dataset, writes checkpoints to Blob Storage, and registers completed models for deployment to inference endpoints.
 

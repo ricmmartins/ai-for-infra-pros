@@ -242,7 +242,47 @@ az vmss create \
 
 ## Example Architecture: LLM Inference on AKS
 
-![](../images/example-architecture.png)
+```
+                              ┌─────────────────┐
+                              │  Users / Clients │
+                              └────────┬────────┘
+                                       │
+                                       ▼
+                          ┌────────────────────────┐
+                          │  Azure Load Balancer / │
+                          │  Application Gateway   │
+                          └────────────┬───────────┘
+                                       │
+               ┌───────────────────────────────────────────────┐
+               │                 AKS Cluster                   │
+               │                                               │
+               │  ┌─────────────────┐  ┌─────────────────┐    │
+               │  │  GPU Pod        │  │  GPU Pod        │    │
+               │  │  (Model Server) │  │  (Model Server) │    │
+               │  └────────┬────────┘  └────────┬────────┘    │
+               │           │                    │              │
+               │  ┌────────┴────────────────────┘              │
+               │  │                                            │
+               │  │  ┌──────────────┐  ┌───────────────┐      │
+               │  │  │  Horizontal  │  │   Cluster     │      │
+               │  │  │  Pod         │  │   Autoscaler  │      │
+               │  │  │  Autoscaler  │  │               │      │
+               │  │  └──────────────┘  └───────────────┘      │
+               │  │                                            │
+               │  │  ┌─────────────────────────────────┐      │
+               │  │  │  GPU Node Pool (NC4as_T4_v3)    │      │
+               │  │  └─────────────────────────────────┘      │
+               └──┼────────────────────────────────────────────┘
+                  │
+         ┌────────┴────────────────────┐
+         │                             │
+         ▼                             ▼
+┌──────────────────┐      ┌─────────────────────┐
+│  Azure Blob      │      │  Azure Monitor +    │
+│  Storage         │      │  Managed Prometheus │
+│  (Model Weights) │      │  + Grafana          │
+└──────────────────┘      └─────────────────────┘
+```
 
 This reference architecture shows a production LLM inference deployment combining several components you've learned about in this chapter:
 
