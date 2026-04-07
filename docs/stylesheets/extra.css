@@ -1,5 +1,5 @@
 /* =========================================
-   Pastel color palette ΓÇö matched to hero image
+   Pastel color palette — matched to hero image
    Navy: #1B3A5C  Medium blue: #5B8DB8
    Light blue: #8BB8D9  Pale blue: #D6E8F5
    Background: #EEF5FB  Accent warm: #7AACCC
@@ -28,7 +28,7 @@
   --md-typeset-a-color: #8BB8D9;
 }
 
-/* Header ΓÇö soft navy gradient */
+/* Header — soft navy gradient */
 .md-header {
   background: linear-gradient(135deg, #1B3A5C 0%, #2C5F8A 100%);
 }
@@ -203,7 +203,7 @@ html {
   background: rgba(91, 141, 184, 0.25);
 }
 
-/* Blockquote styling ΓÇö softer blue left border */
+/* Blockquote styling — softer blue left border */
 .md-typeset blockquote {
   border-left-color: #8BB8D9;
 }
