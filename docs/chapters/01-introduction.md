@@ -1,4 +1,4 @@
-# Chapter 1 — Why AI Needs You <span class="badge-free">Free Chapter</span>
+# Chapter 1 — Why AI Needs You
 
 > "The best AI infrastructure I've ever seen wasn't built by a machine learning engineer. It was built by a sysadmin who got curious."
 

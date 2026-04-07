@@ -7,7 +7,7 @@ repo_url: https://github.com/ricmmartins/ai-for-infra-pros
 repo_name: ricmmartins/ai-for-infra-pros
 
 copyright: >
-  Created by <a href="https://rmmartins.com">Ricardo Martins</a> —
+  Created by <a href="https://rmmartins.com">Ricardo Martins</a> ΓÇö
   Principal Solutions Engineer @ Microsoft
 
 theme:
@@ -51,36 +51,35 @@ theme:
 
 nav:
   - Home: index.md
-  - Free Chapters:
-    - "Ch 1: Why AI Needs You ✦": chapters/01-introduction.md
-    - "Ch 4: The GPU Deep Dive ✦": chapters/04-gpu-deep-dive.md
-    - "Ch 15: Visual Glossary ✦": chapters/15-visual-glossary.md
-  - Part I — Foundations:
-    - "Ch 2: Data — The Fuel That Powers Everything": previews/02-data.md
-    - "Ch 3: Compute — Where Intelligence Comes to Life": previews/03-compute.md
-  - Part II — Building:
-    - "Ch 5: Infrastructure as Code for AI": previews/05-iac.md
-    - "Ch 6: MLOps from an Infra Lens": previews/06-mlops.md
-  - Part III — Operating:
-    - "Ch 7: Monitoring and Observability": previews/07-monitoring.md
-    - "Ch 8: Security in AI Environments": previews/08-security.md
-    - "Ch 9: Cost Engineering": previews/09-cost-engineering.md
-  - Part IV — Scaling:
-    - "Ch 10: Platform Operations at Scale": previews/10-platform-ops.md
-    - "Ch 11: Azure OpenAI — Tokens & Throughput": previews/11-azure-openai.md
-    - "Ch 12: Troubleshooting Playbook": previews/12-troubleshooting.md
-  - Part V — Strategy:
-    - "Ch 13: AI Use Cases for Infra Engineers": previews/13-ai-use-cases.md
-    - "Ch 14: The AI Adoption Framework": previews/14-adoption-framework.md
+  - Part I ΓÇö Foundations:
+    - Why AI Needs You: chapters/01-introduction.md
+    - "Data: The Fuel That Powers Everything": chapters/02-data.md
+    - "Compute: Where Intelligence Comes to Life": chapters/03-compute.md
+    - The GPU Deep Dive: chapters/04-gpu-deep-dive.md
+  - Part II ΓÇö Building:
+    - Infrastructure as Code for AI: chapters/05-iac.md
+    - MLOps from an Infra Lens: chapters/06-mlops.md
+  - Part III ΓÇö Operating:
+    - Monitoring and Observability: chapters/07-monitoring.md
+    - Security in AI Environments: chapters/08-security.md
+    - Cost Engineering: chapters/09-cost-engineering.md
+  - Part IV ΓÇö Scaling:
+    - Platform Operations at Scale: chapters/10-platform-ops.md
+    - "Azure OpenAI: Tokens & Throughput": chapters/11-azure-openai.md
+    - Troubleshooting Playbook: chapters/12-troubleshooting.md
+  - Part V ΓÇö Strategy:
+    - AI Use Cases for Infra Engineers: chapters/13-ai-use-cases.md
+    - The AI Adoption Framework: chapters/14-adoption-framework.md
+    - "Visual Glossary: Infra to AI": chapters/15-visual-glossary.md
   - Hands-On Labs:
     - extras/labs/index.md
-    - "Lab 1: GPU VM with Bicep ✦": extras/labs/bicep-vm-gpu/index.md
-    - "Lab 2: AKS GPU with Terraform ✦": extras/labs/terraform-aks-gpu/index.md
-    - "Lab 3: Inference API with Azure ML ✦": extras/labs/yaml-inference-api/index.md
+    - GPU VM with Bicep: extras/labs/bicep-vm-gpu/index.md
+    - AKS GPU with Terraform: extras/labs/terraform-aks-gpu/index.md
+    - Inference API with Azure ML: extras/labs/yaml-inference-api/index.md
   - Extras:
-    - Case Studies: previews/case-studies.md
-    - Cheatsheets: previews/cheatsheets.md
-    - Technical FAQ: previews/technical-faq.md
+    - Case Studies: extras/case-studies.md
+    - Cheatsheets: extras/cheatsheets.md
+    - Technical FAQ: extras/technical-faq.md
 
 markdown_extensions:
   - abbr
@@ -127,7 +126,6 @@ plugins:
       minify_html: true
 
 extra:
-  book_url: https://leanpub.com/ai-for-infra-pros
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/ricmmartins

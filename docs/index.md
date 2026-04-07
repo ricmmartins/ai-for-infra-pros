@@ -10,16 +10,9 @@ hide:
 
 <p class="subtitle">The Practical Handbook for Infrastructure Engineers Entering the AI Era</p>
 
-> *"You don't need to be a data scientist to work with AI — but you do need to understand how it runs, scales, breaks, and costs money."*
+> *"You don't need to be a data scientist to work with AI ΓÇö but you do need to understand how it runs, scales, breaks, and costs money."*
 
 ![AI for Infra Pros](images/ai4infrapros.png){ loading=lazy }
-
-<div class="cta-group" markdown>
-
-[Get the Full Book :fontawesome-solid-book:](https://leanpub.com/ai-for-infra-pros){ .cta-primary }
-[Read Free Chapters :fontawesome-solid-glasses:](#free-chapters){ .cta-secondary }
-
-</div>
 
 </div>
 
@@ -65,122 +58,71 @@ hide:
 
 Every AI model that reaches production sits on top of infrastructure someone had to build, scale, secure, and keep running. **That someone is you.**
 
-This handbook was born from years of bridging the gap between systems engineering and machine learning. It translates AI concepts into the language infrastructure, cloud, and DevOps engineers already speak — and gives you the practical depth to architect, deploy, monitor, and operate AI workloads at production scale.
+This handbook was born from years of bridging the gap between systems engineering and machine learning. It translates AI concepts into the language infrastructure, cloud, and DevOps engineers already speak ΓÇö and gives you the practical depth to architect, deploy, monitor, and operate AI workloads at production scale.
 
 **This is not an AI/ML textbook.** It's a practitioner's handbook. Every chapter includes production-grade examples, decision matrices, hands-on labs, and the kind of hard-won lessons that only come from running AI infrastructure in the real world.
 
 ---
 
-## What's Inside
+## What You'll Learn
 
-<div class="whats-inside-grid" markdown>
-
-<div class="inside-card" markdown>
-**GPU & Compute**
-VM families, CUDA vs Tensor Cores, nvidia-smi, and the memory math behind OOM errors
-</div>
-
-<div class="inside-card" markdown>
-**Data Pipelines**
-Storage architecture, BlobFuse2, NVMe staging, and why I/O is the hidden bottleneck
-</div>
-
-<div class="inside-card" markdown>
-**Infrastructure as Code**
-Production-ready Terraform and Bicep for GPU clusters, AKS node pools, and CI/CD
-</div>
-
-<div class="inside-card" markdown>
-**MLOps**
-Model registries, CI/CD for models, A/B testing infrastructure, and supply chain security
-</div>
-
-<div class="inside-card" markdown>
-**Monitoring & Observability**
-DCGM, Managed Prometheus, KQL queries, and the six dimensions of AI observability
-</div>
-
-<div class="inside-card" markdown>
-**Security**
-Prompt injection defense, private endpoints, managed identities, and content safety
-</div>
-
-<div class="inside-card" markdown>
-**Cost Engineering**
-GPU cost modeling, spot VMs for training, PTU economics, and FinOps practices
-</div>
-
-<div class="inside-card" markdown>
-**Platform Ops at Scale**
-Multi-tenancy, GPU scheduling (Kueue, Volcano), SLA design, and fleet management
-</div>
-
-<div class="inside-card" markdown>
-**Troubleshooting**
-10 real-world failure scenarios with step-by-step diagnosis and resolution
-</div>
-
-<div class="inside-card" markdown>
-**Career Paths**
-AI Infra Engineer, MLOps Engineer, AI Platform Engineer, and a 30-day plan
-</div>
-
-</div>
+- **GPU architecture and compute** ΓÇö VM families, CUDA cores vs Tensor Cores, nvidia-smi interpretation, and the memory math behind OOM errors
+- **Data pipelines for AI** ΓÇö storage architecture, BlobFuse2, NVMe staging, and why I/O is the hidden bottleneck
+- **Infrastructure as Code** ΓÇö production-ready Terraform and Bicep for GPU clusters, AKS node pools, and CI/CD with OIDC
+- **MLOps from an infra lens** ΓÇö model registries, CI/CD for models, A/B testing infrastructure, and supply chain security
+- **Monitoring and observability** ΓÇö DCGM, Managed Prometheus, KQL queries, and the six dimensions of AI observability
+- **AI security** ΓÇö prompt injection defense, private endpoints, managed identities, and content safety guardrails
+- **Cost engineering** ΓÇö GPU cost modeling, spot VMs for training, PTU economics, and FinOps practices
+- **Platform operations at scale** ΓÇö multi-tenancy, GPU scheduling (Kueue, Volcano), SLA design, and fleet management
+- **Production troubleshooting** ΓÇö 10 real-world failure scenarios with step-by-step diagnosis and resolution
+- **Career paths** ΓÇö AI Infra Engineer, MLOps Engineer, AI Platform Engineer, and more
 
 ---
 
-## Get the Book { #get-the-book }
+## Quick Start Guide
 
-<div class="pricing-card" markdown>
+Each chapter is self-contained. Pick your starting point based on what you need:
 
-**AI for Infra Pros — Full Book**
+<div class="quick-start-grid" markdown>
 
-<span class="price">$35</span>
-<span class="price-sub">PDF, ePub, and MOBI · Free lifetime updates</span>
-
-<ul class="pricing-includes">
-<li>All 15 chapters (220+ pages)</li>
-<li>3 hands-on labs with IaC templates</li>
-<li>10 production troubleshooting scenarios</li>
-<li>Case studies, cheatsheets, and technical FAQ</li>
-<li>PDF, ePub, and MOBI formats</li>
-<li>Free lifetime updates</li>
-</ul>
-
-[Get it on Leanpub :fontawesome-solid-arrow-up-right-from-square:](https://leanpub.com/ai-for-infra-pros){ .cta-primary }
-
+<div class="qs-card" markdown>
+**Understand how AI connects to your skills**
+[Chapter 1 ΓÇö Why AI Needs You](chapters/01-introduction.md)
 </div>
 
----
-
-## Read Free Chapters { #free-chapters }
-
-Start reading now — these chapters are available for free right here on the site:
-
-<div class="free-chapters-grid" markdown>
-
-<div class="free-chapter-card" markdown>
-**Chapter 1**
-[Why AI Needs You](chapters/01-introduction.md)
-The infrastructure engineer's case for entering the AI world
+<div class="qs-card" markdown>
+**Provision your first GPU VM**
+[Chapter 3 ΓÇö Compute](chapters/03-compute.md)
 </div>
 
-<div class="free-chapter-card" markdown>
-**Chapter 4**
-[The GPU Deep Dive](chapters/04-gpu-deep-dive.md)
-CUDA, memory hierarchy, multi-GPU strategies, and debugging
+<div class="qs-card" markdown>
+**Understand GPU memory and OOM errors**
+[Chapter 4 ΓÇö The GPU Deep Dive](chapters/04-gpu-deep-dive.md)
 </div>
 
-<div class="free-chapter-card" markdown>
-**Chapter 15**
-[Visual Glossary](chapters/15-visual-glossary.md)
-55+ AI terms explained through infrastructure analogies
+<div class="qs-card" markdown>
+**Automate AI infrastructure with IaC**
+[Chapter 5 ΓÇö Infrastructure as Code](chapters/05-iac.md)
 </div>
 
-<div class="free-chapter-card" markdown>
-**Hands-On Labs**
-[All 3 Labs](extras/labs/index.md)
-GPU VM with Bicep, AKS with Terraform, Inference API with Azure ML
+<div class="qs-card" markdown>
+**Set up monitoring for AI workloads**
+[Chapter 7 ΓÇö Monitoring](chapters/07-monitoring.md)
+</div>
+
+<div class="qs-card" markdown>
+**Control AI costs before they control you**
+[Chapter 9 ΓÇö Cost Engineering](chapters/09-cost-engineering.md)
+</div>
+
+<div class="qs-card" markdown>
+**Fix a production issue right now**
+[Chapter 12 ΓÇö Troubleshooting](chapters/12-troubleshooting.md)
+</div>
+
+<div class="qs-card" markdown>
+**Translate an AI term you just heard**
+[Chapter 15 ΓÇö Visual Glossary](chapters/15-visual-glossary.md)
 </div>
 
 </div>
@@ -202,7 +144,7 @@ No prior AI/ML knowledge is required. Every concept is explained through infrast
 
 ---
 
-## About the Author
+## Credits
 
 Created by **Ricardo Martins**
 
@@ -212,18 +154,12 @@ Created by **Ricardo Martins**
 
 ---
 
-<div class="cta-group" markdown>
+<div class="disclaimer" markdown>
 
-> *"AI needs infrastructure. And infrastructure needs engineers who understand AI. This book is the bridge."*
-
-[Get the Full Book :fontawesome-solid-book:](https://leanpub.com/ai-for-infra-pros){ .cta-primary }
+**Disclaimer:** This is an independent, personal project — not an official Microsoft publication. The views and content are solely the author's own. While many examples use Azure, the concepts, architectures, and operational practices in this book apply to any cloud platform — AWS, GCP, or on-premises. If you manage infrastructure, this book was written for you, regardless of your cloud provider.
 
 </div>
 
 ---
 
-<div class="disclaimer" markdown>
-
-**Disclaimer:** This is an independent, personal project — not an official Microsoft publication. The views and content are solely the author's own. While many examples use Azure, the concepts, architectures, and operational practices in this book apply to **any cloud platform** — AWS, GCP, or on-premises. If you manage infrastructure, this book was written for you, regardless of your cloud provider. All trademarks and product names belong to their respective owners.
-
-</div>
+> *"AI needs infrastructure. And infrastructure needs engineers who understand AI. This book is the bridge."*
