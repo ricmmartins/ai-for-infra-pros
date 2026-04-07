@@ -256,3 +256,11 @@ Created by **Ricardo Martins**
 [Get the Full Book :fontawesome-solid-book:](https://leanpub.com/ai-for-infra-pros){ .cta-primary }
 
 </div>
+
+---
+
+<div class="disclaimer" markdown>
+
+**Disclaimer:** This is a personal project by Ricardo Martins and is not an official Microsoft publication. The views, opinions, and content expressed in this book are solely those of the author and do not represent the views of Microsoft. While examples and labs reference Azure services, this book is not endorsed, sponsored, or affiliated with Microsoft in any official capacity. All trademarks, service marks, and product names referenced belong to their respective owners.
+
+</div>
