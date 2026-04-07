@@ -255,6 +255,15 @@ Every GPU debugging session eventually comes down to software compatibility. The
      A --> B --> C --> D --> E --> F
 ```
 
+```mermaid
+graph TD
+     A["Model Code<br/>(your ML team's training script)"] --> B["Framework<br/>(PyTorch 2.x, TensorFlow, JAX)"]
+     B --> C["cuDNN (optimized DL primitives)<br/>+ NCCL (multi-GPU)"]
+     C --> D["CUDA Toolkit<br/>(libraries, runtime, compiler)"]
+     D --> E["NVIDIA Driver<br/>(kernel module → GPU hardware)"]
+     E --> F["GPU Hardware<br/>(A100, H100, etc.)"]
+```
+
 **Driver**: The kernel-level module that communicates directly with GPU hardware. It must support your GPU architecture (an old driver won't recognize an H100). Each driver version has a maximum CUDA version it supports.
 
 **CUDA Toolkit**: A collection of libraries, a runtime API, and a compiler (`nvcc`). The CUDA version in `nvidia-smi` shows the maximum CUDA version supported by the installed driver — not necessarily the version being used by your application.
