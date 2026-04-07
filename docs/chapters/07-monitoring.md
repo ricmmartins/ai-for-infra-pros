@@ -22,7 +22,7 @@ This is the fundamental challenge of AI observability: **the infrastructure can 
 
 Traditional infrastructure monitoring covers compute, network, and storage. That's necessary but insufficient for AI workloads. You need to monitor six dimensions simultaneously, because failures in any one of them can manifest as a degraded user experience — and the symptoms often overlap in ways that make root cause analysis tricky.
 
-🔄 **Infra ↔ AI Translation**: Think of it this way — monitoring a web server means watching CPU, memory, disk, and network. Monitoring an AI workload is like monitoring a web server, a database, a billing system, and a quality assurance department simultaneously. The model is not just consuming resources; it's producing outputs that have a correctness dimension traditional infrastructure doesn't have.
+**Infra ↔ AI Translation**: Think of it this way — monitoring a web server means watching CPU, memory, disk, and network. Monitoring an AI workload is like monitoring a web server, a database, a billing system, and a quality assurance department simultaneously. The model is not just consuming resources; it's producing outputs that have a correctness dimension traditional infrastructure doesn't have.
 
 ### 1. Compute — GPU Utilization, Memory, Temperature
 
@@ -48,7 +48,7 @@ GPUs and tokens are expensive, and costs can escalate rapidly without visibility
 
 AI systems introduce novel security monitoring requirements. Watch for anomalous API access patterns, prompt injection attempts (inputs designed to manipulate model behavior), attempts to extract training data or system prompts, and unusual token consumption spikes that could indicate abuse. These are threats that traditional WAF and NSG logs won't catch.
 
-📊 **Decision Matrix — What to Monitor First**
+**Decision Matrix — What to Monitor First**
 
 | Priority | Dimension | Why |
 |----------|-----------|-----|
@@ -189,7 +189,7 @@ token_counter.add(
 )
 ```
 
-🔄 **Infra ↔ AI Translation**: Think of TPM limits like bandwidth throttling and RPM limits like connection-rate limiting. You've managed both in networking for years — the same patterns apply. Token budgets are the AI equivalent of data transfer quotas.
+**Infra ↔ AI Translation**: Think of TPM limits like bandwidth throttling and RPM limits like connection-rate limiting. You've managed both in networking for years — the same patterns apply. Token budgets are the AI equivalent of data transfer quotas.
 
 ---
 
@@ -465,7 +465,7 @@ This dashboard supports capacity planning and procurement decisions.
 - **Growth Projection**: Request volume trendline with 30/60/90-day forecast
 - **Token Budget Burn Rate**: Days remaining at current consumption rate
 
-📊 **Decision Matrix — Dashboard Design**
+**Decision Matrix — Dashboard Design**
 
 | Audience | Refresh Rate | Data Retention | Key Questions |
 |----------|-------------|---------------|---------------|
@@ -597,16 +597,16 @@ You should see metric lines like `DCGM_FI_DEV_GPU_UTIL`, `DCGM_FI_DEV_FB_USED`, 
 
 Before moving on, verify you have these capabilities in place:
 
-- ✅ **GPU metrics flowing** — DCGM Exporter deployed, Prometheus scraping, Grafana visualizing
-- ✅ **Azure OpenAI monitoring** — TPM/RPM tracked, 429 alerting configured, TTFT measured
-- ✅ **Distributed tracing** — OpenTelemetry instrumented across your inference pipeline
-- ✅ **KQL queries saved** — Throttling, latency, error rate, and token consumption queries bookmarked
-- ✅ **Tiered alerting** — P1/P2/P3 alerts defined with appropriate channels and response times
-- ✅ **Cost visibility** — Token consumption and GPU spend tracked per team/project/deployment
-- ✅ **Three dashboards** — Executive (cost/SLA), Engineering (latency/errors), Capacity (quotas/scaling)
-- ✅ **Security monitoring** — Access patterns and anomalous usage tracked
-- ✅ **Auto-remediation** — At least one automated response for a validated failure mode
-- ✅ **No alert fatigue** — Alert thresholds tuned to minimize false alarms
+- **GPU metrics flowing** — DCGM Exporter deployed, Prometheus scraping, Grafana visualizing
+- **Azure OpenAI monitoring** — TPM/RPM tracked, 429 alerting configured, TTFT measured
+- **Distributed tracing** — OpenTelemetry instrumented across your inference pipeline
+- **KQL queries saved** — Throttling, latency, error rate, and token consumption queries bookmarked
+- **Tiered alerting** — P1/P2/P3 alerts defined with appropriate channels and response times
+- **Cost visibility** — Token consumption and GPU spend tracked per team/project/deployment
+- **Three dashboards** — Executive (cost/SLA), Engineering (latency/errors), Capacity (quotas/scaling)
+- **Security monitoring** — Access patterns and anomalous usage tracked
+- **Auto-remediation** — At least one automated response for a validated failure mode
+- **No alert fatigue** — Alert thresholds tuned to minimize false alarms
 
 ---
 
