@@ -252,7 +252,6 @@ Every GPU debugging session eventually comes down to software compatibility. The
      D["CUDA Toolkit (libraries, runtime, compiler)"]
      E["NVIDIA Driver (kernel module → GPU hardware)"]
      F["GPU Hardware (A100, H100, etc.)"]
-     A --> B --> C --> D --> E --> F
 ```
 
 ```mermaid
