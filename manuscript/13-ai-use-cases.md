@@ -24,7 +24,7 @@ The opening story isn't fiction. Microsoft's own datacenters use ML models to pr
 
 The approach is straightforward: collect telemetry (SMART data for disks, ECC error counts for memory, voltage fluctuations for power supplies), establish baseline patterns, and train a model to recognize the trajectory that precedes failure. Azure Machine Learning's AutoML can handle the model training — you don't need to hand-tune hyperparameters. Your job is what you're already good at: getting clean telemetry into the pipeline and building the automation that acts on predictions.
 
-🔄 **Infra ↔ AI Translation**: Think of predictive failure as proactive monitoring on steroids. Instead of alerting when a threshold is crossed (reactive), you're alerting when a *trend* predicts a future threshold crossing (predictive). Same data sources, same alerting pipeline, fundamentally different outcome.
+**Infra ↔ AI Translation**: Think of predictive failure as proactive monitoring on steroids. Instead of alerting when a threshold is crossed (reactive), you're alerting when a *trend* predicts a future threshold crossing (predictive). Same data sources, same alerting pipeline, fundamentally different outcome.
 
 **Quantified impact**: Organizations running predictive disk replacement typically see a 40–60% reduction in unplanned storage incidents and near-elimination of the 3 AM replacement scenario.
 
@@ -47,7 +47,7 @@ AppRequests
 | where toint(anomalies) != 0
 ```
 
-⚠️ **Production Gotcha**: Anomaly detection requires stable baselines. Don't enable it during a migration, a major release, or any period where "normal" is shifting. Let it learn for at least two weeks of stable operations before trusting its output.
+**Production Gotcha**: Anomaly detection requires stable baselines. Don't enable it during a migration, a major release, or any period where "normal" is shifting. Let it learn for at least two weeks of stable operations before trusting its output.
 
 ### Intelligent Alerting — Reducing Alert Fatigue
 
@@ -67,7 +67,7 @@ The infrastructure you need is what you already have: metrics flowing into Log A
 
 Unexpected cost spikes are the financial equivalent of an unplanned outage. Azure Cost Management includes anomaly detection that flags unusual spending patterns — a team that suddenly triples its GPU consumption, a storage account growing 10× faster than normal, or a new resource type appearing that nobody budgeted for. Configure alerts on cost anomalies the same way you'd configure alerts on performance anomalies: automatically, with routing to the right team for investigation.
 
-💡 **Pro Tip**: Combine cost anomaly detection with resource tagging. When an anomaly fires, the first question is always "who caused this?" Tags that trace every resource to a team, project, and cost center make that question instantly answerable.
+**Pro Tip**: Combine cost anomaly detection with resource tagging. When an anomaly fires, the first question is always "who caused this?" Tags that trace every resource to a team, project, and cost center make that question instantly answerable.
 
 ---
 
@@ -99,9 +99,9 @@ The architecture is straightforward:
 
 A junior engineer at 2 AM asks: "The Kubernetes API server is returning 429s on the production cluster — what's the runbook?" Instead of hunting through Confluence, they get an answer grounded in your organization's actual procedures, with links to the source documents.
 
-💡 **Pro Tip**: Start with RAG over your existing runbooks — it's the highest ROI AI project for any ops team. You don't need to train a model, fine-tune anything, or build a dataset. You need an Azure AI Search index, an Azure OpenAI deployment, and a weekend. The knowledge is already written down; you're just making it accessible.
+**Pro Tip**: Start with RAG over your existing runbooks — it's the highest ROI AI project for any ops team. You don't need to train a model, fine-tune anything, or build a dataset. You need an Azure AI Search index, an Azure OpenAI deployment, and a weekend. The knowledge is already written down; you're just making it accessible.
 
-⚠️ **Production Gotcha**: RAG quality depends entirely on document quality. If your runbooks are outdated, contradictory, or vague, your copilot will confidently return outdated, contradictory, or vague answers. Treat a RAG deployment as an opportunity to audit and improve your documentation — the AI will expose every gap.
+**Production Gotcha**: RAG quality depends entirely on document quality. If your runbooks are outdated, contradictory, or vague, your copilot will confidently return outdated, contradictory, or vague answers. Treat a RAG deployment as an opportunity to audit and improve your documentation — the AI will expose every gap.
 
 ---
 
@@ -127,7 +127,7 @@ For known failure patterns, close the loop entirely. Azure Logic Apps integrated
 4. Automated action: Roll back to v2.14.2, notify the dev team, create a ticket for memory limit review
 5. Total human involvement: reading the notification over coffee
 
-🔄 **Infra ↔ AI Translation**: This is the same pattern as auto-scaling or self-healing infrastructure — automation that responds to conditions. The difference is that the "condition matching" is done by an ML model instead of a static rule, so it can handle fuzzy, ambiguous, or novel patterns that would require dozens of if/else branches to encode manually.
+**Infra ↔ AI Translation**: This is the same pattern as auto-scaling or self-healing infrastructure — automation that responds to conditions. The difference is that the "condition matching" is done by an ML model instead of a static rule, so it can handle fuzzy, ambiguous, or novel patterns that would require dozens of if/else branches to encode manually.
 
 ### Intelligent Escalation and Post-Incident Reports
 
@@ -167,7 +167,7 @@ Infrastructure-as-Code promises consistency, but drift happens. Someone makes a 
 
 Your infrastructure background positions you for some of the highest-demand roles in the industry. The AI boom didn't create a demand for more data scientists alone — it created a massive demand for people who can make AI work reliably at scale. That's you.
 
-📊 **Decision Matrix: AI + Infrastructure Career Paths**
+**Decision Matrix: AI + Infrastructure Career Paths**
 
 | Role | What You Do | Skills to Add | How Your Infra Background Helps |
 |---|---|---|---|
@@ -179,7 +179,7 @@ Your infrastructure background positions you for some of the highest-demand role
 
 Every one of these roles requires someone who understands how infrastructure actually works — not in theory, but in production, at 3 AM, when something breaks. That's experience you can't shortcut with a certification.
 
-💡 **Pro Tip**: You don't need to pick one path immediately. Start by adding AI-specific skills to your current role — deploy a GPU VM, run a training job, build a RAG pipeline. The career path will emerge from what excites you most.
+**Pro Tip**: You don't need to pick one path immediately. Start by adding AI-specific skills to your current role — deploy a GPU VM, run a training job, build a RAG pipeline. The career path will emerge from what excites you most.
 
 ---
 
@@ -225,18 +225,18 @@ Pick one project that solves a real problem for your team:
 
 ---
 
-## ✅ Chapter Checklist
+## Chapter Checklist
 
 Before moving on, confirm you understand these concepts:
 
-- ✅ AI can predict hardware failures by analyzing SMART data trends, ECC errors, and telemetry patterns — turning reactive replacements into planned maintenance
-- ✅ Log anomaly detection in Azure Monitor uses ML to surface unusual patterns without requiring you to define every possible failure scenario
-- ✅ Intelligent alerting with dynamic thresholds and alert correlation reduces noise by 60–80% while maintaining incident coverage
-- ✅ RAG over existing runbooks is the highest-ROI AI project for ops teams — no model training required, just index your documentation
-- ✅ Automated incident response with Logic Apps + Azure OpenAI can classify, remediate, and report on known failure patterns without human intervention
-- ✅ Right-sizing recommendations powered by ML analysis of utilization patterns catch optimization opportunities that static threshold tools miss
-- ✅ Five distinct career paths combine infrastructure expertise with AI skills — and all of them value your production operations experience
-- ✅ A 30-day plan with weekly milestones can take you from "AI-curious" to "running an AI-powered ops project"
+- AI can predict hardware failures by analyzing SMART data trends, ECC errors, and telemetry patterns — turning reactive replacements into planned maintenance
+- Log anomaly detection in Azure Monitor uses ML to surface unusual patterns without requiring you to define every possible failure scenario
+- Intelligent alerting with dynamic thresholds and alert correlation reduces noise by 60–80% while maintaining incident coverage
+- RAG over existing runbooks is the highest-ROI AI project for ops teams — no model training required, just index your documentation
+- Automated incident response with Logic Apps + Azure OpenAI can classify, remediate, and report on known failure patterns without human intervention
+- Right-sizing recommendations powered by ML analysis of utilization patterns catch optimization opportunities that static threshold tools miss
+- Five distinct career paths combine infrastructure expertise with AI skills — and all of them value your production operations experience
+- A 30-day plan with weekly milestones can take you from "AI-curious" to "running an AI-powered ops project"
 
 ---
 

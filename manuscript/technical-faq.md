@@ -56,7 +56,7 @@ Total ≈ params × 12 bytes + activation memory
 
 **Practical example**: Llama 2 13B at FP16 = 26 GB for weights alone. On an A100 (80 GB), that leaves 54 GB for KV cache and activations — comfortable for inference with batch size up to ~32. But for full fine-tuning, you'd need 13B × 12 = 156 GB — requiring at least 2× A100 with ZeRO Stage 3 sharding.
 
-⚠️ **Production Gotcha**: PyTorch's CUDA memory allocator fragments memory over time. Even if your model fits in 15 GB on a 16 GB T4, it will OOM after a few hours under load. Leave 20% headroom minimum, or configure `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True`.
+**Production Gotcha**: PyTorch's CUDA memory allocator fragments memory over time. Even if your model fits in 15 GB on a 16 GB T4, it will OOM after a few hours under load. Leave 20% headroom minimum, or configure `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True`.
 
 ---
 
@@ -81,12 +81,12 @@ python -c "import torch; print(torch.cuda.memory_summary())"
 ```
 
 **Quick fix checklist:**
-- ☐ Reduce batch size
-- ☐ Reduce max sequence length
-- ☐ Enable gradient checkpointing (training)
-- ☐ Quantize the model (INT8 with bitsandbytes, INT4 with GPTQ/AWQ)
-- ☐ Move to a GPU with more VRAM
-- ☐ Enable tensor parallelism across multiple GPUs
+- Reduce batch size
+- Reduce max sequence length
+- Enable gradient checkpointing (training)
+- Quantize the model (INT8 with bitsandbytes, INT4 with GPTQ/AWQ)
+- Move to a GPU with more VRAM
+- Enable tensor parallelism across multiple GPUs
 
 ---
 
@@ -112,7 +112,7 @@ python -c "import torch; print(torch.cuda.memory_summary())"
 - **Scale-in cooldown**: 15-20 minutes (avoid thrashing during traffic dips)
 - **Min replicas**: Never set to 0 in production (cold start for GPU workloads is 2-5 minutes for model loading)
 
-💡 **Pro Tip**: For AKS, set `min_count: 1` on your GPU node pool even during off-hours. The cost of one idle T4 (~$380/month) is far less than the user impact of a 5-minute cold start.
+**Pro Tip**: For AKS, set `min_count: 1` on your GPU node pool even during off-hours. The cost of one idle T4 (~$380/month) is far less than the user impact of a 5-minute cold start.
 
 ---
 
@@ -141,7 +141,7 @@ az ml online-deployment create --endpoint-name prod-api \
 az ml online-endpoint update --name prod-api --traffic "v3=100 v4=0"
 ```
 
-⚠️ **Production Gotcha**: Model files in Azure ML's default storage account can accumulate fast. Set up lifecycle policies to archive versions older than 90 days — a single team can generate 500+ GB of model artifacts per quarter.
+**Production Gotcha**: Model files in Azure ML's default storage account can accumulate fast. Set up lifecycle policies to archive versions older than 90 days — a single team can generate 500+ GB of model artifacts per quarter.
 
 ---
 
@@ -170,7 +170,7 @@ Application Insights SDK → Azure Monitor → Action Groups (PagerDuty/Teams)
 | GPU waste | Utilization < 20% for 60 min | P3 (daily report) |
 | Thermal throttling | Temperature > 83°C for 10 min | P2 (Teams) |
 
-💡 **Pro Tip**: `nvidia-smi` is fine for a quick check, but it samples once per invocation. DCGM Exporter provides continuous 1-second resolution metrics — the difference matters when debugging intermittent latency spikes.
+**Pro Tip**: `nvidia-smi` is fine for a quick check, but it samples once per invocation. DCGM Exporter provides continuous 1-second resolution metrics — the difference matters when debugging intermittent latency spikes.
 
 ---
 
@@ -239,7 +239,7 @@ if step % checkpoint_interval == 0:
     }, f"azureml://checkpoint-{step}.pt")  # Save to Azure Blob
 ```
 
-⚠️ **Production Gotcha**: Spot eviction rates vary by region and VM size. `Standard_NC24ads_A100_v4` in `eastus` might see 2% eviction rate, while `westus2` sees 15%. Check [Azure Spot VM eviction data](https://learn.microsoft.com/azure/virtual-machines/spot-vms) before committing.
+**Production Gotcha**: Spot eviction rates vary by region and VM size. `Standard_NC24ads_A100_v4` in `eastus` might see 2% eviction rate, while `westus2` sees 15%. Check [Azure Spot VM eviction data](https://learn.microsoft.com/azure/virtual-machines/spot-vms) before committing.
 
 ---
 
@@ -285,7 +285,7 @@ Example (GPT-4o):
 - Per-deployment TPM/RPM limits to prevent runaway costs
 - Log token usage per caller for chargeback
 
-💡 **Pro Tip**: Retries are hidden cost amplifiers. If 10% of requests get 429'd and retry 3 times, your actual token consumption is 1.3× what your application logs show. Always measure at the Azure resource level, not the application level.
+**Pro Tip**: Retries are hidden cost amplifiers. If 10% of requests get 429'd and retry 3 times, your actual token consumption is 1.3× what your application logs show. Always measure at the Azure resource level, not the application level.
 
 ---
 
@@ -315,7 +315,7 @@ Base PTUs: 180,000 ÷ 3,600 = 50 PTUs
 With 25% burst headroom: 63 PTUs
 ```
 
-⚠️ **Production Gotcha**: PTUs are region-specific and subject to availability. If you need 100+ PTUs of a specific model, check regional capacity with your Microsoft account team *before* planning the migration. Popular regions fill up.
+**Production Gotcha**: PTUs are region-specific and subject to availability. If you need 100+ PTUs of a specific model, check regional capacity with your Microsoft account team *before* planning the migration. Popular regions fill up.
 
 ---
 
@@ -343,7 +343,7 @@ With 25% burst headroom: 63 PTUs
 - **NVIDIA MPS (Multi-Process Service)** offers slightly better sharing but still no hard memory boundaries
 - For production multi-tenancy, use **dedicated GPU nodes** per team via node selectors and taints
 
-💡 **Pro Tip**: Label your GPU nodes with `gpu-type: t4` or `gpu-type: a100` and use `nodeSelector` in deployments. This prevents a dev workload from accidentally landing on an expensive A100 node.
+**Pro Tip**: Label your GPU nodes with `gpu-type: t4` or `gpu-type: a100` and use `nodeSelector` in deployments. This prevents a dev workload from accidentally landing on an expensive A100 node.
 
 ---
 
@@ -387,7 +387,7 @@ docker inspect <image> | grep CUDA
 
 The CUDA toolkit in your container must be ≤ the driver's supported CUDA version. If your container uses CUDA 12.3 but the driver supports 12.2, it will fail silently or throw `CUDA error: no kernel image is available`.
 
-⚠️ **Production Gotcha**: The Azure NVIDIA driver extension auto-updates by default. Pin the version in production to prevent an auto-update from breaking CUDA compatibility: `--version 1.9 --settings '{"driverVersion":"535.129.03"}'`.
+**Production Gotcha**: The Azure NVIDIA driver extension auto-updates by default. Pin the version in production to prevent an auto-update from breaking CUDA compatibility: `--version 1.9 --settings '{"driverVersion":"535.129.03"}'`.
 
 ---
 
@@ -436,7 +436,7 @@ AzureDiagnostics
 - Training datasets on **Blob (Premium)** or **ANF** depending on I/O requirements
 - Checkpoints to **ANF** or **Blob** (ANF if checkpoint frequency < 5 min; Blob otherwise)
 
-💡 **Pro Tip**: For AKS inference pods, use an init container that copies the model from Blob to the node's local SSD (`emptyDir`). This eliminates Blob latency on every model reload and survives pod restarts on the same node.
+**Pro Tip**: For AKS inference pods, use an init container that copies the model from Blob to the node's local SSD (`emptyDir`). This eliminates Blob latency on every model reload and survives pod restarts on the same node.
 
 ---
 
@@ -471,7 +471,7 @@ az ml online-deployment delete --name blue --endpoint-name prod-api --yes
 3. Monitor P95 latency and error rate between versions
 4. Promote or rollback by adjusting traffic weights
 
-⚠️ **Production Gotcha**: ML model blue-green is more expensive than app blue-green because each deployment holds a full copy of the model in GPU memory. During the transition, you're paying for 2× the GPU capacity. Keep the transition window short (hours, not days).
+**Production Gotcha**: ML model blue-green is more expensive than app blue-green because each deployment holds a full copy of the model in GPU memory. During the transition, you're paying for 2× the GPU capacity. Keep the transition window short (hours, not days).
 
 ---
 
@@ -501,7 +501,7 @@ Run a realistic load test for 30+ minutes and check:
 - P95 latency stays within SLA at peak QPS
 - GPU utilization is 40-80% at expected traffic (room for bursts)
 
-💡 **Pro Tip**: Start with the smallest GPU that fits your model and scale *out* (more replicas) rather than *up* (bigger GPU). Two T4 replicas often cost less than one A100 and provide better availability.
+**Pro Tip**: Start with the smallest GPU that fits your model and scale *out* (more replicas) rather than *up* (bigger GPU). Two T4 replicas often cost less than one A100 and provide better availability.
 
 ---
 
@@ -548,7 +548,7 @@ az vm list-usage --location eastus --output table | grep -i "NC\|ND\|NV"
 - **Spot VMs for dev/test** — Spot quota is separate from on-demand and often more available
 - **Subscription splitting** — Enterprise teams sometimes use separate subscriptions per workload to get independent quotas
 
-⚠️ **Production Gotcha**: Quota approval is not instant. Plan 3-5 business days for standard requests, 1-2 weeks for large A100/H100 requests. Start the quota process the moment you begin capacity planning — not when you're ready to deploy.
+**Production Gotcha**: Quota approval is not instant. Plan 3-5 business days for standard requests, 1-2 weeks for large A100/H100 requests. Start the quota process the moment you begin capacity planning — not when you're ready to deploy.
 
 ---
 
@@ -577,7 +577,7 @@ az vm list-usage --location eastus --output table | grep -i "NC\|ND\|NV"
 - Create runbooks and operational documentation (Ch12)
 - Mentor other infra engineers on AI readiness (Ch14)
 
-💡 **Pro Tip**: You don't need to understand backpropagation or loss functions. Your job is to make AI *run* — reliably, securely, and cost-effectively. Focus on the infrastructure layer, and partner with data scientists on the model layer.
+**Pro Tip**: You don't need to understand backpropagation or loss functions. Your job is to make AI *run* — reliably, securely, and cost-effectively. Focus on the infrastructure layer, and partner with data scientists on the model layer.
 
 ---
 

@@ -36,7 +36,7 @@ Machine learning experiments must be repeatable. If a model achieves breakthroug
 
 Regulated industries need to know who changed what, when, and why. When your infrastructure is defined in code and stored in Git, you get that audit trail for free. Every change is a pull request. Every pull request has a reviewer. Every deployment is traceable to a commit hash. Try getting that from a portal session.
 
-🔄 **Infra ↔ AI Translation**: When an ML engineer says "I need the same environment as last week's experiment," they're asking for infrastructure reproducibility. When a compliance officer says "show me what changed," they're asking for an audit trail. IaC answers both questions with the same artifact: a versioned configuration file.
+**Infra ↔ AI Translation**: When an ML engineer says "I need the same environment as last week's experiment," they're asking for infrastructure reproducibility. When a compliance officer says "show me what changed," they're asking for an audit trail. IaC answers both questions with the same artifact: a versioned configuration file.
 
 ---
 
@@ -44,12 +44,12 @@ Regulated industries need to know who changed what, when, and why. When your inf
 
 Not every tool is right for every job. The AI infrastructure space has four primary approaches, each with distinct strengths.
 
-📊 **Decision Matrix: Choosing Your IaC Tool**
+**Decision Matrix: Choosing Your IaC Tool**
 
 | Criteria | Terraform | Bicep | Azure CLI | Pulumi |
 |----------|-----------|-------|-----------|--------|
 | **Paradigm** | Declarative | Declarative | Imperative | Declarative (code) |
-| **Multi-cloud** | ✅ Yes | ❌ Azure only | ❌ Azure only | ✅ Yes |
+| **Multi-cloud** | Yes | ❌ Azure only | ❌ Azure only | Yes |
 | **State management** | Remote state file | None (ARM handles it) | None | Remote state file |
 | **Language** | HCL | Bicep DSL | Bash/PowerShell | Python, TypeScript, Go, C# |
 | **Learning curve** | Moderate | Low (Azure users) | Low | Moderate–High |
@@ -73,7 +73,7 @@ The Azure CLI is imperative — you tell it exactly what to do, step by step. It
 
 Use **Terraform** when you need multi-cloud support, have a platform engineering team, or are managing infrastructure at scale across multiple environments. Use **Bicep** when you're Azure-native and want the simplest path to production-grade infrastructure with the least operational overhead. Use **Azure CLI** for automation glue, prototyping, and operations tasks. Use **Pulumi** when your team prefers to write infrastructure in the same language as their application code.
 
-💡 **Pro Tip**: Many production teams use more than one tool. A common pattern is Terraform or Bicep for infrastructure provisioning, Azure CLI scripts for operational tasks (quota checks, feature registration), and GitHub Actions to orchestrate all of it.
+**Pro Tip**: Many production teams use more than one tool. A common pattern is Terraform or Bicep for infrastructure provisioning, Azure CLI scripts for operational tasks (quota checks, feature registration), and GitHub Actions to orchestrate all of it.
 
 ---
 
@@ -143,7 +143,7 @@ variable "environment" {
 }
 ```
 
-💡 **Pro Tip**: That `validation` block on `gpu_vm_size` is not decorative. It prevents the exact mistake from the opening story — someone accidentally specifying a D-series or E-series VM for a GPU workload. Catch it at `terraform plan`, not on your cloud bill.
+**Pro Tip**: That `validation` block on `gpu_vm_size` is not decorative. It prevents the exact mistake from the opening story — someone accidentally specifying a D-series or E-series VM for a GPU workload. Catch it at `terraform plan`, not on your cloud bill.
 
 ### AKS Cluster with GPU Node Pool
 
@@ -217,7 +217,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "gpu" {
 }
 ```
 
-⚠️ **Production Gotcha**: The `sku=gpu:NoSchedule` taint is critical. Without it, Kubernetes will happily schedule your monitoring DaemonSets, log collectors, and other non-GPU workloads onto your $3.80/hr GPU nodes. The taint ensures only pods with a matching toleration land on GPU hardware. Every GPU pod in your cluster must include `tolerations: [{key: "sku", operator: "Equal", value: "gpu", effect: "NoSchedule"}]` in its spec.
+**Production Gotcha**: The `sku=gpu:NoSchedule` taint is critical. Without it, Kubernetes will happily schedule your monitoring DaemonSets, log collectors, and other non-GPU workloads onto your $3.80/hr GPU nodes. The taint ensures only pods with a matching toleration land on GPU hardware. Every GPU pod in your cluster must include `tolerations: [{key: "sku", operator: "Equal", value: "gpu", effect: "NoSchedule"}]` in its spec.
 
 ### Outputs
 
@@ -272,7 +272,7 @@ az storage container create \
   --account-name stterraformstate
 ```
 
-⚠️ **Production Gotcha**: Terraform state for GPU resources is a blast radius concern. If two engineers run `terraform apply` simultaneously against the same state, you can end up with orphaned GPU nodes that nobody's state file knows about. Azure Storage provides native blob leasing for state locking, but you should also enforce single-writer discipline through CI/CD — only your pipeline should run `apply`, never a human directly.
+**Production Gotcha**: Terraform state for GPU resources is a blast radius concern. If two engineers run `terraform apply` simultaneously against the same state, you can end up with orphaned GPU nodes that nobody's state file knows about. Azure Storage provides native blob leasing for state locking, but you should also enforce single-writer discipline through CI/CD — only your pipeline should run `apply`, never a human directly.
 
 ---
 
@@ -445,7 +445,7 @@ output vmId string = vm.id
 output privateIp string = nic.properties.ipConfigurations[0].properties.privateIPAddress
 ```
 
-💡 **Pro Tip**: The `@allowed` decorator on `vmSize` serves the same purpose as Terraform's `validation` block — it prevents non-GPU SKUs from being deployed. The NVIDIA driver extension (`Microsoft.HpcCompute/NvidiaGpuDriverLinux`) eliminates the need to SSH in and manually install drivers, which was one of the most error-prone steps in the old manual process.
+**Pro Tip**: The `@allowed` decorator on `vmSize` serves the same purpose as Terraform's `validation` block — it prevents non-GPU SKUs from being deployed. The NVIDIA driver extension (`Microsoft.HpcCompute/NvidiaGpuDriverLinux`) eliminates the need to SSH in and manually install drivers, which was one of the most error-prone steps in the old manual process.
 
 ### AKS Cluster with GPU Node Pool (Bicep)
 
@@ -682,7 +682,7 @@ This workflow implements a critical safety pattern for AI infrastructure:
 2. **On merge to main**: The `apply` job runs, but only after passing through an **environment protection rule**. This is a GitHub-native approval gate where designated reviewers must explicitly approve the deployment.
 3. **Artifact handoff**: The plan is saved as an artifact and consumed by the apply job. This ensures the exact plan that was reviewed is the plan that gets applied — no drift between review and execution.
 
-⚠️ **Production Gotcha**: Always pin your action versions. Use `actions/checkout@v4`, `hashicorp/setup-terraform@v3`, `azure/login@v2`, and `actions/upload-artifact@v4`. Using `@latest` or `@main` in production pipelines means a breaking upstream change can take down your infrastructure deployment at the worst possible time — like when you need to scale GPU nodes for a deadline.
+**Production Gotcha**: Always pin your action versions. Use `actions/checkout@v4`, `hashicorp/setup-terraform@v3`, `azure/login@v2`, and `actions/upload-artifact@v4`. Using `@latest` or `@main` in production pipelines means a breaking upstream change can take down your infrastructure deployment at the worst possible time — like when you need to scale GPU nodes for a deadline.
 
 ### Environment Protection Rules
 
@@ -771,7 +771,7 @@ locals {
 }
 ```
 
-🔄 **Infra ↔ AI Translation**: The `experiment` tag bridges the gap between infrastructure and ML workflows. When a data scientist asks "how much did experiment X cost?", you can answer with a single Azure Cost Management query filtered by that tag. Without it, you're manually correlating timestamps and resource groups.
+**Infra ↔ AI Translation**: The `experiment` tag bridges the gap between infrastructure and ML workflows. When a data scientist asks "how much did experiment X cost?", you can answer with a single Azure Cost Management query filtered by that tag. Without it, you're manually correlating timestamps and resource groups.
 
 ### Module Registries
 
@@ -890,7 +890,7 @@ terraform destroy
 
 Type `yes` when prompted. Terraform will remove all resources in reverse dependency order. No orphaned NICs, no forgotten disks, no surprise bills next month.
 
-💡 **Pro Tip**: For ephemeral training environments, consider running `terraform destroy` on a schedule. A GitHub Actions workflow triggered by `schedule` (cron) can destroy dev GPU clusters every Friday at 6 PM and recreate them Monday at 8 AM. That alone can cut GPU costs by 65%.
+**Pro Tip**: For ephemeral training environments, consider running `terraform destroy` on a schedule. A GitHub Actions workflow triggered by `schedule` (cron) can destroy dev GPU clusters every Friday at 6 PM and recreate them Monday at 8 AM. That alone can cut GPU costs by 65%.
 
 ---
 
@@ -898,18 +898,18 @@ Type `yes` when prompted. Terraform will remove all resources in reverse depende
 
 Before moving on, verify you can answer "yes" to each of these:
 
-- ✅ All AI infrastructure is defined in code (Terraform or Bicep) — no portal-only resources
-- ✅ GPU VM SKUs are validated in variable definitions to prevent non-GPU deployments
-- ✅ AKS GPU node pools use the `sku=gpu:NoSchedule` taint
-- ✅ Terraform state is stored remotely in Azure Storage with locking enabled
-- ✅ CI/CD pipelines use OIDC authentication — no client secrets in GitHub
-- ✅ The plan → approve → apply pattern is enforced with environment protection rules
-- ✅ Azure Policy blocks GPU VMs without required tags
-- ✅ All resources follow a consistent naming convention
-- ✅ Every resource carries tags for environment, project, team, cost-center, and experiment
-- ✅ Reusable modules are published to a registry for cross-team consumption
-- ✅ GPU quota is verified before deployment
-- ✅ Destruction is automated and tested — you can `terraform destroy` with confidence
+- All AI infrastructure is defined in code (Terraform or Bicep) — no portal-only resources
+- GPU VM SKUs are validated in variable definitions to prevent non-GPU deployments
+- AKS GPU node pools use the `sku=gpu:NoSchedule` taint
+- Terraform state is stored remotely in Azure Storage with locking enabled
+- CI/CD pipelines use OIDC authentication — no client secrets in GitHub
+- The plan → approve → apply pattern is enforced with environment protection rules
+- Azure Policy blocks GPU VMs without required tags
+- All resources follow a consistent naming convention
+- Every resource carries tags for environment, project, team, cost-center, and experiment
+- Reusable modules are published to a registry for cross-team consumption
+- GPU quota is verified before deployment
+- Destruction is automated and tested — you can `terraform destroy` with confidence
 
 ---
 

@@ -32,7 +32,7 @@ Inside each SM, you'll find two types of processing units:
 
 **Tensor Cores** are the reason modern GPUs dominate AI workloads. These specialized units perform matrix-multiply-and-accumulate operations in a single clock cycle — the exact operation at the heart of neural network training and inference. An A100 has 432 Tensor Cores (3rd generation). An H100 has 528 (4th generation). When someone says "the H100 is 3× faster than the A100 for training," Tensor Cores are the primary reason.
 
-🔄 **Infra ↔ AI Translation**: A GPU is like a 100-lane highway where every lane carries math operations simultaneously. A CPU is a 4-lane highway where each lane can handle complex turns, exits, and decision-making. For matrix math — the backbone of AI — you want the highway. For complex branching logic, you still want the CPU.
+**Infra ↔ AI Translation**: A GPU is like a 100-lane highway where every lane carries math operations simultaneously. A CPU is a 4-lane highway where each lane can handle complex turns, exits, and decision-making. For matrix math — the backbone of AI — you want the highway. For complex branching logic, you still want the CPU.
 
 ### NVLink: The GPU-to-GPU Superhighway
 
@@ -44,7 +44,7 @@ When you have multiple GPUs in a single VM, they need to communicate. PCIe provi
 
 NVLink matters because multi-GPU training strategies (covered later in this chapter) exchange massive amounts of data between GPUs every few milliseconds. If that exchange bottlenecks on PCIe (64 GB/s), your expensive GPUs sit idle waiting for data. On Azure, NVLink is available on ND-series VMs — and you can verify its presence with `nvidia-smi topo -m`.
 
-💡 **Pro Tip**: If `nvidia-smi topo -m` shows `PIX` or `PHB` between GPUs instead of `NV#`, you're running on PCIe, not NVLink. For multi-GPU training, this makes a dramatic difference in throughput. Verify you're on the right VM SKU before debugging performance problems.
+**Pro Tip**: If `nvidia-smi topo -m` shows `PIX` or `PHB` between GPUs instead of `NV#`, you're running on PCIe, not NVLink. For multi-GPU training, this makes a dramatic difference in throughput. Verify you're on the right VM SKU before debugging performance problems.
 
 ---
 
@@ -71,7 +71,7 @@ GPU memory is organized in layers, just like CPU memory. Each layer trades capac
 
 **Registers** are the fastest storage, but limited. When a kernel needs more registers than available, it "spills" to slower memory, reducing performance.
 
-🔄 **Infra ↔ AI Translation**: If you've ever diagnosed CPU performance by looking at L1/L2/L3 cache hit rates, the same mental model applies to GPUs. HBM is your RAM — it determines whether a model fits. The cache layers determine how fast it runs.
+**Infra ↔ AI Translation**: If you've ever diagnosed CPU performance by looking at L1/L2/L3 cache hit rates, the same mental model applies to GPUs. HBM is your RAM — it determines whether a model fits. The cache layers determine how fast it runs.
 
 ### What Fills GPU Memory During Training
 
@@ -109,9 +109,9 @@ Let's do the math for that 7B parameter model from the opening ticket:
 
 Now the 2 AM ticket makes perfect sense. A "14 GB model" needs 90+ GB to train. A single A100-40GB never had a chance. Even an A100-80GB is cutting it close. This is exactly why techniques like ZeRO, LoRA, and gradient checkpointing exist — they attack different parts of this equation.
 
-⚠️ **Production Gotcha**: When an ML engineer says "the model is X gigabytes," they almost always mean parameter size — the size of the saved checkpoint file. Training memory is 4-8× larger. Always multiply by at least 4× for a rough training estimate with Adam, and 6-8× for a comfortable margin.
+**Production Gotcha**: When an ML engineer says "the model is X gigabytes," they almost always mean parameter size — the size of the saved checkpoint file. Training memory is 4-8× larger. Always multiply by at least 4× for a rough training estimate with Adam, and 6-8× for a comfortable margin.
 
-💡 **Pro Tip**: **Gradient checkpointing** (also called activation recomputation) trades compute for memory. Instead of saving all activations during the forward pass, it saves only some and recomputes the rest during backpropagation. It slows training by ~20-30% but can cut activation memory by 60-80%. If you see `gradient_checkpointing=True` in a training config, that's what it's doing.
+**Pro Tip**: **Gradient checkpointing** (also called activation recomputation) trades compute for memory. Instead of saving all activations during the forward pass, it saves only some and recomputes the rest during backpropagation. It slows training by ~20-30% but can cut activation memory by 60-80%. If you see `gradient_checkpointing=True` in a training config, that's what it's doing.
 
 ---
 
@@ -140,7 +140,7 @@ The choice of numerical precision — how many bits represent each number — ha
 
 **INT8 and INT4** are quantization formats used primarily for inference. A model trained in BF16 can be quantized to INT8 or INT4 after training, dramatically reducing memory requirements and increasing throughput — at the cost of slight quality degradation.
 
-📊 **Decision Matrix: Choosing Precision**
+**Decision Matrix: Choosing Precision**
 
 | Scenario | Recommended Precision | Why |
 |---|---|---|
@@ -150,7 +150,7 @@ The choice of numerical precision — how many bits represent each number — ha
 | Inference (cost-sensitive) | INT4 (GPTQ/AWQ) | 4-8× memory reduction, slight quality loss |
 | Legacy workload compatibility | FP32 | When precision matters more than performance |
 
-🔄 **Infra ↔ AI Translation**: Think of precision like JPEG quality settings. FP32 is the uncompressed RAW image — highest quality, largest file. BF16 is like a high-quality JPEG — imperceptibly different for most purposes, half the file size. INT4 is like a thumbnail — visibly lossy, but it loads instantly and fits anywhere.
+**Infra ↔ AI Translation**: Think of precision like JPEG quality settings. FP32 is the uncompressed RAW image — highest quality, largest file. BF16 is like a high-quality JPEG — imperceptibly different for most purposes, half the file size. INT4 is like a thumbnail — visibly lossy, but it loads instantly and fits anywhere.
 
 ---
 
@@ -210,7 +210,7 @@ For the largest models (100B+ parameters), production training pipelines combine
 
 This is called **3D parallelism**, and it's how models like GPT-4 and LLaMA 3 are trained. As an infra engineer, you need to understand that this level of training hammers every resource simultaneously: GPU memory, NVLink bandwidth, InfiniBand throughput, and storage I/O.
 
-📊 **Decision Matrix: Choosing a Parallelism Strategy**
+**Decision Matrix: Choosing a Parallelism Strategy**
 
 | Model Size | Strategy | GPU Requirement | Network Requirement |
 |---|---|---|---|
@@ -253,7 +253,7 @@ Every GPU debugging session eventually comes down to software compatibility. The
 
 **TensorRT**: NVIDIA's inference optimization engine. It analyzes a trained model and applies optimizations: layer fusion (combining multiple operations into one kernel), precision calibration (automatic FP32→INT8 conversion), and memory planning. TensorRT can deliver 2-5× inference speedup compared to running a model directly in PyTorch.
 
-⚠️ **Production Gotcha: The Container Escape Hatch**
+**Production Gotcha: The Container Escape Hatch**
 
 The most common GPU software issue is version mismatch: PyTorch was compiled against CUDA 12.1, but your VM has CUDA 11.8 drivers. Or cuDNN 8.6 is installed, but the framework expects 8.9. These mismatches produce errors like `CUDA error: no kernel image is available for execution on the device` or, worse, silent crashes.
 
@@ -269,7 +269,7 @@ docker run --gpus all -it nvcr.io/nvidia/pytorch:24.05-py3
 
 On Azure, the **NVIDIA GPU Driver Extension** handles driver installation on GPU VMs. For containerized workloads on AKS, the **NVIDIA Device Plugin** (deployed as a DaemonSet) exposes GPUs to Kubernetes pods. The combination of NVIDIA containers + Azure GPU extensions eliminates most software stack headaches.
 
-💡 **Pro Tip**: When troubleshooting GPU software issues, always collect three version numbers first: `nvidia-smi` (driver + max CUDA version), `nvcc --version` (installed CUDA Toolkit), and `python -c "import torch; print(torch.version.cuda)"` (CUDA version PyTorch was compiled against). Mismatches between any of these are your most likely root cause.
+**Pro Tip**: When troubleshooting GPU software issues, always collect three version numbers first: `nvidia-smi` (driver + max CUDA version), `nvcc --version` (installed CUDA Toolkit), and `python -c "import torch; print(torch.version.cuda)"` (CUDA version PyTorch was compiled against). Mismatches between any of these are your most likely root cause.
 
 ---
 
@@ -348,7 +348,7 @@ nvidia-smi pmon -s u -c 1
 | Perf State | P0 | P2 or higher during active job |
 | ECC Errors | 0 | Any non-zero uncorrectable |
 
-💡 **Pro Tip**: For continuous GPU monitoring in production, `nvidia-smi dmon` is more useful than repeated `nvidia-smi` calls. It outputs a compact, timestamped stream of GPU metrics that's easy to pipe into log aggregation systems. Combine it with Azure Monitor's GPU metrics for historical dashboards.
+**Pro Tip**: For continuous GPU monitoring in production, `nvidia-smi dmon` is more useful than repeated `nvidia-smi` calls. It outputs a compact, timestamped stream of GPU metrics that's easy to pipe into log aggregation systems. Combine it with Azure Monitor's GPU metrics for historical dashboards.
 
 ---
 
@@ -454,7 +454,7 @@ Or GPU processes crash intermittently with `CUDA error: uncorrectable ECC error 
 4. Pre-process data into optimized formats (WebDataset, TFRecord, Mosaic StreamingDataset).
 5. Profile with `torch.profiler` to confirm the bottleneck is data loading, not communication.
 
-⚠️ **Production Gotcha**: Low GPU utilization doesn't always mean data starvation. It can also indicate excessive gradient synchronization overhead (too many GPUs for a small model), pipeline bubbles (poorly configured pipeline parallelism), or a checkpoint-save operation blocking training. Check what the GPUs are waiting on before prescribing data pipeline fixes.
+**Production Gotcha**: Low GPU utilization doesn't always mean data starvation. It can also indicate excessive gradient synchronization overhead (too many GPUs for a small model), pipeline bubbles (poorly configured pipeline parallelism), or a checkpoint-save operation blocking training. Check what the GPUs are waiting on before prescribing data pipeline fixes.
 
 ### 7. NVLink Not Detected
 
@@ -500,7 +500,7 @@ As an infra engineer, you need to know what each GPU generation brings to the ta
 | H100 | ND H100 v5 | 8 | Yes (900 GB/s) | Yes (400 Gb/s) |
 | B200 | ND GB200 v6 / ND GB300 v6 | 4 | Yes (1.8 TB/s) | Yes (400 Gb/s) |
 
-💡 **Pro Tip**: Each generation roughly doubles the HBM bandwidth and introduces a new reduced-precision format. Ampere brought TF32 and structured sparsity. Hopper brought FP8 and the Transformer Engine (which automatically manages precision during training). Blackwell brings FP4, 192 GB of HBM per GPU, and NVLink 5.0 with 1.8 TB/s per VM. When the ML team says "we need H100s, not A100s," they're usually chasing the higher memory bandwidth and Transformer Engine — not just more FLOPS.
+**Pro Tip**: Each generation roughly doubles the HBM bandwidth and introduces a new reduced-precision format. Ampere brought TF32 and structured sparsity. Hopper brought FP8 and the Transformer Engine (which automatically manages precision during training). Blackwell brings FP4, 192 GB of HBM per GPU, and NVLink 5.0 with 1.8 TB/s per VM. When the ML team says "we need H100s, not A100s," they're usually chasing the higher memory bandwidth and Transformer Engine — not just more FLOPS.
 
 ---
 
@@ -508,14 +508,14 @@ As an infra engineer, you need to know what each GPU generation brings to the ta
 
 Before moving to the next chapter, make sure you can confidently answer these questions and perform these tasks:
 
-- ✅ **Explain GPU architecture** — You can describe SMs, CUDA Cores, and Tensor Cores and explain why GPUs dominate matrix math workloads.
-- ✅ **Diagnose memory issues** — You can calculate the memory footprint of a training job (parameters + gradients + optimizer states + activations) and explain why a "7B model" needs 90+ GB to train.
-- ✅ **Understand precision tradeoffs** — You know the difference between FP32, BF16, FP16, and INT8/INT4, and when each is appropriate.
-- ✅ **Choose a parallelism strategy** — Given a model size and GPU count, you can recommend DP, ZeRO-2, ZeRO-3/FSDP, or 3D parallelism.
-- ✅ **Navigate the NVIDIA software stack** — You can explain the Driver → CUDA → cuDNN → NCCL → Framework chain and diagnose version mismatches.
-- ✅ **Read nvidia-smi fluently** — You can interpret every field, identify healthy vs. unhealthy states, and use advanced monitoring commands.
-- ✅ **Troubleshoot GPU issues** — You can diagnose and resolve OOM errors, version mismatches, driver failures, ECC errors, thermal throttling, low utilization, and NVLink problems.
-- ✅ **Compare GPU generations** — You know the capabilities of V100, A100, H100, and B200, and which Azure VM SKUs map to each.
+- **Explain GPU architecture** — You can describe SMs, CUDA Cores, and Tensor Cores and explain why GPUs dominate matrix math workloads.
+- **Diagnose memory issues** — You can calculate the memory footprint of a training job (parameters + gradients + optimizer states + activations) and explain why a "7B model" needs 90+ GB to train.
+- **Understand precision tradeoffs** — You know the difference between FP32, BF16, FP16, and INT8/INT4, and when each is appropriate.
+- **Choose a parallelism strategy** — Given a model size and GPU count, you can recommend DP, ZeRO-2, ZeRO-3/FSDP, or 3D parallelism.
+- **Navigate the NVIDIA software stack** — You can explain the Driver → CUDA → cuDNN → NCCL → Framework chain and diagnose version mismatches.
+- **Read nvidia-smi fluently** — You can interpret every field, identify healthy vs. unhealthy states, and use advanced monitoring commands.
+- **Troubleshoot GPU issues** — You can diagnose and resolve OOM errors, version mismatches, driver failures, ECC errors, thermal throttling, low utilization, and NVLink problems.
+- **Compare GPU generations** — You know the capabilities of V100, A100, H100, and B200, and which Azure VM SKUs map to each.
 
 ---
 

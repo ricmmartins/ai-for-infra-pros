@@ -56,7 +56,7 @@ Each model has a maximum context window — the upper limit on total tokens in a
 
 A large context window doesn't mean you should fill it. Every token in the context window counts against your TPM quota. A single 100K-token request with a RAG-stuffed prompt consumes as much throughput as 62 shorter 1,600-token requests.
 
-🔄 **Infra ↔ AI Translation**: Think of tokens as the packet payload of AI. TPM is your bandwidth ceiling — the total data throughput you can push through per minute. RPM is your packets-per-second limit. Just like networking, you can be bandwidth-constrained (large payloads, few requests) or PPS-constrained (small payloads, many requests). Same diagnostic thinking, different units.
+**Infra ↔ AI Translation**: Think of tokens as the packet payload of AI. TPM is your bandwidth ceiling — the total data throughput you can push through per minute. RPM is your packets-per-second limit. Just like networking, you can be bandwidth-constrained (large payloads, few requests) or PPS-constrained (small payloads, many requests). Same diagnostic thinking, different units.
 
 ---
 
@@ -64,7 +64,7 @@ A large context window doesn't mean you should fill it. Every token in the conte
 
 When you create an Azure OpenAI deployment, you're making an architectural decision that determines your cost model, throughput guarantees, and failure modes. Azure OpenAI offers several deployment types, and choosing the wrong one is the most common capacity planning mistake teams make.
 
-### 📊 Decision Matrix: Standard vs Global Standard vs Provisioned (PTU)
+### Decision Matrix: Standard vs Global Standard vs Provisioned (PTU)
 
 | Characteristic | Standard | Global Standard | Provisioned (PTU) |
 |---|---|---|---|
@@ -73,7 +73,7 @@ When you create an Azure OpenAI deployment, you're making an architectural decis
 | **Latency** | Variable (shared infra) | Variable (Microsoft-routed) | Predictable, low variance |
 | **Data residency** | Single region | Microsoft selects region | Single region |
 | **Throttling** | 429 when quota exceeded | 429 when quota exceeded | No throttling within PTU capacity |
-| **Capacity guarantee** | ❌ Best-effort | ❌ Best-effort | ✅ Reserved and guaranteed |
+| **Capacity guarantee** | ❌ Best-effort | ❌ Best-effort | Reserved and guaranteed |
 | **Minimum commitment** | None | None | Typically monthly |
 | **Best for** | Dev/test, variable workloads | Global apps, higher default limits | Production, SLA-bound apps |
 
@@ -99,7 +99,7 @@ PTU deployments reserve dedicated inference capacity for your workload. You purc
 
 PTU makes sense when you need SLA-level guarantees — customer-facing copilots, revenue-generating applications, or workloads where a 429 error has direct business impact. It also makes sense at scale: once your Standard consumption is high enough, PTU becomes more cost-effective because you're paying a flat rate regardless of usage.
 
-⚠️ **Production Gotcha**: PTU throughput varies by model, prompt length, and generation length. A PTU configured for GPT-4o doesn't deliver a fixed TPM number — throughput depends on the mix of input and output tokens in your actual workload. Never hardcode TPM-per-PTU ratios from documentation. Use the [Azure OpenAI capacity calculator](https://oai.azure.com/portal/calculator) with your real traffic patterns to estimate PTU requirements, and validate with load testing before committing.
+**Production Gotcha**: PTU throughput varies by model, prompt length, and generation length. A PTU configured for GPT-4o doesn't deliver a fixed TPM number — throughput depends on the mix of input and output tokens in your actual workload. Never hardcode TPM-per-PTU ratios from documentation. Use the [Azure OpenAI capacity calculator](https://oai.azure.com/portal/calculator) with your real traffic patterns to estimate PTU requirements, and validate with load testing before committing.
 
 ### Choosing the Right Deployment Type
 
@@ -111,7 +111,7 @@ Use this decision flow:
 4. **Production workload with SLA requirements, or consistently high volume?** → Provisioned (PTU)
 5. **Critical production with overflow capacity needed?** → PTU primary + Standard overflow (see High-Availability Architecture)
 
-💡 **Pro Tip**: Many production architectures combine deployment types. Route baseline traffic to PTU for guaranteed latency and overflow traffic to Standard or Global Standard during peaks. API Management makes this routing straightforward — we'll cover the pattern later in this chapter.
+**Pro Tip**: Many production architectures combine deployment types. Route baseline traffic to PTU for guaranteed latency and overflow traffic to Standard or Global Standard during peaks. API Management makes this routing straightforward — we'll cover the pattern later in this chapter.
 
 ---
 
@@ -157,7 +157,7 @@ wait_time = min(base_delay × 2^attempt + random_jitter, max_delay)
 
 Jitter prevents the "thundering herd" problem where multiple clients retry simultaneously, creating another spike. If the `Retry-After` header value is longer than your calculated backoff, always use `Retry-After` instead.
 
-⚠️ **Production Gotcha**: Aggressive retries on Standard deployments can create a feedback loop. The retries themselves consume quota, meaning each retry cycle makes the next one more likely to fail. Cap your retry count (3–5 attempts max), and if the `Retry-After` header exceeds 60 seconds, route the request to a fallback deployment in another region instead of waiting.
+**Production Gotcha**: Aggressive retries on Standard deployments can create a feedback loop. The retries themselves consume quota, meaning each retry cycle makes the next one more likely to fail. Cap your retry count (3–5 attempts max), and if the `Retry-After` header exceeds 60 seconds, route the request to a fallback deployment in another region instead of waiting.
 
 ---
 
@@ -207,7 +207,7 @@ Default quotas are starting points, not hard ceilings. You can request quota inc
 
 When a single deployment's quota isn't enough, spread traffic across multiple deployments. You can deploy the same model multiple times within a region (each drawing from the region's quota pool) or across regions. Azure API Management is the natural front door for this pattern — it can round-robin requests, route based on priority, and automatically fail over on 429 responses.
 
-💡 **Pro Tip**: When requesting quota for capacity planning, document your expected peak usage and use case. Quota reviewers approve increases faster when they understand the workload. "We need 2M TPM for a 500-user internal support chatbot with documented peak patterns" gets approved faster than "please increase our quota."
+**Pro Tip**: When requesting quota for capacity planning, document your expected peak usage and use case. Quota reviewers approve increases faster when they understand the workload. "We need 2M TPM for a 500-user internal support chatbot with documented peak patterns" gets approved faster than "please increase our quota."
 
 ---
 
@@ -262,7 +262,7 @@ When a deployment is consistently returning errors, stop sending it traffic temp
 
 This prevents a failing deployment from consuming your retry budget and degrading the experience for all users.
 
-💡 **Pro Tip**: Tag your APIM policies with the deployment type. When the circuit breaker trips on a Standard deployment due to regional capacity pressure, it should fail over to a different region's Standard deployment — not to your PTU deployment, which should be reserved for priority traffic.
+**Pro Tip**: Tag your APIM policies with the deployment type. When the circuit breaker trips on a Standard deployment due to regional capacity pressure, it should fail over to a different region's Standard deployment — not to your PTU deployment, which should be reserved for priority traffic.
 
 ---
 
@@ -341,7 +341,7 @@ Set up alerts before you need them:
 - **P95 latency > 5 seconds**: Warning — user experience is degrading, even if requests are succeeding.
 - **PTU utilization > 90%**: Critical — your reserved capacity is nearly saturated. Overflow traffic will need a fallback path.
 
-⚠️ **Production Gotcha**: Azure OpenAI metrics in Azure Monitor have a 1–3 minute reporting delay. Don't rely on real-time dashboards for incident response on throttling events. Instead, instrument your application layer (Application Insights, OpenTelemetry) for sub-minute visibility into 429 rates and latency.
+**Production Gotcha**: Azure OpenAI metrics in Azure Monitor have a 1–3 minute reporting delay. Don't rely on real-time dashboards for incident response on throttling events. Instead, instrument your application layer (Application Insights, OpenTelemetry) for sub-minute visibility into 429 rates and latency.
 
 ---
 
@@ -382,7 +382,7 @@ Azure OpenAI's Batch API processes requests asynchronously at a 50% discount com
 
 Streaming doesn't reduce total token consumption or cost, but it dramatically improves perceived latency. Instead of waiting for the entire response to generate before displaying anything, the client receives tokens as they're produced. Time to First Token (TTFT) drops from seconds to milliseconds. For interactive applications, always enable streaming.
 
-🔄 **Infra ↔ AI Translation**: Model routing is the AI equivalent of tiered storage. You don't store every file on premium NVMe — you tier based on access patterns and performance requirements. Similarly, you don't route every prompt to GPT-4o. Hot requests (complex, user-facing) get the premium model. Warm requests (simple, background) get the cost-effective one.
+**Infra ↔ AI Translation**: Model routing is the AI equivalent of tiered storage. You don't store every file on premium NVMe — you tier based on access patterns and performance requirements. Similarly, you don't route every prompt to GPT-4o. Hot requests (complex, user-facing) get the premium model. Warm requests (simple, background) get the cost-effective one.
 
 ---
 
@@ -390,16 +390,16 @@ Streaming doesn't reduce total token consumption or cost, but it dramatically im
 
 Before moving on, verify you've addressed these capacity planning fundamentals:
 
-- ✅ **Token estimation**: You can estimate tokens per request for your workload (system prompt + input + output)
-- ✅ **Deployment type selected**: Standard, Global Standard, or PTU — chosen based on workload predictability and SLA requirements
-- ✅ **TPM/RPM quotas sized**: Calculated for peak, not average, with headroom
-- ✅ **Throttling understood**: You know whether your workload is TPM-bound or RPM-bound, and have retry logic with exponential backoff and jitter
-- ✅ **Capacity plan documented**: Concurrent users × requests/min × tokens/request = required TPM, with peak multiplier applied
-- ✅ **Multi-region failover configured**: At least two deployments in different regions with API Management routing
-- ✅ **Monitoring enabled**: Diagnostic logs flowing to Log Analytics, alerts on 429 rate, latency, and token utilization
-- ✅ **Optimization applied**: System prompts trimmed, max_tokens set, model routing implemented for cost-appropriate model selection
-- ✅ **Batch API evaluated**: Non-real-time workloads moved to Batch API for 50% cost savings
-- ✅ **PTU sizing validated**: If using PTU, throughput tested with real traffic patterns — never relying on hardcoded TPM-per-PTU ratios
+- **Token estimation**: You can estimate tokens per request for your workload (system prompt + input + output)
+- **Deployment type selected**: Standard, Global Standard, or PTU — chosen based on workload predictability and SLA requirements
+- **TPM/RPM quotas sized**: Calculated for peak, not average, with headroom
+- **Throttling understood**: You know whether your workload is TPM-bound or RPM-bound, and have retry logic with exponential backoff and jitter
+- **Capacity plan documented**: Concurrent users × requests/min × tokens/request = required TPM, with peak multiplier applied
+- **Multi-region failover configured**: At least two deployments in different regions with API Management routing
+- **Monitoring enabled**: Diagnostic logs flowing to Log Analytics, alerts on 429 rate, latency, and token utilization
+- **Optimization applied**: System prompts trimmed, max_tokens set, model routing implemented for cost-appropriate model selection
+- **Batch API evaluated**: Non-real-time workloads moved to Batch API for 50% cost savings
+- **PTU sizing validated**: If using PTU, throughput tested with real traffic patterns — never relying on hardcoded TPM-per-PTU ratios
 
 ---
 

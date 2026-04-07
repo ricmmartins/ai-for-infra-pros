@@ -18,7 +18,7 @@ You've seen this movie before — just with different actors. Developers used to
 
 If you've ever pulled an image from a container registry, tagged a release in Git, or promoted a build from staging to production, you already understand the core concepts of model lifecycle management. The vocabulary changes, but the patterns are nearly identical.
 
-🔄 **Infra ↔ AI Translation**:
+**Infra ↔ AI Translation**:
 
 | Infra Concept | ML Equivalent |
 |---|---|
@@ -75,7 +75,7 @@ az ml model show \
   --query "jobs"
 ```
 
-💡 **Pro Tip**: Use Azure ML's model collections to group related models (e.g., all models in a recommendation pipeline). This makes it easier to promote or roll back an entire model ensemble rather than individual components.
+**Pro Tip**: Use Azure ML's model collections to group related models (e.g., all models in a recommendation pipeline). This makes it easier to promote or roll back an entire model ensemble rather than individual components.
 
 ### MLflow Model Registry
 
@@ -122,7 +122,7 @@ az acr repository show-tags \
 
 This approach works well when you want a single artifact (the container) to encapsulate model weights, dependencies, and serving code. It simplifies deployment because your existing container orchestration tooling (AKS, Container Apps) handles everything downstream.
 
-### 📊 Decision Matrix: Choosing a Model Registry
+### Decision Matrix: Choosing a Model Registry
 
 | Criteria | Azure ML Registry | MLflow Registry | ACR (Container) |
 |---|---|---|---|
@@ -134,7 +134,7 @@ This approach works well when you want a single artifact (the container) to enca
 | **Infra overhead** | Managed | Self-hosted or Azure ML | Managed (ACR) |
 | **When to avoid** | Multi-cloud requirement | Need deep Azure integration | Models without containers |
 
-⚠️ **Production Gotcha**: Don't use shared file systems or blob storage as your "registry." Without immutable versions, atomic uploads, and metadata APIs, you end up with `model_final_v2_FIXED_actually_final.pt` — the exact chaos this chapter exists to prevent.
+**Production Gotcha**: Don't use shared file systems or blob storage as your "registry." Without immutable versions, atomic uploads, and metadata APIs, you end up with `model_final_v2_FIXED_actually_final.pt` — the exact chaos this chapter exists to prevent.
 
 ---
 
@@ -282,7 +282,7 @@ jobs:
             --workspace-name ${{ env.AZURE_ML_WS }}
 ```
 
-🔄 **Infra ↔ AI Translation**: This is your blue/green deployment pipeline, but for model weights instead of container images. The `--traffic` flag works exactly like weighted routing in Azure Front Door or Application Gateway — you're shifting a percentage of production requests to the new model version while the old one continues serving.
+**Infra ↔ AI Translation**: This is your blue/green deployment pipeline, but for model weights instead of container images. The `--traffic` flag works exactly like weighted routing in Azure Front Door or Application Gateway — you're shifting a percentage of production requests to the new model version while the old one continues serving.
 
 ### Infrastructure Responsibilities at Each Stage
 
@@ -367,7 +367,7 @@ az ml online-deployment delete \
   --yes
 ```
 
-💡 **Pro Tip**: Define your rollback criteria before deployment, not after. Write them into your pipeline configuration. Common triggers: P95 latency exceeds 2× baseline for 5 minutes, error rate exceeds 1% for 3 minutes, or prediction confidence distribution diverges beyond a statistical threshold.
+**Pro Tip**: Define your rollback criteria before deployment, not after. Write them into your pipeline configuration. Common triggers: P95 latency exceeds 2× baseline for 5 minutes, error rate exceeds 1% for 3 minutes, or prediction confidence distribution diverges beyond a statistical threshold.
 
 ---
 
@@ -416,7 +416,7 @@ az acr repository show \
   --query "changeableAttributes"
 ```
 
-⚠️ **Production Gotcha**: Model files downloaded from public hubs like Hugging Face can contain malicious code. PyTorch's default serialization uses Python `pickle`, which can execute arbitrary code during deserialization. A model file named `pytorch_model.bin` could contain a reverse shell payload that activates when your inference server loads the weights. **Always** scan model files from untrusted sources, prefer SafeTensors format over pickle, and run model loading in sandboxed environments before promoting to your registry. Treat model files with the same suspicion you'd give an unsigned container image from Docker Hub.
+**Production Gotcha**: Model files downloaded from public hubs like Hugging Face can contain malicious code. PyTorch's default serialization uses Python `pickle`, which can execute arbitrary code during deserialization. A model file named `pytorch_model.bin` could contain a reverse shell payload that activates when your inference server loads the weights. **Always** scan model files from untrusted sources, prefer SafeTensors format over pickle, and run model loading in sandboxed environments before promoting to your registry. Treat model files with the same suspicion you'd give an unsigned container image from Docker Hub.
 
 ### Securing the Model Pipeline
 
@@ -463,7 +463,7 @@ ENV CUBLAS_WORKSPACE_CONFIG=:4096:8
 ENTRYPOINT ["python", "src/train.py"]
 ```
 
-💡 **Pro Tip**: Use Azure ML curated environments or Microsoft's ACPT (Azure Container for PyTorch) base images. These are pre-validated combinations of CUDA, cuDNN, and framework versions that are tested against Azure GPU SKUs. Building your own CUDA stack from scratch is a reliability risk you don't need to take.
+**Pro Tip**: Use Azure ML curated environments or Microsoft's ACPT (Azure Container for PyTorch) base images. These are pre-validated combinations of CUDA, cuDNN, and framework versions that are tested against Azure GPU SKUs. Building your own CUDA stack from scratch is a reliability risk you don't need to take.
 
 ### Storage Architecture for Training Artifacts
 
@@ -538,24 +538,24 @@ A feature store deployment typically includes:
 - **Azure Cache for Redis** or **Cosmos DB** for the online store — sub-millisecond reads for real-time serving. Choose Redis for simple key-value patterns with extreme low latency. Choose Cosmos DB when you need multi-region replication, richer query patterns, or SLA-backed availability.
 - **A synchronization pipeline** (Azure Data Factory, Spark, or custom) that materializes features from the offline store to the online store on a schedule or triggered by new data.
 
-💡 **Pro Tip**: Treat the online feature store like any other caching tier. Apply the same operational practices — monitor hit rates, set eviction policies, plan capacity for peak load, and test failure scenarios. If Redis goes down, your inference endpoints lose access to features and predictions fail. This is a critical-path dependency.
+**Pro Tip**: Treat the online feature store like any other caching tier. Apply the same operational practices — monitor hit rates, set eviction policies, plan capacity for peak load, and test failure scenarios. If Redis goes down, your inference endpoints lose access to features and predictions fail. This is a critical-path dependency.
 
 ---
 
-## ✅ Chapter Checklist
+## Chapter Checklist
 
 Before moving to Chapter 7, verify that your model lifecycle management covers these essentials:
 
-- ☐ **Model registry in place** — All production models are registered with immutable versions, metadata, and lineage tracking (Azure ML, MLflow, or ACR).
-- ☐ **CI/CD pipeline for models** — Automated pipeline with Dev → Staging → Production stages and validation gates at each transition.
-- ☐ **Validation gates defined** — Accuracy thresholds, latency benchmarks, throughput tests, and security scans run automatically before any model reaches production.
-- ☐ **Traffic management configured** — Canary or blue/green deployment capability with percentage-based traffic splitting for safe model rollouts.
-- ☐ **Automated rollback** — Monitoring alerts trigger automatic traffic revert when model performance degrades beyond defined thresholds.
-- ☐ **Model supply chain secured** — Model artifacts are signed, scanned, stored in private registries, and accessed via managed identity and private endpoints.
-- ☐ **Reproducible training environments** — Framework, CUDA, Python, and data versions are pinned. Training runs in containerized environments with deterministic configurations.
-- ☐ **Storage architecture planned** — Blob storage for checkpoints with lifecycle policies, experiment tracking for metrics, versioned data lake for datasets.
-- ☐ **Feature store infrastructure scoped** — If required, offline store (ADLS), online store (Redis/Cosmos DB), and synchronization pipeline are provisioned and monitored.
-- ☐ **Rollback tested** — You've actually tested rolling back a model version in a non-production environment. Don't wait for a 2 AM incident to discover your rollback process has gaps.
+- **Model registry in place** — All production models are registered with immutable versions, metadata, and lineage tracking (Azure ML, MLflow, or ACR).
+- **CI/CD pipeline for models** — Automated pipeline with Dev → Staging → Production stages and validation gates at each transition.
+- **Validation gates defined** — Accuracy thresholds, latency benchmarks, throughput tests, and security scans run automatically before any model reaches production.
+- **Traffic management configured** — Canary or blue/green deployment capability with percentage-based traffic splitting for safe model rollouts.
+- **Automated rollback** — Monitoring alerts trigger automatic traffic revert when model performance degrades beyond defined thresholds.
+- **Model supply chain secured** — Model artifacts are signed, scanned, stored in private registries, and accessed via managed identity and private endpoints.
+- **Reproducible training environments** — Framework, CUDA, Python, and data versions are pinned. Training runs in containerized environments with deterministic configurations.
+- **Storage architecture planned** — Blob storage for checkpoints with lifecycle policies, experiment tracking for metrics, versioned data lake for datasets.
+- **Feature store infrastructure scoped** — If required, offline store (ADLS), online store (Redis/Cosmos DB), and synchronization pipeline are provisioned and monitored.
+- **Rollback tested** — You've actually tested rolling back a model version in a non-production environment. Don't wait for a 2 AM incident to discover your rollback process has gaps.
 
 ---
 

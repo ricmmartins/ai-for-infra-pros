@@ -1,5 +1,3 @@
-{frontmatter}
-
 # AI for Infra Pros
 
 ## The Practical Handbook for Infrastructure Engineers Entering the AI Era
@@ -42,5 +40,3 @@ Website: [rmmartins.com](https://rmmartins.com)
 ## Disclaimer
 
 This is an independent, personal project — not an official Microsoft publication. The views and content are solely the author's own. While many examples use Azure, the concepts, architectures, and operational practices in this book apply to any cloud platform — AWS, GCP, or on-premises. If you manage infrastructure, this book was written for you, regardless of your cloud provider. All trademarks and product names belong to their respective owners.
-
-{mainmatter}

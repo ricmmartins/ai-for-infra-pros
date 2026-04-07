@@ -30,7 +30,7 @@ Before you build anything, you need an honest assessment of where your organizat
 
 Survey your team's capabilities across four dimensions: cloud platform fluency (Azure services, networking, identity), AI/ML fundamentals (inference, GPU scheduling, token economics), automation maturity (IaC adoption, CI/CD practices), and security operations (managed identity, secret management). You're not looking for data scientists — you're looking for whether your team can provision, secure, and monitor AI infrastructure.
 
-🔄 **Infra ↔ AI Translation:** A "skills assessment" in AI adoption isn't about knowing how transformers work. It's about whether your team can answer: "What's the difference between an A100 and a T4, and when would you choose each?" See Chapter 4 for the GPU deep dive.
+**Infra ↔ AI Translation:** A "skills assessment" in AI adoption isn't about knowing how transformers work. It's about whether your team can answer: "What's the difference between an A100 and a T4, and when would you choose each?" See Chapter 4 for the GPU deep dive.
 
 ### Infrastructure Readiness
 
@@ -44,7 +44,7 @@ Review your security baseline through the lens of AI-specific risks. Are managed
 
 This is the audit most teams skip and most teams need. Survey for unauthorized AI usage: teams running models on personal subscriptions, API keys in code repos, GPU VMs provisioned outside IaC pipelines, and SaaS AI tools processing company data without security review.
 
-⚠️ **Production Gotcha:** Shadow AI isn't just a governance problem — it's a security exposure. Every unreviewed model endpoint is a potential data leak. Treat shadow AI discovery with the same urgency as discovering unpatched servers.
+**Production Gotcha:** Shadow AI isn't just a governance problem — it's a security exposure. Every unreviewed model endpoint is a potential data leak. Treat shadow AI discovery with the same urgency as discovering unpatched servers.
 
 ### Phase 1 Deliverable: Readiness Scorecard
 
@@ -69,7 +69,7 @@ Phase 2 closes the gaps your Diagnostic uncovered. This is where you invest in p
 
 Infrastructure engineers don't need to understand backpropagation — they need GPU memory management, inference scaling patterns, and token-based pricing. Build learning paths around three tiers: foundational (AI concepts in infrastructure language — see Chapter 15), operational (deploying and monitoring AI workloads), and advanced (performance tuning, cost optimization).
 
-💡 **Pro Tip:** The fastest way to upskill an infrastructure team on AI isn't a certification — it's a guided lab. Set up a sandbox, hand them a Bicep template and a container image, and let them deploy, break, and fix an inference endpoint. Learning by operating beats learning by reading.
+**Pro Tip:** The fastest way to upskill an infrastructure team on AI isn't a certification — it's a guided lab. Set up a sandbox, hand them a Bicep template and a container image, and let them deploy, break, and fix an inference endpoint. Learning by operating beats learning by reading.
 
 ### Core Tooling Setup
 
@@ -97,7 +97,7 @@ Build templates for your common AI patterns: GPU VM clusters for training (see C
 
 Your pipelines need to handle infrastructure changes (Bicep/Terraform through GitOps) and model deployments (container images, model artifacts, endpoint configurations). Different workflows, different testing, but the same governance — pull request reviews, automated validation, staged rollouts.
 
-🔄 **Infra ↔ AI Translation:** "Model deployment" is analogous to "application deployment." The model is the application, the inference endpoint is the service, the model version is the release. Your existing CI/CD patterns apply — extend them for new artifact types.
+**Infra ↔ AI Translation:** "Model deployment" is analogous to "application deployment." The model is the application, the inference endpoint is the service, the model version is the release. Your existing CI/CD patterns apply — extend them for new artifact types.
 
 ### Monitoring and Observability Stack
 
@@ -107,7 +107,7 @@ Deploy the monitoring stack before the workloads it monitors: GPU utilization an
 
 Implement cost controls before costs become a problem. Set up budgets per team, alerts at 50%/75%/90% thresholds, resource tagging for cost attribution, and GPU quota governance. See Chapter 9 for the full cost engineering approach.
 
-⚠️ **Production Gotcha:** A single Standard_ND96asr_v4 costs over $20/hour. A team that forgets to shut down a training cluster over a weekend burns thousands. Automated shutdown policies aren't optional — they're essential from day one.
+**Production Gotcha:** A single Standard_ND96asr_v4 costs over $20/hour. A team that forgets to shut down a training cluster over a weekend burns thousands. Automated shutdown policies aren't optional — they're essential from day one.
 
 ### Phase 3 Deliverable: AI Platform v1
 
@@ -123,7 +123,7 @@ With the platform in place, teams can experiment — but with guardrails. The go
 
 Create experimentation environments isolated from production: dedicated resource groups with cost caps via Azure Policy, GPU quotas sized for experimentation, network connectivity to data sources with access controls, and automatic cleanup — sandboxes inactive for 14 days get flagged, 30 days get decommissioned.
 
-💡 **Pro Tip:** Give each experiment a unique cost tag from day one. When your CFO asks "what are we spending on experiments versus production?" answer with a dashboard, not a spreadsheet.
+**Pro Tip:** Give each experiment a unique cost tag from day one. When your CFO asks "what are we spending on experiments versus production?" answer with a dashboard, not a spreadsheet.
 
 ### Experiment Tracking and Reproducibility
 
@@ -155,7 +155,7 @@ Namespace or resource group isolation per team, GPU quota enforcement per tenant
 
 Define SLOs for availability, latency (p99), throughput, and error budget. AI endpoints have unique failure modes — model loading delays, GPU memory exhaustion, token rate limiting — that your SLO design must account for.
 
-🔄 **Infra ↔ AI Translation:** An "inference endpoint SLA" is exactly like a web API SLA. The difference: "cold start" might be 30 seconds (loading gigabytes of model weights into GPU memory), and "resource exhaustion" usually means GPU memory, not CPU. Same discipline, different resources.
+**Infra ↔ AI Translation:** An "inference endpoint SLA" is exactly like a web API SLA. The difference: "cold start" might be 30 seconds (loading gigabytes of model weights into GPU memory), and "resource exhaustion" usually means GPU memory, not CPU. Same discipline, different resources.
 
 ### Fleet Management and Operations Runbooks
 
@@ -183,7 +183,7 @@ Quarterly reviews covering: new Azure AI services that could simplify your archi
 
 Maintain a radar categorizing tools and services as: **Adopt** (proven, standardize), **Trial** (promising, time-boxed evaluation), **Assess** (interesting, monitor), or **Hold** (not ready). Review quarterly.
 
-💡 **Pro Tip:** Your technology radar should be a living document, not a conference slide. Assign an owner, make it accessible to every platform consumer. When a team asks "should we use this serving framework?" the radar should have the answer.
+**Pro Tip:** Your technology radar should be a living document, not a conference slide. Assign an owner, make it accessible to every platform consumer. When a team asks "should we use this serving framework?" the radar should have the answer.
 
 ### Cost Optimization Sprints
 
@@ -213,7 +213,7 @@ These are the five most common ways AI adoption fails from an infrastructure per
 
 **"Build Everything" — Custom When Managed Exists.** Building a custom serving framework when Azure ML managed endpoints suffice. Every custom component is a maintenance burden. Default to managed services.
 
-⚠️ **Production Gotcha:** These anti-patterns compound. "Big Bang" leads to "Shadow AI" (teams can't wait), which creates "Security Afterthought" (shadow deployments skip review). Recognizing the pattern is the first step to breaking it.
+**Production Gotcha:** These anti-patterns compound. "Big Bang" leads to "Shadow AI" (teams can't wait), which creates "Security Afterthought" (shadow deployments skip review). Recognizing the pattern is the first step to breaking it.
 
 ---
 
@@ -221,7 +221,7 @@ These are the five most common ways AI adoption fails from an infrastructure per
 
 Each phase transition should be an explicit decision, not a gradual drift.
 
-📊 **Decision Matrix: Phase Advancement Criteria**
+**Decision Matrix: Phase Advancement Criteria**
 
 | Gate | Required Deliverables | Approval Authority | Rollback Criteria |
 |---|---|---|---|
@@ -231,7 +231,7 @@ Each phase transition should be an explicit decision, not a gradual drift.
 | **Phase 4 → 5** | ≥2 validated use cases with production estimates, costs reviewed | Infra lead + business sponsor + security lead | Use cases exceed cost projections by >50% |
 | **Phase 5 → 6** | SLOs met for 30 days, runbooks tested, compliance audit passed | Infrastructure lead + compliance | SLO violations, compliance findings |
 
-💡 **Pro Tip:** Decision gates aren't bureaucratic checkpoints — they're risk management tools. Skipping a gate means accepting risk you haven't assessed.
+**Pro Tip:** Decision gates aren't bureaucratic checkpoints — they're risk management tools. Skipping a gate means accepting risk you haven't assessed.
 
 ---
 
@@ -262,15 +262,15 @@ Track metrics across three dimensions to evaluate your framework's effectiveness
 
 ## Chapter Checklist
 
-- ✅ You understand the 6-phase model: Diagnostic → Enablement → Infrastructure Preparation → Experimentation → Scale and Governance → Continuous Adoption
-- ✅ You've identified which phase your organization is currently in — be honest about it
-- ✅ You can articulate the deliverables required to exit your current phase
-- ✅ You've reviewed the anti-patterns and identified which ones are present in your environment
-- ✅ You know the decision gate criteria for advancing to the next phase
-- ✅ You've selected infrastructure, business, and team metrics to track
-- ✅ You have a plan for shadow AI discovery — or you've already conducted one
-- ✅ You understand that AI adoption is a continuous process, not a one-time project
-- ✅ You've connected this framework to earlier chapters: IaC (Chapter 5), monitoring (Chapter 7), security (Chapter 8), cost engineering (Chapter 9), and platform operations (Chapter 10)
+- You understand the 6-phase model: Diagnostic → Enablement → Infrastructure Preparation → Experimentation → Scale and Governance → Continuous Adoption
+- You've identified which phase your organization is currently in — be honest about it
+- You can articulate the deliverables required to exit your current phase
+- You've reviewed the anti-patterns and identified which ones are present in your environment
+- You know the decision gate criteria for advancing to the next phase
+- You've selected infrastructure, business, and team metrics to track
+- You have a plan for shadow AI discovery — or you've already conducted one
+- You understand that AI adoption is a continuous process, not a one-time project
+- You've connected this framework to earlier chapters: IaC (Chapter 5), monitoring (Chapter 7), security (Chapter 8), cost engineering (Chapter 9), and platform operations (Chapter 10)
 
 ---
 
