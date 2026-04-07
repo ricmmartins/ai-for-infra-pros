@@ -227,22 +227,6 @@ Every GPU debugging session eventually comes down to software compatibility. The
 
 ### The Compatibility Chain
 
-```
-┌─────────────────────────────────────────────────────┐
-│  Model Code (your ML team's training script)        │
-├─────────────────────────────────────────────────────┤
-│  Framework (PyTorch 2.x, TensorFlow, JAX)           │
-├─────────────────────────────────────────────────────┤
-│  cuDNN (optimized DL primitives) + NCCL (multi-GPU) │
-├─────────────────────────────────────────────────────┤
-│  CUDA Toolkit (libraries, runtime, compiler)        │
-├─────────────────────────────────────────────────────┤
-│  NVIDIA Driver (kernel module → GPU hardware)       │
-├─────────────────────────────────────────────────────┤
-│  GPU Hardware (A100, H100, etc.)                    │
-└─────────────────────────────────────────────────────┘
-```
-
 ```mermaid
  block-beta
      columns 1
@@ -252,15 +236,6 @@ Every GPU debugging session eventually comes down to software compatibility. The
      D["CUDA Toolkit (libraries, runtime, compiler)"]
      E["NVIDIA Driver (kernel module → GPU hardware)"]
      F["GPU Hardware (A100, H100, etc.)"]
-```
-
-```mermaid
-graph TD
-     A["Model Code<br/>(your ML team's training script)"] --> B["Framework<br/>(PyTorch 2.x, TensorFlow, JAX)"]
-     B --> C["cuDNN (optimized DL primitives)<br/>+ NCCL (multi-GPU)"]
-     C --> D["CUDA Toolkit<br/>(libraries, runtime, compiler)"]
-     D --> E["NVIDIA Driver<br/>(kernel module → GPU hardware)"]
-     E --> F["GPU Hardware<br/>(A100, H100, etc.)"]
 ```
 
 **Driver**: The kernel-level module that communicates directly with GPU hardware. It must support your GPU architecture (an old driver won't recognize an H100). Each driver version has a maximum CUDA version it supports.
