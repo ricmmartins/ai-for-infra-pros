@@ -101,7 +101,7 @@ Unattended-Upgrade::Package-Blacklist {
 - **Use the Azure NVIDIA GPU Driver Extension** for driver lifecycle management instead of manual installs. The extension handles kernel compatibility automatically.
 - **Pin kernel versions** in your IaC templates and treat kernel upgrades as planned maintenance events.
 
-⚠️ **Production Gotcha**: This failure is completely silent. The VM boots normally, passes health checks, and responds to SSH. Only GPU workloads fail. If you don't monitor `nvidia-smi` output, you won't know until users complain.
+**Production Gotcha**: This failure is completely silent. The VM boots normally, passes health checks, and responds to SSH. Only GPU workloads fail. If you don't monitor `nvidia-smi` output, you won't know until users complain.
 
 ---
 
@@ -198,7 +198,7 @@ LoRA trains <1% of parameters, slashing gradient and optimizer memory by 100×.
 - **Set `max_seq_length` explicitly** to cap activation memory at the longest sequence you expect.
 - **Use `gradient_accumulation_steps`** to maintain effective batch size while keeping per-GPU batch size small.
 
-💡 **Pro Tip**: If you see OOM errors that happen at random steps (not consistently at step N), suspect variable-length sequences. Set `max_seq_length` and pad/truncate to eliminate the variance.
+**Pro Tip**: If you see OOM errors that happen at random steps (not consistently at step N), suspect variable-length sequences. Set `max_seq_length` and pad/truncate to eliminate the variance.
 
 ---
 
@@ -298,7 +298,7 @@ az quota create --resource-name "StandardNDSv2Family" \
 - **Set up quota monitoring alerts** that fire at 80% GPU quota usage (see Chapter 9).
 - **Configure cluster autoscaler correctly**: set `maxCount` with headroom so the autoscaler can respond to demand.
 
-⚠️ **Production Gotcha**: A pod stuck in Pending produces no logs — there's no container to log from. Always check `kubectl describe pod` for events, not `kubectl logs`.
+**Production Gotcha**: A pod stuck in Pending produces no logs — there's no container to log from. Always check `kubectl describe pod` for events, not `kubectl logs`.
 
 ---
 
@@ -385,7 +385,7 @@ For predictable, high-volume workloads, PTU provides guaranteed throughput witho
 - **Implement a token-aware queue**: Estimate token count before sending requests and throttle client-side when approaching limits.
 - **Use usage tracking**: Log token counts per request to forecast capacity needs before launches.
 
-💡 **Pro Tip**: The most common mistake is retrying 429s immediately in a tight loop. This makes the storm worse. Always respect the `Retry-After` header and add random jitter to prevent thundering herd.
+**Pro Tip**: The most common mistake is retrying 429s immediately in a tight loop. This makes the storm worse. Always respect the `Retry-After` header and add random jitter to prevent thundering herd.
 
 ---
 
@@ -499,7 +499,7 @@ Set `requests = limits` for both CPU and memory to get a Guaranteed QoS class, w
 - **Configure liveness and readiness probes** with adequate `initialDelaySeconds` for model loading.
 - **Monitor GPU temperature** and set alerts at 80°C.
 
-⚠️ **Production Gotcha**: Readiness probes with default `initialDelaySeconds` (0) will mark a model-serving pod as "ready" before the model is actually loaded. Kubernetes routes traffic to it, requests hit an uninitialized model, and users see errors. Always set `initialDelaySeconds` to at least your model load time.
+**Production Gotcha**: Readiness probes with default `initialDelaySeconds` (0) will mark a model-serving pod as "ready" before the model is actually loaded. Kubernetes routes traffic to it, requests hit an uninitialized model, and users see errors. Always set `initialDelaySeconds` to at least your model load time.
 
 ---
 
@@ -616,7 +616,7 @@ echo "PASS: InfiniBand active on $(hostname)"
 - **Checkpoint frequently** — every 15–30 minutes for large jobs. The cost of writing a checkpoint is negligible compared to losing hours of training.
 - **Use Azure CycleCloud or AKS job schedulers** that can detect unresponsive nodes and restart jobs automatically.
 
-💡 **Pro Tip**: If `ibstat` shows `Active` but training still hangs, run `ib_write_bw` between node pairs to test actual InfiniBand bandwidth. A link can be "Active" but degraded.
+**Pro Tip**: If `ibstat` shows `Active` but training still hangs, run `ib_write_bw` between node pairs to test actual InfiniBand bandwidth. A link can be "Active" but degraded.
 
 ---
 
@@ -790,7 +790,7 @@ $ az vm list -g myRG --show-details -o table \
 $ az vm deallocate --resource-group myRG --name dev-gpu-01
 ```
 
-⚠️ **Production Gotcha**: `az vm stop` keeps the VM allocated — it still consumes quota and you still pay for the compute. Only `az vm deallocate` releases the resources.
+**Production Gotcha**: `az vm stop` keeps the VM allocated — it still consumes quota and you still pay for the compute. Only `az vm deallocate` releases the resources.
 
 **Request a quota increase:**
 
@@ -960,7 +960,7 @@ resource "azurerm_role_assignment" "ml_storage_reader" {
 - **Include VNet rules in Terraform** so storage firewall rules are always in sync with network topology.
 - **Test mounts in CI** — add a pipeline step that mounts the storage and verifies file access before deploying training jobs.
 
-💡 **Pro Tip**: RBAC role assignments can take up to 10 minutes to propagate. If you just created the assignment and the mount still fails, wait and retry. Don't start adding storage keys as a workaround.
+**Pro Tip**: RBAC role assignments can take up to 10 minutes to propagate. If you just created the assignment and the mount still fails, wait and retry. Don't start adding storage keys as a workaround.
 
 ---
 
@@ -1025,7 +1025,7 @@ Three common causes:
 - **Data drift detection**: Monitor the statistical distribution of incoming queries vs. training data. Tools like Azure Machine Learning's data drift monitor can automate this.
 - **Version pinning in deployment manifests**: Use immutable image tags (never `latest`) and track model versions in your deployment pipeline.
 
-⚠️ **Production Gotcha**: Quality degradation is the only production issue on this list where all infrastructure metrics look green. GPU utilization is normal. Latency is normal. Error rates are normal. The model is just confidently producing bad outputs. This is why model quality monitoring is separate from infrastructure monitoring — and equally important.
+**Production Gotcha**: Quality degradation is the only production issue on this list where all infrastructure metrics look green. GPU utilization is normal. Latency is normal. Error rates are normal. The model is just confidently producing bad outputs. This is why model quality monitoring is separate from infrastructure monitoring — and equally important.
 
 ---
 
@@ -1082,18 +1082,18 @@ Three common causes:
 
 Before you close this chapter, make sure you have:
 
-- ✅ **GPU driver monitoring** in place — alerts on `nvidia-smi` failures, not just GPU utilization
-- ✅ **Kernel pinning** configured on GPU VMs to prevent unattended upgrade breakage
-- ✅ **Memory calculations** done before training jobs start — use the formula from Chapter 4
-- ✅ **GPU pod templates** with correct `sku=gpu:NoSchedule` tolerations as defaults
-- ✅ **Exponential backoff with jitter** implemented in all Azure OpenAI client code
-- ✅ **Readiness probes** with adequate `initialDelaySeconds` on model-serving containers
-- ✅ **NCCL timeout** configured for distributed training jobs (don't let hangs run forever)
-- ✅ **Container memory limits** set to 2× model weight size for inference pods
-- ✅ **GPU quota monitoring** with alerts at 80% usage per VM family per region
-- ✅ **Storage RBAC and firewall rules** provisioned alongside storage accounts in IaC
-- ✅ **Model quality monitoring** separate from infrastructure monitoring
-- ✅ **Checkpoint frequency** set for distributed training (every 15–30 minutes minimum)
+- **GPU driver monitoring** in place — alerts on `nvidia-smi` failures, not just GPU utilization
+- **Kernel pinning** configured on GPU VMs to prevent unattended upgrade breakage
+- **Memory calculations** done before training jobs start — use the formula from Chapter 4
+- **GPU pod templates** with correct `sku=gpu:NoSchedule` tolerations as defaults
+- **Exponential backoff with jitter** implemented in all Azure OpenAI client code
+- **Readiness probes** with adequate `initialDelaySeconds` on model-serving containers
+- **NCCL timeout** configured for distributed training jobs (don't let hangs run forever)
+- **Container memory limits** set to 2× model weight size for inference pods
+- **GPU quota monitoring** with alerts at 80% usage per VM family per region
+- **Storage RBAC and firewall rules** provisioned alongside storage accounts in IaC
+- **Model quality monitoring** separate from infrastructure monitoring
+- **Checkpoint frequency** set for distributed training (every 15–30 minutes minimum)
 
 ---
 

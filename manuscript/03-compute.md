@@ -1,4 +1,4 @@
-﻿# Chapter 3 — Compute: Where Intelligence Comes to Life
+# Chapter 3 — Compute: Where Intelligence Comes to Life
 
 > "The difference between a training job that takes two days and one that takes ninety minutes isn't a faster GPU — it's knowing which GPU to pick and how to connect them."
 
@@ -30,14 +30,14 @@ Before you select a single VM SKU, you need to know which workload you're servin
 | **Failure impact** | Restart from last checkpoint — hours of lost work | Dropped request — retry in milliseconds |
 | **Network sensitivity** | Extremely high — gradient sync every few seconds | Moderate — request/response payloads are small |
 
-🔄 **Infra ↔ AI Translation**
+**Infra ↔ AI Translation**
 Think of **training** as a massive batch job — like re-indexing a petabyte data warehouse overnight. Think of **inference** as a high-traffic API endpoint — like your organization's authentication service handling thousands of logins per second. The infrastructure patterns you already know map directly.
 
 ### When CPU is enough
 
 Not every AI workload needs a GPU. Lightweight inference scenarios — small classification models, embedding generation for search, or edge deployments — run perfectly well on `Standard_D` or `Standard_F` series VMs. If your model fits comfortably in system RAM and latency requirements are above 50 ms, benchmark on CPU first. GPUs are expensive; don't use them when you don't have to.
 
-💡 **Pro Tip**: Ask the ML team two questions before provisioning anything: (1) "Are we training or serving?" and (2) "What's the model size in parameters?" A 350-million-parameter model can often run inference on CPU. A 70-billion-parameter model cannot.
+**Pro Tip**: Ask the ML team two questions before provisioning anything: (1) "Are we training or serving?" and (2) "What's the model size in parameters?" A 350-million-parameter model can often run inference on CPU. A 70-billion-parameter model cannot.
 
 ---
 
@@ -49,7 +49,7 @@ A modern server CPU has 32–128 cores optimized for complex, branching logic �
 
 AI workloads — training and inference alike — are fundamentally matrix multiplication. Every layer of a neural network multiplies an input matrix by a weight matrix, adds a bias, and applies an activation function. A CPU processes these operations sequentially across a few dozen cores. A GPU processes thousands of them simultaneously. The result: operations that take minutes on a CPU finish in seconds on a GPU.
 
-🔄 **Infra ↔ AI Translation**
+**Infra ↔ AI Translation**
 Think of a GPU like a network interface card that offloads packet processing from the CPU. Just as a SmartNIC handles millions of packets per second without burdening the host processor, a GPU offloads millions of matrix operations. The CPU orchestrates; the GPU executes the heavy math.
 
 ### CUDA Cores vs. Tensor Cores
@@ -68,7 +68,7 @@ Google's **Tensor Processing Units (TPUs)** and AWS's **Trainium** chips are pur
 
 Choosing the right GPU VM family is the single highest-impact decision you'll make for an AI workload. Get it right and training finishes on time, within budget. Get it wrong and you'll burn money on idle hardware or wait days for results that should take hours.
 
-📊 **Decision Matrix: Azure GPU VM Families**
+**Decision Matrix: Azure GPU VM Families**
 
 | Family | SKU Example | GPUs | GPU Memory | Interconnect | Best For | Approx. Cost/hr |
 |--------|-------------|------|------------|--------------|----------|-----------------|
@@ -82,7 +82,7 @@ Choosing the right GPU VM family is the single highest-impact decision you'll ma
 
 *Prices are approximate pay-as-you-go rates for East US. Always check [Azure Pricing Calculator](https://azure.microsoft.com/pricing/calculator/) for current rates.*
 
-⚠️ **Production Gotcha**: The **original ND-series** (ND6s, ND12s, ND24s, ND24rs) was **retired in September 2023**. If you find Terraform templates, ARM scripts, or blog posts referencing these SKUs, they will fail to deploy. Always verify against the [Azure VM retirement page](https://learn.microsoft.com/azure/virtual-machines/sizes/overview) before provisioning. The current ND-series VMs are `Standard_ND96asr_v4` (A100) and `Standard_ND96isr_H100_v5` (H100) — completely different hardware.
+**Production Gotcha**: The **original ND-series** (ND6s, ND12s, ND24s, ND24rs) was **retired in September 2023**. If you find Terraform templates, ARM scripts, or blog posts referencing these SKUs, they will fail to deploy. Always verify against the [Azure VM retirement page](https://learn.microsoft.com/azure/virtual-machines/sizes/overview) before provisioning. The current ND-series VMs are `Standard_ND96asr_v4` (A100) and `Standard_ND96isr_H100_v5` (H100) — completely different hardware.
 
 ### Choosing the right family
 
@@ -110,7 +110,7 @@ If the `Restrictions` column shows `NotAvailableForSubscription`, you need to re
 
 There are three reasons you distribute an AI workload: the model is too large for a single GPU's memory, training is too slow on a single node, or you need to serve more inference requests than one VM can handle. Each reason points to a different clustering strategy.
 
-📊 **Decision Matrix: Clustering Platforms**
+**Decision Matrix: Clustering Platforms**
 
 | Platform | Best For | GPU Support | Scaling | Complexity |
 |----------|----------|-------------|---------|------------|
@@ -152,9 +152,9 @@ spec:
 
 The NVIDIA device plugin (`k8s-device-plugin`, current version v0.18.0) runs as a DaemonSet on GPU nodes. It exposes `nvidia.com/gpu` as a schedulable resource to the Kubernetes scheduler. Without it, Kubernetes has no idea GPUs exist on the node.
 
-⚠️ **Production Gotcha**: The GPU taint in AKS is `sku=gpu:NoSchedule` — **not** `nvidia.com/gpu`. Many online tutorials use the wrong taint key, which means your tolerations won't match and pods will stay in `Pending` forever. Check the [AKS GPU documentation](https://learn.microsoft.com/azure/aks/gpu-cluster) for the current specification.
+**Production Gotcha**: The GPU taint in AKS is `sku=gpu:NoSchedule` — **not** `nvidia.com/gpu`. Many online tutorials use the wrong taint key, which means your tolerations won't match and pods will stay in `Pending` forever. Check the [AKS GPU documentation](https://learn.microsoft.com/azure/aks/gpu-cluster) for the current specification.
 
-💡 **Pro Tip**: Azure now offers **fully managed GPU node pools** (in preview) that automatically install GPU drivers, the NVIDIA device plugin, and a metrics exporter. This eliminates the most common GPU-on-Kubernetes headache — driver version mismatches. Check the [AKS release notes](https://learn.microsoft.com/azure/aks/release-notes) for availability in your region.
+**Pro Tip**: Azure now offers **fully managed GPU node pools** (in preview) that automatically install GPU drivers, the NVIDIA device plugin, and a metrics exporter. This eliminates the most common GPU-on-Kubernetes headache — driver version mismatches. Check the [AKS release notes](https://learn.microsoft.com/azure/aks/release-notes) for availability in your region.
 
 ### Azure Machine Learning compute clusters
 
@@ -177,7 +177,7 @@ When a single node isn't enough, you need a distributed training framework. The 
 | **Horovod** | Uber/LF AI | Framework-agnostic, simple API, MPI-based |
 | **Ray Train** | Anyscale | Python-native, elastic scaling, multi-framework |
 
-🔄 **Infra ↔ AI Translation**
+**Infra ↔ AI Translation**
 Distributed training is conceptually similar to a **distributed database cluster**. Data parallelism is like database sharding — each node holds all the logic (the model) but processes a different subset of data. Model parallelism is like partitioning a monolithic application into microservices — each node handles a different piece of the logic. In both worlds, the network between nodes determines total system performance.
 
 ---
@@ -215,7 +215,7 @@ The impact is significant: network latency drops from approximately **500 μs to
 
 ### Proximity placement groups
 
-⚠️ **Production Gotcha**: Deploying distributed training nodes across different **availability zones** adds cross-zone network latency that can reduce training throughput by **30–50 %**. For multi-node training jobs, always use a **[proximity placement group](https://learn.microsoft.com/azure/virtual-machines/co-location)** to co-locate your VMs in the same data center. This applies to both standalone VMs and AKS node pools.
+**Production Gotcha**: Deploying distributed training nodes across different **availability zones** adds cross-zone network latency that can reduce training throughput by **30–50 %**. For multi-node training jobs, always use a **[proximity placement group](https://learn.microsoft.com/azure/virtual-machines/co-location)** to co-locate your VMs in the same data center. This applies to both standalone VMs and AKS node pools.
 
 ```bash
 # Create a proximity placement group
@@ -236,13 +236,13 @@ az vmss create \
   --accelerated-networking true
 ```
 
-💡 **Pro Tip**: When troubleshooting slow distributed training, check network throughput *before* blaming the GPUs. Run `ib_write_bw` (InfiniBand bandwidth test) between nodes. If you see significantly less than the expected 200 or 400 Gb/s, the problem is likely network configuration — not the model code.
+**Pro Tip**: When troubleshooting slow distributed training, check network throughput *before* blaming the GPUs. Run `ib_write_bw` (InfiniBand bandwidth test) between nodes. If you see significantly less than the expected 200 or 400 Gb/s, the problem is likely network configuration — not the model code.
 
 ---
 
 ## Example Architecture: LLM Inference on AKS
 
-![](resources/example-architecture.png)
+![](example-architecture.png)
 
 This reference architecture shows a production LLM inference deployment combining several components you've learned about in this chapter:
 
@@ -381,7 +381,7 @@ GPU VMs are expensive even when idle. Delete the resource group when you're done
 az group delete --name $RESOURCE_GROUP --yes --no-wait
 ```
 
-⚠️ **Production Gotcha**: A single `Standard_NC4as_T4_v3` costs approximately $0.53/hour. That's manageable for a lab. But an `Standard_ND96isr_H100_v5` costs roughly $98/hour — leaving one running over a weekend costs over **$4,700**. Always set up [Azure cost alerts](https://learn.microsoft.com/azure/cost-management-billing/costs/cost-mgt-alerts-monitor-usage-spending) and auto-shutdown policies for GPU VMs.
+**Production Gotcha**: A single `Standard_NC4as_T4_v3` costs approximately $0.53/hour. That's manageable for a lab. But an `Standard_ND96isr_H100_v5` costs roughly $98/hour — leaving one running over a weekend costs over **$4,700**. Always set up [Azure cost alerts](https://learn.microsoft.com/azure/cost-management-billing/costs/cost-mgt-alerts-monitor-usage-spending) and auto-shutdown policies for GPU VMs.
 
 ---
 
@@ -398,7 +398,7 @@ GPU infrastructure requires purpose-built observability. Traditional CPU metrics
 | Token throughput (tokens/sec) | Application logs, Azure OpenAI metrics | Model serving efficiency |
 | Node availability | AKS Cluster Autoscaler, VMSS | Scaling events and failure recovery |
 
-💡 **Pro Tip**: Deploy **NVIDIA DCGM Exporter** as a DaemonSet in your AKS GPU node pools. It exposes GPU metrics in Prometheus format, which **Azure Managed Prometheus** scrapes automatically. Pair it with pre-built **Grafana dashboards** for GPU utilization, memory, temperature, and error rates. This gives you the same visibility into GPU health that you're used to having for CPU and memory with standard infrastructure monitoring.
+**Pro Tip**: Deploy **NVIDIA DCGM Exporter** as a DaemonSet in your AKS GPU node pools. It exposes GPU metrics in Prometheus format, which **Azure Managed Prometheus** scrapes automatically. Pair it with pre-built **Grafana dashboards** for GPU utilization, memory, temperature, and error rates. This gives you the same visibility into GPU health that you're used to having for CPU and memory with standard infrastructure monitoring.
 
 ---
 
@@ -415,21 +415,21 @@ GPU infrastructure inherits all the security requirements of your existing envir
 
 ---
 
-## ✅ Chapter Checklist
+## Chapter Checklist
 
 Before you move on, make sure you can confidently answer these questions:
 
-- ✅ **I can distinguish training from inference** and know which compute profile each requires.
-- ✅ **I understand why GPUs dominate AI** — massive parallelism for matrix math — and when CPUs are sufficient.
-- ✅ **I can select the right Azure GPU VM family**: NC T4 v3 for inference, ND A100/H100 for training, NV A10 for dev/test.
-- ✅ **I know the original ND-series is retired** (September 2023) and will not use those SKUs.
-- ✅ **I can check GPU SKU availability** in my target region using `az vm list-skus`.
-- ✅ **I understand clustering options**: AKS for inference at scale, Azure ML for managed training, VMSS for batch GPU workloads.
-- ✅ **I know AKS GPU taints** (`sku=gpu:NoSchedule`) and how to configure tolerations and the NVIDIA device plugin.
-- ✅ **I understand why networking is the hidden multiplier**: InfiniBand (200–400 Gb/s), RDMA, and NCCL are what make distributed training feasible.
-- ✅ **I can provision a GPU VM**, install drivers via the Azure VM Extension, and validate with `nvidia-smi`.
-- ✅ **I have GPU monitoring covered**: DCGM Exporter, Managed Prometheus, and Grafana dashboards for GPU utilization, memory, and temperature.
-- ✅ **I will always clean up GPU resources** and set cost alerts to avoid surprise bills.
+- **I can distinguish training from inference** and know which compute profile each requires.
+- **I understand why GPUs dominate AI** — massive parallelism for matrix math — and when CPUs are sufficient.
+- **I can select the right Azure GPU VM family**: NC T4 v3 for inference, ND A100/H100 for training, NV A10 for dev/test.
+- **I know the original ND-series is retired** (September 2023) and will not use those SKUs.
+- **I can check GPU SKU availability** in my target region using `az vm list-skus`.
+- **I understand clustering options**: AKS for inference at scale, Azure ML for managed training, VMSS for batch GPU workloads.
+- **I know AKS GPU taints** (`sku=gpu:NoSchedule`) and how to configure tolerations and the NVIDIA device plugin.
+- **I understand why networking is the hidden multiplier**: InfiniBand (200–400 Gb/s), RDMA, and NCCL are what make distributed training feasible.
+- **I can provision a GPU VM**, install drivers via the Azure VM Extension, and validate with `nvidia-smi`.
+- **I have GPU monitoring covered**: DCGM Exporter, Managed Prometheus, and Grafana dashboards for GPU utilization, memory, and temperature.
+- **I will always clean up GPU resources** and set cost alerts to avoid surprise bills.
 
 ---
 

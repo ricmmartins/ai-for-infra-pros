@@ -1,5 +1,3 @@
-{backmatter}
-
 # Resources
 
 ## Online Companion

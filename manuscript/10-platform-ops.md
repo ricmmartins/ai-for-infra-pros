@@ -22,7 +22,7 @@ Platform engineering isn't new. You've been doing it for years with web apps, da
 
 AI infrastructure follows the same principle. Instead of provisioning GPU VMs ad hoc, you build templates. Instead of manually creating Kubernetes namespaces, you offer a self-service portal. Instead of answering "how do I deploy a model?", you provide a pipeline that does it.
 
-🔄 **Infra ↔ AI Translation:** Platform engineering is the same discipline you already know — now applied to GPU compute, model registries, and inference endpoints instead of web apps and SQL databases. The abstraction layers change; the thinking doesn't.
+**Infra ↔ AI Translation:** Platform engineering is the same discipline you already know — now applied to GPU compute, model registries, and inference endpoints instead of web apps and SQL databases. The abstraction layers change; the thinking doesn't.
 
 ### What to Automate vs. What to Manage
 
@@ -30,14 +30,14 @@ Not everything should be self-service. The decision depends on blast radius and 
 
 | Category | Self-Service | Managed (Requires Approval) |
 |---|---|---|
-| Dev/test namespaces | ✅ | |
-| Small GPU allocations (1–2 GPUs) | ✅ | |
-| Production inference endpoints | | ✅ |
-| Large training jobs (8+ GPUs) | | ✅ |
-| New cluster provisioning | | ✅ |
-| Jupyter notebook environments | ✅ | |
-| Azure OpenAI endpoint creation | | ✅ |
-| Storage volumes for datasets | ✅ | |
+| Dev/test namespaces | | |
+| Small GPU allocations (1–2 GPUs) | | |
+| Production inference endpoints | | |
+| Large training jobs (8+ GPUs) | | |
+| New cluster provisioning | | |
+| Jupyter notebook environments | | |
+| Azure OpenAI endpoint creation | | |
+| Storage volumes for datasets | | |
 
 The rule of thumb: if a mistake costs less than a few hundred dollars and can be reversed in minutes, make it self-service. If it involves expensive resources, production traffic, or cross-team impact, put a gate on it.
 
@@ -51,14 +51,14 @@ Multi-tenancy in AI infrastructure is about balancing isolation against efficien
 
 There are four levels of isolation, each with different tradeoffs:
 
-### 📊 Decision Matrix: Team Isolation Levels
+### Decision Matrix: Team Isolation Levels
 
 | Isolation Level | Cost Efficiency | Security Boundary | Operational Overhead | Best For |
 |---|---|---|---|---|
-| **Namespace** | ⭐⭐⭐⭐⭐ | Low | Low | Trusted teams sharing a cluster |
-| **Node pool** | ⭐⭐⭐⭐ | Medium | Medium | Teams needing dedicated GPU types |
-| **Cluster** | ⭐⭐⭐ | High | High | Teams with different compliance needs |
-| **Subscription** | ⭐⭐ | Very High | Very High | Regulated workloads, separate billing |
+| **Namespace** | | Low | Low | Trusted teams sharing a cluster |
+| **Node pool** | | Medium | Medium | Teams needing dedicated GPU types |
+| **Cluster** | | High | High | Teams with different compliance needs |
+| **Subscription** | | Very High | Very High | Regulated workloads, separate billing |
 
 Most organizations land on a hybrid: one or two shared clusters with per-team namespaces and dedicated GPU node pools, plus separate clusters for production inference and regulated workloads.
 
@@ -111,7 +111,7 @@ spec:
 
 This caps the data science team at 8 GPUs, 64 CPU cores, and 256 GiB of memory. They can distribute that budget across any number of pods — one job with 8 GPUs or eight jobs with 1 GPU each — but they can't exceed the total.
 
-⚠️ **Production Gotcha:** ResourceQuotas only enforce at scheduling time. If you lower a quota below current usage, existing pods won't be evicted — but new pods will be rejected. Plan quota changes during maintenance windows when teams can reschedule their workloads.
+**Production Gotcha:** ResourceQuotas only enforce at scheduling time. If you lower a quota below current usage, existing pods won't be evicted — but new pods will be rejected. Plan quota changes during maintenance windows when teams can reschedule their workloads.
 
 ### Network Isolation
 
@@ -181,7 +181,7 @@ spec:
         accelerator: nvidia-a100
 ```
 
-💡 **Pro Tip:** Always set GPU requests equal to GPU limits. Unlike CPU and memory, GPUs can't be overcommitted. A pod requesting 1 GPU will exclusively own that GPU regardless of its limit value, so mismatched values only create confusion.
+**Pro Tip:** Always set GPU requests equal to GPU limits. Unlike CPU and memory, GPUs can't be overcommitted. A pod requesting 1 GPU will exclusively own that GPU regardless of its limit value, so mismatched values only create confusion.
 
 ### Priority Classes
 
@@ -219,7 +219,7 @@ description: "Interactive notebooks, experiments — can be preempted."
 
 With this hierarchy, a production inference pod will preempt a training job if GPUs are scarce, and training jobs will preempt exploratory notebooks. But exploratory workloads will never preempt anything — they wait.
 
-💡 **Pro Tip:** Use `preemptionPolicy: Never` for exploratory workloads. This prevents a stampede where 50 notebook pods all try to preempt each other in a tight GPU environment.
+**Pro Tip:** Use `preemptionPolicy: Never` for exploratory workloads. This prevents a stampede where 50 notebook pods all try to preempt each other in a tight GPU environment.
 
 ### Kueue: Fair Scheduling for Batch AI Workloads
 
@@ -364,7 +364,7 @@ az vm list-usage --location eastus \
 
 Set alerts when any quota crosses 80% utilization. At 80%, you still have time to request an increase. At 95%, you're one training job away from a hard stop.
 
-💡 **Pro Tip:** Azure quota increases can take days for GPU SKUs in popular regions. File your increase request well before you need it — ideally when you hit 60% utilization, not 90%.
+**Pro Tip:** Azure quota increases can take days for GPU SKUs in popular regions. File your increase request well before you need it — ideally when you hit 60% utilization, not 90%.
 
 ---
 
@@ -374,7 +374,7 @@ Set alerts when any quota crosses 80% utilization. At 80%, you still have time t
 
 Every inference endpoint needs clear service-level objectives. Without them, every latency spike is a fire drill and every team's workload is equally "critical."
 
-### 📊 Decision Matrix: SLO Tiers for AI Services
+### Decision Matrix: SLO Tiers for AI Services
 
 | Tier | Latency (P99) | Availability | Throughput | Example Use Cases |
 |---|---|---|---|---|
@@ -419,7 +419,7 @@ startupProbe:
   failureThreshold: 30
 ```
 
-⚠️ **Production Gotcha:** Large models can take 5–10 minutes to load into GPU memory. Set `startupProbe.failureThreshold` high enough to cover your largest model's load time, or Kubernetes will kill the container in a restart loop before the model is ready.
+**Production Gotcha:** Large models can take 5–10 minutes to load into GPU memory. Set `startupProbe.failureThreshold` high enough to cover your largest model's load time, or Kubernetes will kill the container in a restart loop before the model is ready.
 
 ### Graceful Degradation
 
@@ -495,13 +495,13 @@ Container Runtime  containerd 1.7 containerd 1.7 containerd 1.7 containerd 1.7
 ─────────────────────────────────────────────────────────────
 ```
 
-💡 **Pro Tip:** Keep production clusters on identical versions. Let the dev cluster run one version ahead as your early-warning system. When a new CUDA version breaks a popular training framework, you want to discover that in dev — not in the middle of a two-week production training run.
+**Pro Tip:** Keep production clusters on identical versions. Let the dev cluster run one version ahead as your early-warning system. When a new CUDA version breaks a popular training framework, you want to discover that in dev — not in the middle of a two-week production training run.
 
 ### GPU Driver Upgrades
 
 GPU driver upgrades are the most dangerous operation in your fleet. A bad driver can cause silent data corruption in model training, kernel panics, or total GPU failure. Treat driver upgrades with the same care as a kernel upgrade.
 
-⚠️ **Production Gotcha:** Never upgrade GPU drivers on all clusters simultaneously. Use a canary deployment strategy: upgrade the dev cluster first, run validation workloads for 48 hours, then move to one production cluster. Wait another 48 hours before rolling to the rest of the fleet. Silent GPU errors can take days to surface in training loss curves.
+**Production Gotcha:** Never upgrade GPU drivers on all clusters simultaneously. Use a canary deployment strategy: upgrade the dev cluster first, run validation workloads for 48 hours, then move to one production cluster. Wait another 48 hours before rolling to the rest of the fleet. Silent GPU errors can take days to surface in training loss curves.
 
 Build standardized VM images with pre-baked GPU drivers using Azure Image Builder or Packer. This ensures every node in every cluster runs identical driver versions. Never rely on driver installation at boot time — it's slow, fragile, and adds unpredictable startup latency to your node pools.
 
@@ -596,29 +596,29 @@ Data scientists don't want to build Docker images or write Kubernetes manifests.
 - **VS Code Dev Containers:** Provide `.devcontainer` configurations with GPU passthrough. Data scientists clone a repo and get a fully configured development environment.
 - **Training job templates:** Offer a simple CLI or web form: "I want to fine-tune a model. Here's my script, here's my dataset, here's how many GPUs I need." The template generates the Kubernetes Job manifest, submits it through Kueue, and sends the scientist a link to the logs.
 
-🔄 **Infra ↔ AI Translation:** This is the same abstraction pattern you've used for years. VMs became containers. Containers became serverless functions. Now, GPU access becomes a profile dropdown. Every generation of infrastructure goes through this arc from manual to self-service.
+**Infra ↔ AI Translation:** This is the same abstraction pattern you've used for years. VMs became containers. Containers became serverless functions. Now, GPU access becomes a profile dropdown. Every generation of infrastructure goes through this arc from manual to self-service.
 
 ---
 
 ## Chapter Checklist
 
-- ✅ Defined isolation boundaries for each team (namespace, node pool, cluster, or subscription)
-- ✅ Implemented ResourceQuotas to cap GPU, CPU, and memory per namespace
-- ✅ Set up RBAC scoping with Microsoft Entra ID groups mapped to Kubernetes roles
-- ✅ Applied network policies to prevent cross-namespace traffic
-- ✅ Created priority classes separating production inference, training, and exploratory workloads
-- ✅ Deployed Kueue for job queueing and fair-share scheduling
-- ✅ Evaluated Volcano for distributed training with gang scheduling
-- ✅ Set up Azure capacity reservations for production inference GPU VMs
-- ✅ Configured quota usage alerts at 80% thresholds
-- ✅ Defined SLO tiers (real-time, near-real-time, batch) for inference endpoints
-- ✅ Implemented health probes with startup probe timeouts that cover model load time
-- ✅ Built a GitOps repository structure for multi-cluster fleet management
-- ✅ Established a canary strategy for GPU driver upgrades
-- ✅ Centralized observability with cross-cluster GPU monitoring dashboards
-- ✅ Implemented cost attribution with consistent Kubernetes labels
-- ✅ Automated team onboarding via Terraform modules or platform templates
-- ✅ Provided self-service environments (JupyterHub, training templates) for data scientists
+- Defined isolation boundaries for each team (namespace, node pool, cluster, or subscription)
+- Implemented ResourceQuotas to cap GPU, CPU, and memory per namespace
+- Set up RBAC scoping with Microsoft Entra ID groups mapped to Kubernetes roles
+- Applied network policies to prevent cross-namespace traffic
+- Created priority classes separating production inference, training, and exploratory workloads
+- Deployed Kueue for job queueing and fair-share scheduling
+- Evaluated Volcano for distributed training with gang scheduling
+- Set up Azure capacity reservations for production inference GPU VMs
+- Configured quota usage alerts at 80% thresholds
+- Defined SLO tiers (real-time, near-real-time, batch) for inference endpoints
+- Implemented health probes with startup probe timeouts that cover model load time
+- Built a GitOps repository structure for multi-cluster fleet management
+- Established a canary strategy for GPU driver upgrades
+- Centralized observability with cross-cluster GPU monitoring dashboards
+- Implemented cost attribution with consistent Kubernetes labels
+- Automated team onboarding via Terraform modules or platform templates
+- Provided self-service environments (JupyterHub, training templates) for data scientists
 
 ---
 

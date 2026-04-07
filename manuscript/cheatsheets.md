@@ -8,14 +8,14 @@ A condensed, at-a-glance reference covering every chapter of the book. Print thi
 
 | VM SKU | GPU | VRAM | Ideal For | Inference | Training | ~Cost/hr |
 |--------|-----|------|-----------|-----------|----------|----------|
-| `Standard_NC4as_T4_v3` | 1× T4 | 16 GB | Cost-effective inference | ✅✅ | ❌ | ~$0.53 |
-| `Standard_NC6s_v3` | 1× V100 | 16 GB | General AI workloads | ✅ | ⚠️ | ~$0.90 |
-| `Standard_NC24ads_A100_v4` | 1× A100 | 80 GB | Single-GPU training/inference | ✅✅ | ✅✅ | ~$3.67 |
-| `Standard_NV36ads_A10_v5` | 1× A10 | 24 GB | Visualization + lightweight AI | ✅ | ❌ | ~$1.80 |
-| `Standard_ND96asr_v4` | 8× A100 | 640 GB total | Multi-GPU LLM training | ✅✅✅ | ✅✅✅ | ~$27.20 |
-| `Standard_ND96isr_H100_v5` | 8× H100 | 640 GB total | Frontier model training | ✅✅✅ | ✅✅✅ | ~$40+ |
+| `Standard_NC4as_T4_v3` | 1× T4 | 16 GB | Cost-effective inference | | ❌ | ~$0.53 |
+| `Standard_NC6s_v3` | 1× V100 | 16 GB | General AI workloads | | | ~$0.90 |
+| `Standard_NC24ads_A100_v4` | 1× A100 | 80 GB | Single-GPU training/inference | | | ~$3.67 |
+| `Standard_NV36ads_A10_v5` | 1× A10 | 24 GB | Visualization + lightweight AI | | ❌ | ~$1.80 |
+| `Standard_ND96asr_v4` | 8× A100 | 640 GB total | Multi-GPU LLM training | | | ~$27.20 |
+| `Standard_ND96isr_H100_v5` | 8× H100 | 640 GB total | Frontier model training | | | ~$40+ |
 
-💡 **Pro Tip**: For inference, start with T4 (`NC4as_T4_v3`). Only move to A10 or A100 when you've proven the model doesn't fit in 16 GB VRAM or needs higher throughput.
+**Pro Tip**: For inference, start with T4 (`NC4as_T4_v3`). Only move to A10 or A100 when you've proven the model doesn't fit in 16 GB VRAM or needs higher throughput.
 
 ---
 
@@ -30,7 +30,7 @@ A condensed, at-a-glance reference covering every chapter of the book. Print thi
 | Azure families | Dv5, Ev5, Fv2 | NCas_T4, NC_A100, ND_H100 |
 | Cost profile | 💲 | 💲💲💲 |
 
-⚠️ **Production Gotcha**: Don't put preprocessing (image resizing, tokenization) on GPUs. Use CPU nodes for data preparation and reserve GPU exclusively for model computation.
+**Production Gotcha**: Don't put preprocessing (image resizing, tokenization) on GPUs. Use CPU nodes for data preparation and reserve GPU exclusively for model computation.
 
 ---
 
@@ -64,7 +64,7 @@ VRAM ≈ Model weights + KV cache
 KV cache per token ≈ 2 × num_layers × hidden_dim × 2 bytes (FP16)
 ```
 
-💡 **Pro Tip**: When a model *just barely* fits in VRAM, you'll OOM under load because the KV cache grows with sequence length and batch size. Leave 20% VRAM headroom.
+**Pro Tip**: When a model *just barely* fits in VRAM, you'll OOM under load because the KV cache grows with sequence length and batch size. Leave 20% VRAM headroom.
 
 ### GPU Count Calculator
 
@@ -79,7 +79,7 @@ Min GPUs needed = Total model memory ÷ Per-GPU VRAM × 1.2 (safety margin)
 | Llama 2 70B | FP16 | 140 GB | 2× A100-80GB |
 | Llama 2 70B | INT4 | 35 GB | 1× A100-80GB |
 
-⚠️ **Production Gotcha**: These are *weights only*. KV cache for a 4K context with batch size 32 can add 8-12 GB. Always benchmark actual memory under realistic load.
+**Production Gotcha**: These are *weights only*. KV cache for a 4K context with batch size 32 can add 8-12 GB. Always benchmark actual memory under realistic load.
 
 ---
 
@@ -202,7 +202,7 @@ az ml job show --name <job-name> --output table
 az ml job stream --name <job-name>
 ```
 
-💡 **Pro Tip**: Always version your models with semantic versioning in the model registry. When an inference endpoint degrades, you need to roll back to `fraud-detector:3` not "whatever was deployed last Tuesday."
+**Pro Tip**: Always version your models with semantic versioning in the model registry. When an inference endpoint degrades, you need to roll back to `fraud-detector:3` not "whatever was deployed last Tuesday."
 
 ---
 
@@ -223,7 +223,7 @@ az vm create \
   --eviction-policy Deallocate
 ```
 
-⚠️ **Production Gotcha**: Always check GPU quota *before* deploying: `az vm list-usage --location eastus -o table | grep -i "NC"`. Quota requests take 1-5 business days.
+**Production Gotcha**: Always check GPU quota *before* deploying: `az vm list-usage --location eastus -o table | grep -i "NC"`. Quota requests take 1-5 business days.
 
 ### AKS GPU Node Pool (Terraform)
 
@@ -340,7 +340,7 @@ az consumption budget create \
 }
 ```
 
-💡 **Pro Tip**: Set up a weekly cost anomaly alert at 120% of your trailing 4-week average. GPU costs can spike fast when someone forgets to deallocate a training VM.
+**Pro Tip**: Set up a weekly cost anomaly alert at 120% of your trailing 4-week average. GPU costs can spike fast when someone forgets to deallocate a training VM.
 
 ---
 
@@ -429,7 +429,7 @@ data:
           replicas: 2
 ```
 
-⚠️ **Production Gotcha**: GPU time-slicing provides no memory isolation. If Pod A allocates 14 GB on a 16 GB T4, Pod B will OOM even though Kubernetes shows the GPU as "available." Only use time-slicing in dev/test.
+**Production Gotcha**: GPU time-slicing provides no memory isolation. If Pod A allocates 14 GB on a 16 GB T4, Pod B will OOM even though Kubernetes shows the GPU as "available." Only use time-slicing in dev/test.
 
 ---
 
@@ -495,7 +495,7 @@ az monitor metrics list \
   --output table
 ```
 
-💡 **Pro Tip**: If your 429 rate exceeds 5%, you're leaving performance on the table. Either increase your TPM quota, migrate to PTU, or implement client-side exponential backoff with jitter.
+**Pro Tip**: If your 429 rate exceeds 5%, you're leaving performance on the table. Either increase your TPM quota, migrate to PTU, or implement client-side exponential backoff with jitter.
 
 ---
 

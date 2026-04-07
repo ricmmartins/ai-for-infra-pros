@@ -36,7 +36,7 @@ Every AI system rests on three pillars, and you'll recognize them immediately:
 
 The model is the application. The data is what it consumes and produces. The infrastructure is everything that makes it run reliably, securely, and at scale. That last part? That's you.
 
-### 🔄 Infra ↔ AI Translation
+### Infra ↔ AI Translation
 
 This is the mental model that will carry you through the entire book. When someone on the AI team uses unfamiliar jargon, map it back to what you know:
 
@@ -51,7 +51,7 @@ This is the mental model that will carry you through the entire book. When someo
 | Model registry | Artifact repository | Versioned storage for deployable artifacts (think Azure Container Registry, but for models) |
 | GPU cluster | High-performance compute tier | Specialized hardware allocated for demanding workloads |
 
-💡 **Pro Tip**: When you're in a meeting and the data science team starts talking about "epochs," "hyperparameters," and "loss functions," don't panic. Those are *their* tuning knobs — the equivalent of your connection pool sizes, cache TTLs, and autoscale thresholds. You don't need to master their knobs. You need to understand what their knobs demand from your infrastructure.
+**Pro Tip**: When you're in a meeting and the data science team starts talking about "epochs," "hyperparameters," and "loss functions," don't panic. Those are *their* tuning knobs — the equivalent of your connection pool sizes, cache TTLs, and autoscale thresholds. You don't need to master their knobs. You need to understand what their knobs demand from your infrastructure.
 
 ---
 
@@ -81,7 +81,7 @@ This is equally important — maybe more so. These fundamentals don't change jus
 - **Incident response**: When the model inference API goes down at 2 AM, someone still needs to triage it. That someone should be you.
 - **Cost management**: Budgets, tagging, right-sizing, reserved capacity. If anything, cost governance is *more* critical with AI workloads.
 
-⚠️ **Production Gotcha**: Don't assume AI workloads need entirely new tooling. Teams often over-invest in specialized "ML platforms" while ignoring basic infrastructure hygiene. The most common production failures in AI systems aren't model accuracy problems — they're the same old culprits: disk full, network timeout, expired certificate, missing RBAC permission. Your instincts are right.
+**Production Gotcha**: Don't assume AI workloads need entirely new tooling. Teams often over-invest in specialized "ML platforms" while ignoring basic infrastructure hygiene. The most common production failures in AI systems aren't model accuracy problems — they're the same old culprits: disk full, network timeout, expired certificate, missing RBAC permission. Your instincts are right.
 
 ---
 
@@ -113,7 +113,7 @@ These aren't hypothetical scenarios. They're real patterns I've seen repeatedly 
 
 **Blind spots in observability.** The team monitors model accuracy but not infrastructure health. When inference latency spikes from 200ms to 8 seconds, nobody can tell whether it's the model, the compute, the network, or a noisy neighbor. There are no GPU metrics in the monitoring stack.
 
-⚠️ **Production Gotcha — The $50K GPU Weekend**: A team provisioned 8 × `Standard_ND96asr_v4` VMs (A100 GPUs) on a Friday afternoon for a training run they expected to finish by Saturday morning. The training job crashed at 3 AM due to a checkpoint storage misconfiguration, but the VMs kept running. Nobody had set up auto-shutdown policies or budget alerts. Monday morning surprise: **$53,000 in compute charges** for 60 hours of idle GPU time. An infrastructure engineer would have configured `auto-shutdown`, set a budget alert at $5,000, and stored checkpoints on Blob with lifecycle policies. Fifteen minutes of infrastructure work would have saved $48,000.
+**Production Gotcha — The $50K GPU Weekend**: A team provisioned 8 × `Standard_ND96asr_v4` VMs (A100 GPUs) on a Friday afternoon for a training run they expected to finish by Saturday morning. The training job crashed at 3 AM due to a checkpoint storage misconfiguration, but the VMs kept running. Nobody had set up auto-shutdown policies or budget alerts. Monday morning surprise: **$53,000 in compute charges** for 60 hours of idle GPU time. An infrastructure engineer would have configured `auto-shutdown`, set a budget alert at $5,000, and stored checkpoints on Blob with lifecycle policies. Fifteen minutes of infrastructure work would have saved $48,000.
 
 ---
 
@@ -147,7 +147,7 @@ The gap is narrower than you think. Here's what you'll learn through this book:
 - **AI-specific networking**: InfiniBand topology for multi-node training, NCCL communication patterns, bandwidth requirements between GPU nodes
 - **Managed AI services**: Azure OpenAI deployment types (standard vs. provisioned), Azure Machine Learning endpoints, AI Foundry
 
-💡 **Pro Tip**: You don't need to learn Python, TensorFlow, or PyTorch. You don't need to understand backpropagation or gradient descent. You need to understand what those tools and processes *demand from infrastructure*. When a data scientist says "my training job needs 8 A100 GPUs with NVLink and 2 TB of NVMe scratch space," you need to know which Azure VM SKU delivers that — not how the training algorithm works internally.
+**Pro Tip**: You don't need to learn Python, TensorFlow, or PyTorch. You don't need to understand backpropagation or gradient descent. You need to understand what those tools and processes *demand from infrastructure*. When a data scientist says "my training job needs 8 A100 GPUs with NVLink and 2 TB of NVMe scratch space," you need to know which Azure VM SKU delivers that — not how the training algorithm works internally.
 
 ### Career Paths in AI Infrastructure
 
@@ -160,7 +160,7 @@ This isn't a niche. It's a rapidly growing field with multiple trajectories:
 | **AI Cloud Architect** | Designing end-to-end AI platforms, reference architectures, governance frameworks | Azure AI services, cost optimization, security architecture |
 | **AI Platform Engineer** | Building internal platforms that enable data science teams to self-serve | Kubernetes, developer experience, API management, quotas |
 
-📊 **Decision Matrix — Where to Start**:
+**Decision Matrix — Where to Start**:
 - If you're strong in **compute and networking** → start with AI Infrastructure Engineer
 - If you're strong in **automation and CI/CD** → start with MLOps Engineer
 - If you're strong in **architecture and governance** → start with AI Cloud Architect
@@ -190,7 +190,7 @@ Here's an expanded glossary with infrastructure analogies for every term. Bookma
 | **Epoch** | One complete pass through the training dataset | Like a full backup cycle — the job processes every record once |
 | **Inference endpoint** | An API that serves model predictions | A web service endpoint — same concepts of scaling, load balancing, and health probes |
 
-🔄 **Infra ↔ AI Translation — The One-Liner Cheat Sheet**: A trained model is a compiled binary. Training is a batch job. Inference is an API call. A dataset is a database. A training pipeline is a CI/CD pipeline. If you can hold this mental model, you can navigate any AI architecture conversation.
+**Infra ↔ AI Translation — The One-Liner Cheat Sheet**: A trained model is a compiled binary. Training is a batch job. Inference is an API call. A dataset is a database. A training pipeline is a CI/CD pipeline. If you can hold this mental model, you can navigate any AI architecture conversation.
 
 ---
 
@@ -208,7 +208,7 @@ az vm list-skus --location <your-region> --size Standard_N --output table
 
 This filters for the `Standard_N` family, which includes all GPU-accelerated VMs in Azure. You'll see SKU names like `Standard_NC24ads_A100_v4`, `Standard_ND96asr_v4`, and `Standard_NV36ads_A10_v5`.
 
-💡 **Pro Tip**: Pay attention to three GPU VM family prefixes:
+**Pro Tip**: Pay attention to three GPU VM family prefixes:
 - **NC** — Compute-optimized GPUs for training and inference (NVIDIA T4, A100)
 - **ND** — High-end GPUs designed for distributed deep learning with InfiniBand (A100, H100)
 - **NV** — Visualization and lightweight inference GPUs (AMD Radeon, NVIDIA A10)
@@ -237,7 +237,7 @@ Now that you have the output, try answering these:
 4. What are your current **vCPU quotas** for the NC and ND families? Would you be able to deploy a single A100 VM today?
 5. How many **GPUs per VM** do the ND-series SKUs offer? (Some provide up to 8 GPUs in a single node)
 
-⚠️ **Production Gotcha**: GPU quota requests in Azure can take **24–72 hours** for approval, sometimes longer for high-demand SKUs like A100 and H100. If a project has a Wednesday deadline, don't wait until Tuesday to request quota. Build quota planning into your AI project kickoff process — just like you'd plan IP address space or subscription limits for any large deployment.
+**Production Gotcha**: GPU quota requests in Azure can take **24–72 hours** for approval, sometimes longer for high-demand SKUs like A100 and H100. If a project has a Wednesday deadline, don't wait until Tuesday to request quota. Build quota planning into your AI project kickoff process — just like you'd plan IP address space or subscription limits for any large deployment.
 
 ---
 
@@ -245,14 +245,14 @@ Now that you have the output, try answering these:
 
 Before moving on, make sure you're comfortable with these concepts:
 
-- ✅ **AI is an infrastructure workload**, not a data science mystery. It consumes compute, storage, and network — your domain.
-- ✅ **The AI stack has three layers**: data (storage), model (the application), and infrastructure (your responsibility).
-- ✅ **A trained model is a compiled binary.** Training is a batch job. Inference is an API call. You already know these patterns.
-- ✅ **AI infrastructure changes some things** (GPUs instead of CPUs, InfiniBand instead of Ethernet, tokens instead of requests) **but keeps the fundamentals** (security, networking, IaC, monitoring, cost governance).
-- ✅ **Infrastructure engineers are critically needed** in AI — data scientists can build models but struggle with production operations, security, and cost management.
-- ✅ **You don't need to learn Python or ML theory.** You need to learn what AI workloads demand from infrastructure.
-- ✅ **GPU VMs come in families**: NC (compute/training), ND (distributed deep learning), NV (visualization). Quota must be requested in advance.
-- ✅ **Career paths exist**: AI Infrastructure Engineer, MLOps Engineer, AI Cloud Architect, AI Platform Engineer — all build on your current skills.
+- **AI is an infrastructure workload**, not a data science mystery. It consumes compute, storage, and network — your domain.
+- **The AI stack has three layers**: data (storage), model (the application), and infrastructure (your responsibility).
+- **A trained model is a compiled binary.** Training is a batch job. Inference is an API call. You already know these patterns.
+- **AI infrastructure changes some things** (GPUs instead of CPUs, InfiniBand instead of Ethernet, tokens instead of requests) **but keeps the fundamentals** (security, networking, IaC, monitoring, cost governance).
+- **Infrastructure engineers are critically needed** in AI — data scientists can build models but struggle with production operations, security, and cost management.
+- **You don't need to learn Python or ML theory.** You need to learn what AI workloads demand from infrastructure.
+- **GPU VMs come in families**: NC (compute/training), ND (distributed deep learning), NV (visualization). Quota must be requested in advance.
+- **Career paths exist**: AI Infrastructure Engineer, MLOps Engineer, AI Cloud Architect, AI Platform Engineer — all build on your current skills.
 
 ---
 

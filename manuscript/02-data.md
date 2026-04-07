@@ -18,7 +18,7 @@ Every AI system, from a simple image classifier to a trillion-parameter large la
 
 Remove any one of these and you have nothing. But here is the insight that most infrastructure engineers miss early on: of those three components, data is the one that touches infrastructure at *every single stage*. The model is code. Compute is provisioned and (mostly) left running. But data must be ingested, stored, prepared, served for training, and delivered at inference — and every one of those stages is an infrastructure problem.
 
-🔄 **Infra ↔ AI Translation**
+**Infra ↔ AI Translation**
 
 | Infrastructure Concept | AI Equivalent | Why It Matters |
 |------------------------|---------------|----------------|
@@ -47,7 +47,7 @@ Not all data is created equal, and the type of data directly determines which st
 
 Modern AI is dominated by unstructured data. A single large language model might train on terabytes of text scraped from the web. A computer vision model needs millions of images. A speech-to-text system ingests thousands of hours of audio. All of this is unstructured, all of it is massive, and all of it needs to be read sequentially at high throughput during training.
 
-💡 **Pro Tip**: When a data science team tells you "we have about 500 GB of training data," assume it will grow to 5 TB within six months. Model experimentation multiplies dataset size through augmentation, versioning, and preprocessing variants. Size your storage account and throughput limits accordingly.
+**Pro Tip**: When a data science team tells you "we have about 500 GB of training data," assume it will grow to 5 TB within six months. Model experimentation multiplies dataset size through augmentation, versioning, and preprocessing variants. Size your storage account and throughput limits accordingly.
 
 ---
 
@@ -64,7 +64,7 @@ This is where data enters your environment. It might arrive through REST APIs, e
 - **Azure Data Factory** — Orchestrated batch pipelines from 90+ data sources
 - **AzCopy** — High-performance command-line transfers for bulk data movement
 
-⚠️ **Production Gotcha**: Ingestion pipelines that work fine with 10 GB fail spectacularly at 10 TB. Always test your ingestion pipeline at 10× your expected data volume. AzCopy with `--cap-mbps` lets you throttle transfers during business hours and run full-speed overnight.
+**Production Gotcha**: Ingestion pipelines that work fine with 10 GB fail spectacularly at 10 TB. Always test your ingestion pipeline at 10× your expected data volume. AzCopy with `--cap-mbps` lets you throttle transfers during business hours and run full-speed overnight.
 
 ### Storage
 
@@ -85,7 +85,7 @@ Raw data is rarely model-ready. It needs cleaning, normalization, deduplication,
 - **Azure Synapse Analytics** — Integrated analytics with serverless SQL and Spark pools
 - **Azure Data Factory** — ETL/ELT pipeline orchestration
 
-🔄 **Infra ↔ AI Translation**: Data preparation in AI is the equivalent of ETL in traditional data warehousing — but the volumes are larger and the output format is different. Instead of loading into a SQL warehouse, you are producing Parquet files, TFRecord files, or preprocessed image directories.
+**Infra ↔ AI Translation**: Data preparation in AI is the equivalent of ETL in traditional data warehousing — but the volumes are larger and the output format is different. Instead of loading into a SQL warehouse, you are producing Parquet files, TFRecord files, or preprocessed image directories.
 
 ### Training
 
@@ -112,7 +112,7 @@ At inference time, data flows in the opposite direction — individual requests 
 
 This is where your infrastructure expertise becomes critical. Choosing the right storage backend is the single most impactful decision you will make for AI workload performance.
 
-📊 **Decision Matrix: Storage for AI Workloads**
+**Decision Matrix: Storage for AI Workloads**
 
 | Storage Type | Best For | Throughput | Latency | Cost | Key Feature |
 |---|---|---|---|---|---|
@@ -124,9 +124,9 @@ This is where your infrastructure expertise becomes critical. Choosing the right
 | **Cosmos DB** | Feature stores, real-time inference features | N/A (request-based) | Single-digit ms | Higher | Vector search, global distribution |
 | **SQL Database** | Structured feature stores, metadata | N/A (query-based) | Low (ms) | Moderate | ACID compliance, relational queries |
 
-💡 **Pro Tip**: The most common production pattern is a two-tier approach: store raw datasets in Blob Storage or Data Lake Gen2 for durability and cost, then stage active training data to local NVMe for performance. Think of Blob as your warehouse and NVMe as your workbench.
+**Pro Tip**: The most common production pattern is a two-tier approach: store raw datasets in Blob Storage or Data Lake Gen2 for durability and cost, then stage active training data to local NVMe for performance. Think of Blob as your warehouse and NVMe as your workbench.
 
-⚠️ **Production Gotcha**: Never use Standard HDD-backed storage for training workloads. The IOPS and throughput limits are orders of magnitude below what GPUs require. A single A100 GPU can consume data faster than a Standard HDD account can serve it. Always use Premium or at minimum Standard SSD-backed accounts for active training data.
+**Production Gotcha**: Never use Standard HDD-backed storage for training workloads. The IOPS and throughput limits are orders of magnitude below what GPUs require. A single A100 GPU can consume data faster than a Standard HDD account can serve it. Always use Premium or at minimum Standard SSD-backed accounts for active training data.
 
 ---
 
@@ -178,7 +178,7 @@ sudo blobfuse2 mount /mnt/training-data \
   --preload
 ```
 
-💡 **Pro Tip**: Always point `--tmp-path` to the VM's local NVMe temp disk (`/mnt/resource` on Azure VMs) rather than the OS disk. This gives BlobFuse2's cache the lowest possible latency. On GPU VMs like the ND-series, the local temp disk can deliver 3-7 GB/s of read throughput.
+**Pro Tip**: Always point `--tmp-path` to the VM's local NVMe temp disk (`/mnt/resource` on Azure VMs) rather than the OS disk. This gives BlobFuse2's cache the lowest possible latency. On GPU VMs like the ND-series, the local temp disk can deliver 3-7 GB/s of read throughput.
 
 > For full configuration options, including managed identity authentication and streaming mode, see the [BlobFuse2 documentation](https://learn.microsoft.com/azure/storage/blobs/blobfuse2-what-is).
 
@@ -214,7 +214,7 @@ Azure GPU VMs (ND-series, NC-series) include local NVMe temporary disks that pro
 
 The recommended pattern: use AzCopy or BlobFuse2 preload to stage data from Blob Storage to local NVMe at job start, train from NVMe, then write checkpoints back to Blob Storage for durability.
 
-⚠️ **Production Gotcha: "The 12% GPU Utilization Mystery"** — If a data scientist reports that their GPU utilization is suspiciously low, check the storage backend before investigating anything else. Nine times out of ten, the issue is one of: (1) training data on Standard HDD, (2) a remote mount without caching, or (3) the BlobFuse2 cache directory pointing to the OS disk instead of the NVMe temp disk. A five-minute storage fix can turn a multi-day training job into an overnight one.
+**Production Gotcha: "The 12% GPU Utilization Mystery"** — If a data scientist reports that their GPU utilization is suspiciously low, check the storage backend before investigating anything else. Nine times out of ten, the issue is one of: (1) training data on Standard HDD, (2) a remote mount without caching, or (3) the BlobFuse2 cache directory pointing to the OS disk instead of the NVMe temp disk. A five-minute storage fix can turn a multi-day training job into an overnight one.
 
 ---
 
@@ -239,7 +239,7 @@ Your storage architecture must enforce these classifications through network iso
 
 ### Access control
 
-💡 **Pro Tip**: Always use **managed identities + Azure RBAC** instead of storage account keys. Keys are static, shareable, and hard to rotate. Managed identities are tied to specific resources, automatically rotated, and auditable. Assign the `Storage Blob Data Reader` role for training workloads and `Storage Blob Data Contributor` for pipelines that write checkpoints.
+**Pro Tip**: Always use **managed identities + Azure RBAC** instead of storage account keys. Keys are static, shareable, and hard to rotate. Managed identities are tied to specific resources, automatically rotated, and auditable. Assign the `Storage Blob Data Reader` role for training workloads and `Storage Blob Data Contributor` for pipelines that write checkpoints.
 
 ```bash
 # Assign Storage Blob Data Reader to a VM's managed identity
@@ -255,7 +255,7 @@ az role assignment create \
 - **Azure Key Vault** — Centralized secrets management for storage keys, connection strings, and API keys that pipelines need
 - **Azure Policy** — Enforce storage standards (minimum TLS version, required encryption, allowed SKUs) across all subscriptions
 
-⚠️ **Production Gotcha**: Data scientists frequently copy training data to local machines, shared drives, or unmanaged storage accounts for "quick experiments." This creates shadow data sprawl that violates compliance requirements. Use Azure Policy to restrict storage account creation and Microsoft Purview to scan for data copies outside approved locations.
+**Production Gotcha**: Data scientists frequently copy training data to local machines, shared drives, or unmanaged storage accounts for "quick experiments." This creates shadow data sprawl that violates compliance requirements. Use Azure Policy to restrict storage account creation and Microsoft Purview to scan for data copies outside approved locations.
 
 ---
 
@@ -267,7 +267,7 @@ Understanding how these components fit together is easier with visual references
 
 In the simplest form, data flows linearly from storage through preprocessing into training:
 
-![Simple Training Pipeline](resources/simple-training-pipeline.png)
+![Simple Training Pipeline](simple-training-pipeline.png)
 
 This pattern works for small teams running experiments with datasets under 1 TB. Data lives in Blob Storage, a preprocessing script cleans and transforms it, and the training framework reads directly from the processed output.
 
@@ -275,11 +275,11 @@ This pattern works for small teams running experiments with datasets under 1 TB.
 
 Production AI systems add ingestion orchestration, data versioning, model registries, and inference endpoints:
 
-![Full Production Pipeline](resources/full-training-pipeline.png)
+![Full Production Pipeline](full-training-pipeline.png)
 
 In this architecture, data is ingested through Event Hubs or Data Factory, stored in Data Lake Gen2 with hierarchical namespaces for organization, processed through Databricks or Synapse pipelines, and versioned for reproducibility. Training reads from the versioned dataset, writes checkpoints to Blob Storage, and registers completed models for deployment to inference endpoints.
 
-🔄 **Infra ↔ AI Translation**: If you have built CI/CD pipelines before, a production ML pipeline is the same concept — but instead of code artifacts, you are moving data artifacts through build stages. The "source code" is the dataset, the "build" is training, and the "deployment" is model serving.
+**Infra ↔ AI Translation**: If you have built CI/CD pipelines before, a production ML pipeline is the same concept — but instead of code artifacts, you are moving data artifacts through build stages. The "source code" is the dataset, the "build" is training, and the "deployment" is model serving.
 
 ---
 
@@ -397,21 +397,21 @@ azcopy copy './local-dataset/' \
 
 ## Chapter checklist
 
-✅ **I/O is the hidden bottleneck** — Low GPU utilization during training is almost always a storage problem, not a GPU problem.
+**I/O is the hidden bottleneck** — Low GPU utilization during training is almost always a storage problem, not a GPU problem.
 
-✅ **Match storage to workload** — Use Blob/Data Lake Gen2 for durable storage, local NVMe for training scratch space, and Cosmos DB for low-latency inference features.
+**Match storage to workload** — Use Blob/Data Lake Gen2 for durable storage, local NVMe for training scratch space, and Cosmos DB for low-latency inference features.
 
-✅ **Use BlobFuse2 wisely** — Mount Blob Storage as a filesystem with file cache mode for training. Always point the cache to the VM's local NVMe temp disk.
+**Use BlobFuse2 wisely** — Mount Blob Storage as a filesystem with file cache mode for training. Always point the cache to the VM's local NVMe temp disk.
 
-✅ **Stage data for training** — Copy datasets from Blob Storage to local NVMe before training starts. Write checkpoints back to Blob for durability.
+**Stage data for training** — Copy datasets from Blob Storage to local NVMe before training starts. Write checkpoints back to Blob for durability.
 
-✅ **Never use Standard HDD for training** — The throughput gap between Standard HDD and NVMe is 100× or more. Premium storage or local NVMe is required for GPU workloads.
+**Never use Standard HDD for training** — The throughput gap between Standard HDD and NVMe is 100× or more. Premium storage or local NVMe is required for GPU workloads.
 
-✅ **Secure by default** — Use managed identities and RBAC instead of storage keys. Classify data before it enters any pipeline.
+**Secure by default** — Use managed identities and RBAC instead of storage keys. Classify data before it enters any pipeline.
 
-✅ **Plan for growth** — Training datasets multiply through augmentation, versioning, and experimentation. Size your storage for 10× current needs.
+**Plan for growth** — Training datasets multiply through augmentation, versioning, and experimentation. Size your storage for 10× current needs.
 
-✅ **Use AzCopy for bulk transfers** — It is the fastest way to move data into, out of, and between Azure Storage accounts.
+**Use AzCopy for bulk transfers** — It is the fastest way to move data into, out of, and between Azure Storage accounts.
 
 ---
 

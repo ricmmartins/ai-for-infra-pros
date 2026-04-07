@@ -102,7 +102,7 @@ The platform engineering team had 6 weeks to deliver a repeatable, auditable inf
 - **MLOps and IaC must share a naming contract** — when compute target names are deterministic, pipeline YAML becomes environment-agnostic. *(Ch6)*
 - **Private Link adds 15-20 minutes to provisioning** — plan for it in CI/CD timeouts and communicate the trade-off to stakeholders. *(Ch8)*
 
-💡 **Pro Tip**: Run `terraform plan` in your PR pipeline and post the output as a PR comment. Reviewers catch misconfigurations before they reach any environment.
+**Pro Tip**: Run `terraform plan` in your PR pipeline and post the output as a PR comment. Reviewers catch misconfigurations before they reach any environment.
 
 ---
 
@@ -154,7 +154,7 @@ After a 45-minute outage where P95 latency exceeded 8 seconds (SLA was 500 ms), 
 - **Application-level metrics are non-negotiable** — without `inference_latency_ms` broken down by phase, the team would have blamed the GPU when the real bottleneck was image preprocessing on CPU. *(Ch7)*
 - **Structured alert tiers prevent alert fatigue** — the old system had 47 false positives per month. The new tiered approach reduced noise by 87%. *(Ch7, Ch12)*
 
-⚠️ **Production Gotcha**: DCGM Exporter's default metric set is enormous. Export only the 8-10 metrics you actually dashboard — otherwise Prometheus storage costs will surprise you.
+**Production Gotcha**: DCGM Exporter's default metric set is enormous. Export only the 8-10 metrics you actually dashboard — otherwise Prometheus storage costs will surprise you.
 
 ---
 
@@ -195,7 +195,7 @@ The infrastructure team discovered several cost drivers: GPU VMs running 24/7 fo
 - **PTU is almost always cheaper for sustained workloads** — the break-even point was roughly 120K TPM sustained for 8+ hours/day. *(Ch11)*
 - **Chargeback changes behavior** — teams optimize when they see their own costs. Tag enforcement is a cost control. *(Ch9)*
 
-💡 **Pro Tip**: Before committing to PTU, run a 2-week analysis of your standard deployment's actual TPM consumption. Azure OpenAI's metrics in Azure Monitor give you the exact numbers to calculate break-even.
+**Pro Tip**: Before committing to PTU, run a 2-week analysis of your standard deployment's actual TPM consumption. Azure OpenAI's metrics in Azure Monitor give you the exact numbers to calculate break-even.
 
 ---
 
@@ -249,7 +249,7 @@ The CTO tasked the platform engineering team with building a shared AI platform 
 - **Self-service without guardrails is chaos; guardrails without self-service are bottlenecks** — the Backstage + Gatekeeper combination gave teams speed with safety. *(Ch10, Ch8)*
 - **Cost visibility drives organic optimization** — two teams voluntarily reduced their GPU quotas after seeing Kubecost reports, freeing capacity for the team that actually needed it. *(Ch9)*
 
-⚠️ **Production Gotcha**: Kubernetes ResourceQuotas cap the number of GPUs a namespace can *request*, but they don't prevent a single pod from consuming all GPU memory. Always pair ResourceQuotas with container-level `resources.limits` enforcement via OPA Gatekeeper.
+**Production Gotcha**: Kubernetes ResourceQuotas cap the number of GPUs a namespace can *request*, but they don't prevent a single pod from consuming all GPU memory. Always pair ResourceQuotas with container-level `resources.limits` enforcement via OPA Gatekeeper.
 
 ---
 

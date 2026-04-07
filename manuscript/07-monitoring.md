@@ -22,7 +22,7 @@ This is the fundamental challenge of AI observability: **the infrastructure can 
 
 Traditional infrastructure monitoring covers compute, network, and storage. That's necessary but insufficient for AI workloads. You need to monitor six dimensions simultaneously, because failures in any one of them can manifest as a degraded user experience — and the symptoms often overlap in ways that make root cause analysis tricky.
 
-🔄 **Infra ↔ AI Translation**: Think of it this way — monitoring a web server means watching CPU, memory, disk, and network. Monitoring an AI workload is like monitoring a web server, a database, a billing system, and a quality assurance department simultaneously. The model is not just consuming resources; it's producing outputs that have a correctness dimension traditional infrastructure doesn't have.
+**Infra ↔ AI Translation**: Think of it this way — monitoring a web server means watching CPU, memory, disk, and network. Monitoring an AI workload is like monitoring a web server, a database, a billing system, and a quality assurance department simultaneously. The model is not just consuming resources; it's producing outputs that have a correctness dimension traditional infrastructure doesn't have.
 
 ### 1. Compute — GPU Utilization, Memory, Temperature
 
@@ -48,7 +48,7 @@ GPUs and tokens are expensive, and costs can escalate rapidly without visibility
 
 AI systems introduce novel security monitoring requirements. Watch for anomalous API access patterns, prompt injection attempts (inputs designed to manipulate model behavior), attempts to extract training data or system prompts, and unusual token consumption spikes that could indicate abuse. These are threats that traditional WAF and NSG logs won't catch.
 
-📊 **Decision Matrix — What to Monitor First**
+**Decision Matrix — What to Monitor First**
 
 | Priority | Dimension | Why |
 |----------|-----------|-----|
@@ -101,7 +101,7 @@ az aks show \
   --query "azureMonitorProfile.metrics.enabled"
 ```
 
-💡 **Pro Tip**: Azure Managed Prometheus automatically discovers and scrapes DCGM Exporter pods through Kubernetes service discovery. You don't need to manually configure scrape targets — just deploy the DCGM Exporter DaemonSet and the managed Prometheus instance will find it. If you need custom scrape configs, use the `ama-metrics-settings-configmap` ConfigMap.
+**Pro Tip**: Azure Managed Prometheus automatically discovers and scrapes DCGM Exporter pods through Kubernetes service discovery. You don't need to manually configure scrape targets — just deploy the DCGM Exporter DaemonSet and the managed Prometheus instance will find it. If you need custom scrape configs, use the `ama-metrics-settings-configmap` ConfigMap.
 
 ### Key GPU Metrics and Alert Thresholds
 
@@ -113,7 +113,7 @@ az aks show \
 | ECC Errors (Uncorrectable) | `DCGM_FI_DEV_ECC_DBE_VOL_TOTAL` | > 0 | > 0 | Hardware degradation — replace GPU |
 | Memory Clock Throttle | `DCGM_FI_DEV_CLOCK_THROTTLE_REASONS` | Thermal | HW Slowdown | Performance capped by thermals or power |
 
-⚠️ **Production Gotcha**: Low GPU utilization isn't always a problem. Some inference workloads are latency-sensitive and intentionally keep GPU utilization low to maintain fast response times. Before alerting on low utilization, verify whether the workload is optimized for throughput (training — high utilization expected) or latency (inference — moderate utilization acceptable).
+**Production Gotcha**: Low GPU utilization isn't always a problem. Some inference workloads are latency-sensitive and intentionally keep GPU utilization low to maintain fast response times. Before alerting on low utilization, verify whether the workload is optimized for throughput (training — high utilization expected) or latency (inference — moderate utilization acceptable).
 
 ### nvidia-smi for Ad-Hoc Debugging
 
@@ -160,7 +160,7 @@ az monitor diagnostic-settings create \
   --metrics '[{"category":"AllMetrics","enabled":true}]'
 ```
 
-⚠️ **Production Gotcha**: Azure OpenAI diagnostic logs can generate significant volume in busy deployments. A deployment handling 1,000 RPM produces roughly 1.4 million log entries per day. Set appropriate retention policies on your Log Analytics workspace — 30 days is sufficient for operational debugging, while compliance requirements may dictate longer retention.
+**Production Gotcha**: Azure OpenAI diagnostic logs can generate significant volume in busy deployments. A deployment handling 1,000 RPM produces roughly 1.4 million log entries per day. Set appropriate retention policies on your Log Analytics workspace — 30 days is sufficient for operational debugging, while compliance requirements may dictate longer retention.
 
 ### Token Consumption for Cost Attribution
 
@@ -189,7 +189,7 @@ token_counter.add(
 )
 ```
 
-🔄 **Infra ↔ AI Translation**: Think of TPM limits like bandwidth throttling and RPM limits like connection-rate limiting. You've managed both in networking for years — the same patterns apply. Token budgets are the AI equivalent of data transfer quotas.
+**Infra ↔ AI Translation**: Think of TPM limits like bandwidth throttling and RPM limits like connection-rate limiting. You've managed both in networking for years — the same patterns apply. Token budgets are the AI equivalent of data transfer quotas.
 
 ---
 
@@ -265,7 +265,7 @@ class StructuredFormatter(logging.Formatter):
 
 Structured logs let you filter by model version, correlate by request ID, and aggregate by deployment — all critical during an incident. Without structured logging, you're grepping through free-form text at 3 AM.
 
-💡 **Pro Tip**: Always log the model version and deployment name with every trace and metric. When you deploy a new model version and latency increases by 40%, you need to correlate the performance change with the deployment event. Without version tagging, you'll waste hours investigating infrastructure when the model itself is the cause.
+**Pro Tip**: Always log the model version and deployment name with every trace and metric. When you deploy a new model version and latency increases by 40%, you need to correlate the performance change with the deployment event. Without version tagging, you'll waste hours investigating infrastructure when the model itself is the cause.
 
 ---
 
@@ -379,7 +379,7 @@ AppRequests
 | order by P99 desc
 ```
 
-⚠️ **Production Gotcha**: KQL's `percentile()` function is approximate for large datasets. For exact percentiles on critical SLO reporting, use `percentile_tdigest()` or export data for offline analysis. For operational dashboards, the default approximation is accurate enough.
+**Production Gotcha**: KQL's `percentile()` function is approximate for large datasets. For exact percentiles on critical SLO reporting, use `percentile_tdigest()` or export data for offline analysis. For operational dashboards, the default approximation is accurate enough.
 
 ---
 
@@ -429,7 +429,7 @@ Trigger: GPU temperature > 83°C
   → Action: Reduce batch size via ConfigMap update, alert infra team
 ```
 
-💡 **Pro Tip**: Start with alerting only — no auto-remediation. Once you've validated that an alert consistently represents a real problem (not a false alarm), then automate the response. Auto-remediation on a false signal can cause more damage than the original issue.
+**Pro Tip**: Start with alerting only — no auto-remediation. Once you've validated that an alert consistently represents a real problem (not a false alarm), then automate the response. Auto-remediation on a false signal can cause more damage than the original issue.
 
 ---
 
@@ -465,7 +465,7 @@ This dashboard supports capacity planning and procurement decisions.
 - **Growth Projection**: Request volume trendline with 30/60/90-day forecast
 - **Token Budget Burn Rate**: Days remaining at current consumption rate
 
-📊 **Decision Matrix — Dashboard Design**
+**Decision Matrix — Dashboard Design**
 
 | Audience | Refresh Rate | Data Retention | Key Questions |
 |----------|-------------|---------------|---------------|
@@ -583,13 +583,13 @@ You should now see GPU utilization, memory usage, temperature, power draw, and E
 
 ```bash
 # Query Prometheus for DCGM metrics via kubectl
-kubectl run prom-test --rm -it --image=curlresources/curl -- \
+kubectl run prom-test --rm -it --image=curlcurl -- \
   curl -s "http://dcgm-exporter.gpu-monitoring:9400/metrics" | head -20
 ```
 
 You should see metric lines like `DCGM_FI_DEV_GPU_UTIL`, `DCGM_FI_DEV_FB_USED`, and `DCGM_FI_DEV_GPU_TEMP` with current values.
 
-⚠️ **Production Gotcha**: DCGM Exporter requires the NVIDIA GPU driver and DCGM libraries to be present on the host. On AKS, the GPU driver is installed automatically via the NVIDIA device plugin DaemonSet when you provision GPU node pools. If DCGM Exporter pods are crashing, verify the GPU driver installation with `kubectl logs -n gpu-resources -l name=nvidia-device-plugin-ds`.
+**Production Gotcha**: DCGM Exporter requires the NVIDIA GPU driver and DCGM libraries to be present on the host. On AKS, the GPU driver is installed automatically via the NVIDIA device plugin DaemonSet when you provision GPU node pools. If DCGM Exporter pods are crashing, verify the GPU driver installation with `kubectl logs -n gpu-resources -l name=nvidia-device-plugin-ds`.
 
 ---
 
@@ -597,16 +597,16 @@ You should see metric lines like `DCGM_FI_DEV_GPU_UTIL`, `DCGM_FI_DEV_FB_USED`, 
 
 Before moving on, verify you have these capabilities in place:
 
-- ✅ **GPU metrics flowing** — DCGM Exporter deployed, Prometheus scraping, Grafana visualizing
-- ✅ **Azure OpenAI monitoring** — TPM/RPM tracked, 429 alerting configured, TTFT measured
-- ✅ **Distributed tracing** — OpenTelemetry instrumented across your inference pipeline
-- ✅ **KQL queries saved** — Throttling, latency, error rate, and token consumption queries bookmarked
-- ✅ **Tiered alerting** — P1/P2/P3 alerts defined with appropriate channels and response times
-- ✅ **Cost visibility** — Token consumption and GPU spend tracked per team/project/deployment
-- ✅ **Three dashboards** — Executive (cost/SLA), Engineering (latency/errors), Capacity (quotas/scaling)
-- ✅ **Security monitoring** — Access patterns and anomalous usage tracked
-- ✅ **Auto-remediation** — At least one automated response for a validated failure mode
-- ✅ **No alert fatigue** — Alert thresholds tuned to minimize false alarms
+- **GPU metrics flowing** — DCGM Exporter deployed, Prometheus scraping, Grafana visualizing
+- **Azure OpenAI monitoring** — TPM/RPM tracked, 429 alerting configured, TTFT measured
+- **Distributed tracing** — OpenTelemetry instrumented across your inference pipeline
+- **KQL queries saved** — Throttling, latency, error rate, and token consumption queries bookmarked
+- **Tiered alerting** — P1/P2/P3 alerts defined with appropriate channels and response times
+- **Cost visibility** — Token consumption and GPU spend tracked per team/project/deployment
+- **Three dashboards** — Executive (cost/SLA), Engineering (latency/errors), Capacity (quotas/scaling)
+- **Security monitoring** — Access patterns and anomalous usage tracked
+- **Auto-remediation** — At least one automated response for a validated failure mode
+- **No alert fatigue** — Alert thresholds tuned to minimize false alarms
 
 ---
 

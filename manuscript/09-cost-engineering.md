@@ -34,7 +34,7 @@ When your teams consume Azure OpenAI services, costs scale with usage in a way t
 
 Data scientists need to experiment — that's how models improve. But experimentation means spinning up resources on short notice, trying different configurations, and sometimes abandoning approaches midway. Telling the ML team "submit a purchase order before provisioning any GPU" kills velocity. The solution isn't less experimentation; it's better guardrails around experimentation.
 
-🔄 **Infra ↔ AI Translation**: GPU idle time is like leaving every light on in a stadium after the game ends. The hourly electricity bill is enormous, nobody's benefiting from it, and the fix is a simple timer — but someone has to install the timer before the first game.
+**Infra ↔ AI Translation**: GPU idle time is like leaving every light on in a stadium after the game ends. The hourly electricity bill is enormous, nobody's benefiting from it, and the fix is a simple timer — but someone has to install the timer before the first game.
 
 ---
 
@@ -114,7 +114,7 @@ That's a 94% cost reduction for queries where GPT-4o-mini delivers acceptable qu
 
 > **Note**: Token prices shown are approximate and subject to change. Always verify current pricing on the [Azure OpenAI pricing page](https://azure.microsoft.com/pricing/details/cognitive-services/openai-service/).
 
-### 📊 Decision Matrix: Compute Purchasing Models
+### Decision Matrix: Compute Purchasing Models
 
 | Factor | Pay-as-you-go | 1-Year Reserved | 3-Year Reserved | Spot VMs |
 |---|---|---|---|---|
@@ -125,7 +125,7 @@ That's a 94% cost reduction for queries where GPT-4o-mini delivers acceptable qu
 | **Budget predictability** | Low | High | High | Low |
 | **Flexibility** | Maximum | Moderate (can exchange) | Low | Maximum |
 
-💡 **Pro Tip**: Don't commit to reserved instances until you have at least 2–3 months of utilization data. Many organizations reserve too early, then end up paying for GPUs they don't use. Start with pay-as-you-go, measure actual consumption, then reserve only the baseline you're confident you'll sustain.
+**Pro Tip**: Don't commit to reserved instances until you have at least 2–3 months of utilization data. Many organizations reserve too early, then end up paying for GPUs they don't use. Start with pay-as-you-go, measure actual consumption, then reserve only the baseline you're confident you'll sustain.
 
 ---
 
@@ -162,7 +162,7 @@ The pattern is straightforward:
 3. **Build your startup script** to check for existing checkpoints and resume if found
 4. **Use Azure VM Scale Sets with Spot** to automatically replace evicted VMs
 
-⚠️ **Production Gotcha**: Spot VMs can be evicted with only 30 seconds' notice. Your checkpoint must write to durable storage, not local disk. If your checkpoint takes 5 minutes to write 20 GB of model state, you'll lose it on eviction. Either checkpoint more frequently with smaller state, or use faster storage (Premium SSD or Azure NetApp Files as a staging layer before Blob).
+**Production Gotcha**: Spot VMs can be evicted with only 30 seconds' notice. Your checkpoint must write to durable storage, not local disk. If your checkpoint takes 5 minutes to write 20 GB of model state, you'll lose it on eviction. Either checkpoint more frequently with smaller state, or use faster storage (Premium SSD or Azure NetApp Files as a staging layer before Blob).
 
 ### Spot Savings Example
 
@@ -202,7 +202,7 @@ Before scaling up, measure what you're actually using. Run `nvidia-smi` or use A
 - **GPU Memory Utilization (%)**: If below 50%, a smaller GPU may work. If above 90%, you may need more memory or to enable gradient checkpointing
 - **GPU Memory Used (GB)**: Compare to the GPU's total memory to understand headroom
 
-🔄 **Infra ↔ AI Translation**: Right-sizing GPUs is exactly like right-sizing VMs in traditional infrastructure. You wouldn't run a static website on a 64-core VM. Same principle — but the cost of getting it wrong is 100× higher because GPU VMs are 100× more expensive.
+**Infra ↔ AI Translation**: Right-sizing GPUs is exactly like right-sizing VMs in traditional infrastructure. You wouldn't run a static website on a 64-core VM. Same principle — but the cost of getting it wrong is 100× higher because GPU VMs are 100× more expensive.
 
 ### Auto-Shutdown Policies for Dev/Test
 
@@ -212,7 +212,7 @@ Every GPU VM provisioned for development, experimentation, or testing should hav
 - **Azure Automation runbooks**: Schedule shutdown across resource groups or by tag
 - **Azure Policy**: Enforce that all GPU VMs in dev/test subscriptions must have auto-shutdown enabled
 
-💡 **Pro Tip**: Set the default auto-shutdown time to 7:00 PM local time for all dev/test GPU VMs. Engineers who need their VM to run overnight can extend it manually — but the default should be "off." A single ND96isr_H100_v5 left running from Friday evening to Monday morning costs approximately $4,700. Auto-shutdown eliminates this entirely.
+**Pro Tip**: Set the default auto-shutdown time to 7:00 PM local time for all dev/test GPU VMs. Engineers who need their VM to run overnight can extend it manually — but the default should be "off." A single ND96isr_H100_v5 left running from Friday evening to Monday morning costs approximately $4,700. Auto-shutdown eliminates this entirely.
 
 ### Scaling Down After Experiments
 
@@ -253,7 +253,7 @@ PTU makes sense when:
 
 The break-even point depends on your model, region, and traffic pattern, but as a general guideline: if your standard deployment is consistently utilized at **60–70% or above** of what a PTU allocation would provide, PTU typically becomes cheaper. Below that utilization, you're paying for reserved capacity you're not using.
 
-### 📊 Decision Matrix: Standard vs PTU
+### Decision Matrix: Standard vs PTU
 
 | Factor | Standard (Pay-per-Token) | Provisioned Throughput (PTU) |
 |---|---|---|
@@ -279,7 +279,7 @@ Regardless of whether you use Standard or PTU, reducing token consumption direct
 
 **Multi-model routing**: Not every request needs your most capable (and most expensive) model. Route simple classification, extraction, or FAQ queries to GPT-4o-mini and reserve GPT-4o for complex reasoning, multi-step analysis, or tasks where quality measurably suffers with the smaller model. A well-implemented routing layer can cut inference costs by 50–80%.
 
-💡 **Pro Tip**: Build a simple evaluation harness that runs the same 200 representative queries through both GPT-4o and GPT-4o-mini, then have a domain expert score the outputs. If GPT-4o-mini scores within 5% on 70%+ of queries, you've identified a huge cost savings opportunity with minimal quality impact.
+**Pro Tip**: Build a simple evaluation harness that runs the same 200 representative queries through both GPT-4o and GPT-4o-mini, then have a domain expert score the outputs. If GPT-4o-mini scores within 5% on 70%+ of queries, you've identified a huge cost savings opportunity with minimal quality impact.
 
 ---
 
@@ -301,7 +301,7 @@ Every AI resource should be tagged with at minimum:
 
 Use **Azure Policy** to enforce that GPU VM SKUs (NC*, ND*) cannot be created without these tags. This is a non-negotiable governance control.
 
-⚠️ **Production Gotcha**: Tags are only useful if they're enforced at provisioning time. If you allow untagged resources and try to tag retroactively, you'll always be playing catch-up. Deploy an Azure Policy with `deny` effect that blocks GPU VM creation without required tags. Teams will push back — hold the line.
+**Production Gotcha**: Tags are only useful if they're enforced at provisioning time. If you allow untagged resources and try to tag retroactively, you'll always be playing catch-up. Deploy an Azure Policy with `deny` effect that blocks GPU VM creation without required tags. Teams will push back — hold the line.
 
 ### Budgets and Alerts
 
@@ -393,26 +393,26 @@ Use the **cluster autoscaler** to scale GPU node pools to zero when no GPU pods 
 | OpenCost | Free (open-source) | Yes | Yes | Limited |
 | Kubecost | Free tier + paid | Yes | Yes | Detailed |
 
-💡 **Pro Tip**: Enable the AKS cost analysis add-on (`az aks update --enable-cost-analysis`) before you need it. It requires time to accumulate data before it becomes useful. If you enable it after a cost incident, you won't have historical data to analyze.
+**Pro Tip**: Enable the AKS cost analysis add-on (`az aks update --enable-cost-analysis`) before you need it. It requires time to accumulate data before it becomes useful. If you enable it after a cost incident, you won't have historical data to analyze.
 
 ---
 
-## ✅ Chapter Checklist
+## Chapter Checklist
 
 Before moving on, confirm you have these cost engineering practices in place:
 
-- ✅ **Cost model documented** for both training (GPU-hours) and inference (tokens) workloads
-- ✅ **Tagging policy enforced** via Azure Policy — all GPU resources tagged with cost-center, project, team, and environment
-- ✅ **Budget alerts configured** at 50%, 75%, and 90% thresholds with escalating actions
-- ✅ **Auto-shutdown enabled** on all dev/test GPU VMs
-- ✅ **Spot VMs evaluated** for fault-tolerant training workloads with checkpointing implemented
-- ✅ **Right-sizing validated** — GPU utilization benchmarked before provisioning larger SKUs
-- ✅ **Azure OpenAI pricing model selected** — Standard vs PTU evaluated based on utilization data
-- ✅ **Token optimization implemented** — prompt caching, system prompt trimming, response length limits, multi-model routing
-- ✅ **GPU quota governance** centralized with approval workflow
-- ✅ **Monthly cost review meeting** scheduled with infra, data science, and finance stakeholders
-- ✅ **Namespace-level cost tracking** enabled for shared AKS clusters
-- ✅ **Weekly idle resource report** running to catch forgotten experiments
+- **Cost model documented** for both training (GPU-hours) and inference (tokens) workloads
+- **Tagging policy enforced** via Azure Policy — all GPU resources tagged with cost-center, project, team, and environment
+- **Budget alerts configured** at 50%, 75%, and 90% thresholds with escalating actions
+- **Auto-shutdown enabled** on all dev/test GPU VMs
+- **Spot VMs evaluated** for fault-tolerant training workloads with checkpointing implemented
+- **Right-sizing validated** — GPU utilization benchmarked before provisioning larger SKUs
+- **Azure OpenAI pricing model selected** — Standard vs PTU evaluated based on utilization data
+- **Token optimization implemented** — prompt caching, system prompt trimming, response length limits, multi-model routing
+- **GPU quota governance** centralized with approval workflow
+- **Monthly cost review meeting** scheduled with infra, data science, and finance stakeholders
+- **Namespace-level cost tracking** enabled for shared AKS clusters
+- **Weekly idle resource report** running to catch forgotten experiments
 
 ---
 

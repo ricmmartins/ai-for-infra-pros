@@ -2,7 +2,7 @@
 
 ### The Practical Handbook for Infrastructure Engineers Entering the AI Era
 
-[![Deploy MkDocs](https://github.com/ricmmartins/ai-for-infra-pros/actions/workflows/deploy-mkdocs.yml/badge.svg)](https://github.com/ricmmartins/ai-for-infra-pros/actions/workflows/deploy-mkdocs.yml)
+[![Netlify Status](https://api.netlify.com/api/v1/badges/69d5257f/deploy-status)](https://app.netlify.com/sites/incredible-pastelito-f2ea36/deploys)
 
 > *"You don't need to be a data scientist to work with AI — but you do need to understand how it runs, scales, breaks, and costs money."*
 
@@ -111,7 +111,7 @@ No prior AI/ML knowledge is required. Every concept is explained through infrast
 
 ## Running Locally
 
-This book is built with [MkDocs Material](https://squidfunk.github.io/mkdocs-material/) and deployed automatically to GitHub Pages on every push.
+This book is built with [MkDocs Material](https://squidfunk.github.io/mkdocs-material/) and deployed automatically to [Netlify](https://www.netlify.com/) on every push.
 
 ```bash
 # Install dependencies
@@ -150,7 +150,7 @@ ai-for-infra-pros/
 │   ├── backmatter.md
 │   ├── *.md                   # Leanpub-formatted chapters
 │   └── resources/             # Images for Leanpub
-├── .github/workflows/         # GitHub Actions for auto-deploy
+├── netlify.toml               # Netlify build configuration
 ├── mkdocs.yml                 # MkDocs Material configuration
 ├── requirements-docs.txt      # Python dependencies
 ├── README.md
