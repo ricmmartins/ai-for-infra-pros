@@ -280,18 +280,14 @@ This pattern works for small teams running experiments with datasets under 1 TB.
 
 Production AI systems add ingestion orchestration, data versioning, model registries, and inference endpoints:
 
-```
-┌──────────────┐     ┌──────────────┐     ┌──────────────┐     ┌──────────────┐     ┌──────────────┐     ┌──────────────┐
-│ Event Hubs / │     │ Data Lake    │     │ Databricks / │     │  Azure ML    │     │    Model     │     │  Inference   │
-│ Data Factory │────▶│ Gen2         │────▶│ Synapse      │────▶│  (Training)  │────▶│  Registry    │────▶│  Endpoint    │
-│ (Ingestion)  │     │ (Versioned)  │     │ (Processing) │     │              │     │              │     │              │
-└──────────────┘     └──────────────┘     └──────────────┘     └──────┬───────┘     └──────────────┘     └──────────────┘
-                                                                      │
-                                                                      ▼
-                                                               ┌──────────────┐
-                                                               │ Blob Storage │
-                                                               │ (Checkpoints)│
-                                                               └──────────────┘
+```mermaid
+ graph LR
+       A["Event Hubs /<br/>Data Factory<br/>(Ingestion)"] --> B["Data Lake Gen2<br/>(Versioned)"]
+       B --> C["Databricks /<br/>Synapse<br/>(Processing)"]
+       C --> D["Azure ML<br/>(Training)"]
+       D --> E["Model Registry"]
+       E --> F["Inference<br/>Endpoint"]
+       D --> G["Blob Storage<br/>(Checkpoints)"]
 ```
 
 In this architecture, data is ingested through Event Hubs or Data Factory, stored in Data Lake Gen2 with hierarchical namespaces for organization, processed through Databricks or Synapse pipelines, and versioned for reproducibility. Training reads from the versioned dataset, writes checkpoints to Blob Storage, and registers completed models for deployment to inference endpoints.
