@@ -269,10 +269,10 @@ In the simplest form, data flows linearly from storage through preprocessing int
 
 ```
 ┌──────────────────┐     ┌──────────────────┐     ┌──────────────────┐     ┌──────────────────┐
-│  Azure Blob      │     │  Preprocessing   │     │  GPU VM          │     │  Trained Model   │
-│  Storage         │────▶│  (Clean +       │────▶│  (Model          │────▶│  (Checkpoint)    │
-│  (Raw Data)      │     │   Transform)     │     │   Training)      │     │                  │
-└──────────────────┘     └──────────────────┘     └──────────────────┘     └──────────────────┘
+ │  Azure Blob      │     │  Preprocessing   │     │  GPU VM          │     │  Trained Model   │
+ │  Storage         │────▶│  (Clean +        │────▶│  (Model          │────▶│  (Checkpoint)    │
+ │  (Raw Data)      │     │   Transform)     │     │   Training)      │     │                  │
+ └──────────────────┘     └──────────────────┘     └──────────────────┘     └──────────────────┘
 ```
 
 This pattern works for small teams running experiments with datasets under 1 TB. Data lives in Blob Storage, a preprocessing script cleans and transforms it, and the training framework reads directly from the processed output.
