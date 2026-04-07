@@ -32,7 +32,7 @@ Inside each SM, you'll find two types of processing units:
 
 **Tensor Cores** are the reason modern GPUs dominate AI workloads. These specialized units perform matrix-multiply-and-accumulate operations in a single clock cycle — the exact operation at the heart of neural network training and inference. An A100 has 432 Tensor Cores (3rd generation). An H100 has 528 (4th generation). When someone says "the H100 is 3× faster than the A100 for training," Tensor Cores are the primary reason.
 
-🔄 **Infra ↔ AI Translation**: A GPU is like a 100-lane highway where every lane carries math operations simultaneously. A CPU is a 4-lane highway where each lane can handle complex turns, exits, and decision-making. For matrix math — the backbone of AI — you want the highway. For complex branching logic, you still want the CPU.
+**Infra ↔ AI Translation**: A GPU is like a 100-lane highway where every lane carries math operations simultaneously. A CPU is a 4-lane highway where each lane can handle complex turns, exits, and decision-making. For matrix math — the backbone of AI — you want the highway. For complex branching logic, you still want the CPU.
 
 ### NVLink: The GPU-to-GPU Superhighway
 
@@ -71,7 +71,7 @@ GPU memory is organized in layers, just like CPU memory. Each layer trades capac
 
 **Registers** are the fastest storage, but limited. When a kernel needs more registers than available, it "spills" to slower memory, reducing performance.
 
-🔄 **Infra ↔ AI Translation**: If you've ever diagnosed CPU performance by looking at L1/L2/L3 cache hit rates, the same mental model applies to GPUs. HBM is your RAM — it determines whether a model fits. The cache layers determine how fast it runs.
+**Infra ↔ AI Translation**: If you've ever diagnosed CPU performance by looking at L1/L2/L3 cache hit rates, the same mental model applies to GPUs. HBM is your RAM — it determines whether a model fits. The cache layers determine how fast it runs.
 
 ### What Fills GPU Memory During Training
 
@@ -140,7 +140,7 @@ The choice of numerical precision — how many bits represent each number — ha
 
 **INT8 and INT4** are quantization formats used primarily for inference. A model trained in BF16 can be quantized to INT8 or INT4 after training, dramatically reducing memory requirements and increasing throughput — at the cost of slight quality degradation.
 
-📊 **Decision Matrix: Choosing Precision**
+**Decision Matrix: Choosing Precision**
 
 | Scenario | Recommended Precision | Why |
 |---|---|---|
@@ -150,7 +150,7 @@ The choice of numerical precision — how many bits represent each number — ha
 | Inference (cost-sensitive) | INT4 (GPTQ/AWQ) | 4-8× memory reduction, slight quality loss |
 | Legacy workload compatibility | FP32 | When precision matters more than performance |
 
-🔄 **Infra ↔ AI Translation**: Think of precision like JPEG quality settings. FP32 is the uncompressed RAW image — highest quality, largest file. BF16 is like a high-quality JPEG — imperceptibly different for most purposes, half the file size. INT4 is like a thumbnail — visibly lossy, but it loads instantly and fits anywhere.
+**Infra ↔ AI Translation**: Think of precision like JPEG quality settings. FP32 is the uncompressed RAW image — highest quality, largest file. BF16 is like a high-quality JPEG — imperceptibly different for most purposes, half the file size. INT4 is like a thumbnail — visibly lossy, but it loads instantly and fits anywhere.
 
 ---
 
@@ -210,7 +210,7 @@ For the largest models (100B+ parameters), production training pipelines combine
 
 This is called **3D parallelism**, and it's how models like GPT-4 and LLaMA 3 are trained. As an infra engineer, you need to understand that this level of training hammers every resource simultaneously: GPU memory, NVLink bandwidth, InfiniBand throughput, and storage I/O.
 
-📊 **Decision Matrix: Choosing a Parallelism Strategy**
+**Decision Matrix: Choosing a Parallelism Strategy**
 
 | Model Size | Strategy | GPU Requirement | Network Requirement |
 |---|---|---|---|
@@ -508,14 +508,14 @@ As an infra engineer, you need to know what each GPU generation brings to the ta
 
 Before moving to the next chapter, make sure you can confidently answer these questions and perform these tasks:
 
-- ✅ **Explain GPU architecture** — You can describe SMs, CUDA Cores, and Tensor Cores and explain why GPUs dominate matrix math workloads.
-- ✅ **Diagnose memory issues** — You can calculate the memory footprint of a training job (parameters + gradients + optimizer states + activations) and explain why a "7B model" needs 90+ GB to train.
-- ✅ **Understand precision tradeoffs** — You know the difference between FP32, BF16, FP16, and INT8/INT4, and when each is appropriate.
-- ✅ **Choose a parallelism strategy** — Given a model size and GPU count, you can recommend DP, ZeRO-2, ZeRO-3/FSDP, or 3D parallelism.
-- ✅ **Navigate the NVIDIA software stack** — You can explain the Driver → CUDA → cuDNN → NCCL → Framework chain and diagnose version mismatches.
-- ✅ **Read nvidia-smi fluently** — You can interpret every field, identify healthy vs. unhealthy states, and use advanced monitoring commands.
-- ✅ **Troubleshoot GPU issues** — You can diagnose and resolve OOM errors, version mismatches, driver failures, ECC errors, thermal throttling, low utilization, and NVLink problems.
-- ✅ **Compare GPU generations** — You know the capabilities of V100, A100, H100, and B200, and which Azure VM SKUs map to each.
+- **Explain GPU architecture** — You can describe SMs, CUDA Cores, and Tensor Cores and explain why GPUs dominate matrix math workloads.
+- **Diagnose memory issues** — You can calculate the memory footprint of a training job (parameters + gradients + optimizer states + activations) and explain why a "7B model" needs 90+ GB to train.
+- **Understand precision tradeoffs** — You know the difference between FP32, BF16, FP16, and INT8/INT4, and when each is appropriate.
+- **Choose a parallelism strategy** — Given a model size and GPU count, you can recommend DP, ZeRO-2, ZeRO-3/FSDP, or 3D parallelism.
+- **Navigate the NVIDIA software stack** — You can explain the Driver → CUDA → cuDNN → NCCL → Framework chain and diagnose version mismatches.
+- **Read nvidia-smi fluently** — You can interpret every field, identify healthy vs. unhealthy states, and use advanced monitoring commands.
+- **Troubleshoot GPU issues** — You can diagnose and resolve OOM errors, version mismatches, driver failures, ECC errors, thermal throttling, low utilization, and NVLink problems.
+- **Compare GPU generations** — You know the capabilities of V100, A100, H100, and B200, and which Azure VM SKUs map to each.
 
 ---
 
