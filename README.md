@@ -2,7 +2,7 @@
 
 ### The Practical Handbook for Infrastructure Engineers Entering the AI Era
 
-[![Netlify Status](https://api.netlify.com/api/v1/badges/69d5257f/deploy-status)](https://app.netlify.com/sites/incredible-pastelito-f2ea36/deploys)
+[![Deploy MkDocs](https://github.com/ricmmartins/ai-for-infra-pros/actions/workflows/deploy-mkdocs.yml/badge.svg)](https://github.com/ricmmartins/ai-for-infra-pros/actions/workflows/deploy-mkdocs.yml)
 
 > *"You don't need to be a data scientist to work with AI ΓÇö but you do need to understand how it runs, scales, breaks, and costs money."*
 
@@ -153,7 +153,7 @@ ai-for-infra-pros/
 Γöé   Γö£ΓöÇΓöÇ images/
 Γöé   Γö£ΓöÇΓöÇ stylesheets/           # Custom CSS for the website
 Γöé   ΓööΓöÇΓöÇ index.md               # Website landing page
-Γö£ΓöÇΓöÇ netlify.toml               # Netlify build configuration
+Γö£ΓöÇΓöÇ .github/workflows/         # GitHub Actions for auto-deploy
 Γö£ΓöÇΓöÇ mkdocs.yml                 # MkDocs Material configuration
 Γö£ΓöÇΓöÇ requirements-docs.txt      # Python dependencies
 Γö£ΓöÇΓöÇ README.md
