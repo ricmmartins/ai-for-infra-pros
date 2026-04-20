@@ -126,6 +126,9 @@ plugins:
       minify_html: true
 
 extra:
+  analytics:
+    provider: google
+    property: G-BG40DPKX23
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/ricmmartins
