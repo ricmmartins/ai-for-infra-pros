@@ -8,7 +8,10 @@ repo_name: ricmmartins/ai-for-infra-pros
 
 copyright: >
   Created by <a href="https://rmmartins.com">Ricardo Martins</a> —
-  Principal Solutions Engineer @ Microsoft
+  Principal Solutions Engineer @ Microsoft<br>
+  <a href="https://linuxhackathon.com">Linux Hackathon</a> ·
+  <a href="https://k8shackathon.com">K8s Hackathon</a> ·
+  <a href="https://fromservertocluster.com">From Server to Cluster</a>
 
 theme:
   name: material

@@ -149,7 +149,7 @@ No prior AI/ML knowledge is required. Every concept is explained through infrast
 Created by **Ricardo Martins**
 
 :fontawesome-solid-briefcase: Principal Solutions Engineer @ Microsoft
-:fontawesome-solid-book: Author of [*Azure Governance Made Simple*](https://book.azgovernance.com/) and [*Linux Hackathon*](https://linuxhackathon.com/)
+:fontawesome-solid-book: Author of [*Azure Governance Made Simple*](https://book.azgovernance.com/), [*Linux Hackathon*](https://linuxhackathon.com/), [*K8s Hackathon*](https://k8shackathon.com/) and [*From Server to Cluster*](https://fromservertocluster.com/)
 :fontawesome-solid-globe: [rmmartins.com](https://rmmartins.com)
 
 ---

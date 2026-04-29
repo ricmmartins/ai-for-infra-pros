@@ -166,7 +166,7 @@ ai-for-infra-pros/
 
 Created by **Ricardo Martins**
 Principal Solutions Engineer @ Microsoft
-Author of [*Azure Governance Made Simple*](https://book.azgovernance.com/) and [*Linux Hackathon*](https://linuxhackathon.com/)
+Author of [*Azure Governance Made Simple*](https://book.azgovernance.com/), [*Linux Hackathon*](https://linuxhackathon.com/), [*K8s Hackathon*](https://k8shackathon.com/) and [*From Server to Cluster*](https://fromservertocluster.com/)
 [rmmartins.com](https://rmmartins.com)
 
 ---
