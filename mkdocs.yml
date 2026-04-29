@@ -9,9 +9,13 @@ repo_name: ricmmartins/ai-for-infra-pros
 copyright: >
   Created by <a href="https://rmmartins.com">Ricardo Martins</a> —
   Principal Solutions Engineer @ Microsoft<br>
+  <a href="https://github.com/ricmmartins/ai-for-infra-pros">GitHub</a> ·
+  <a href="https://rmmartins.com">Blog (EN)</a> ·
+  <a href="https://ricardomartins.com.br">Blog (PT-BR)</a> ·
   <a href="https://linuxhackathon.com">Linux Hackathon</a> ·
   <a href="https://k8shackathon.com">K8s Hackathon</a> ·
-  <a href="https://fromservertocluster.com">From Server to Cluster</a>
+  <a href="https://fromservertocluster.com">From Server to Cluster</a><br>
+  <small>This is an independent, personal project — not an official Microsoft publication.</small>
 
 theme:
   name: material
