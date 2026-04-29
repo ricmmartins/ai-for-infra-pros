@@ -144,6 +144,32 @@ No prior AI/ML knowledge is required. Every concept is explained through infrast
 
 ---
 
+## Learning Path
+
+This book is part of a complete learning ecosystem for infrastructure professionals.
+
+<div class="grid cards" markdown>
+
+- :fontawesome-brands-linux: **[Linux Hackathon](https://linuxhackathon.com/)**
+
+    Master Linux fundamentals. 20 hands-on challenges.
+
+- :material-book-open-variant: **[From Server to Cluster](https://fromservertocluster.com/)**
+
+    Bridge your Linux skills to Kubernetes. 15 chapters.
+
+- :material-kubernetes: **[K8s Hackathon](https://k8shackathon.com/)**
+
+    Kubernetes mastery. 20 challenges covering CKA + CKAD + CKS.
+
+- :material-robot: **[AI for Infra Pros](https://ai4infra.com/)** *(You are here)*
+
+    AI/ML for infrastructure engineers. From GPUs to MLOps.
+
+</div>
+
+---
+
 ## Credits
 
 Created by **Ricardo Martins**
