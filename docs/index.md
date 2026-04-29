@@ -175,7 +175,9 @@ This book is part of a complete learning ecosystem for infrastructure profession
 Created by **Ricardo Martins**
 
 :fontawesome-solid-briefcase: Principal Solutions Engineer @ Microsoft
+
 :fontawesome-solid-book: Author of [*Azure Governance Made Simple*](https://book.azgovernance.com/), [*Linux Hackathon*](https://linuxhackathon.com/), [*K8s Hackathon*](https://k8shackathon.com/) and [*From Server to Cluster*](https://fromservertocluster.com/)
+
 :fontawesome-solid-globe: [rmmartins.com](https://rmmartins.com)
 
 ---
