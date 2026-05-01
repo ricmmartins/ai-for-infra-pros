@@ -1,178 +1,180 @@
-# AI for Infra Pros
+# AI para Profissionais de Infraestrutura
 
-### The Practical Handbook for Infrastructure Engineers Entering the AI Era
+### O Guia Prático para Engenheiros de Infraestrutura Entrando na Era da IA
 
 [![Deploy MkDocs](https://github.com/ricmmartins/ai-for-infra-pros/actions/workflows/deploy-mkdocs.yml/badge.svg)](https://github.com/ricmmartins/ai-for-infra-pros/actions/workflows/deploy-mkdocs.yml)
 
-> *"You don't need to be a data scientist to work with AI — but you do need to understand how it runs, scales, breaks, and costs money."*
+🌐 **Available in English:** [Read in English](https://github.com/ricmmartins/ai-for-infra-pros/tree/main)
 
-**Read online at [www.ai4infra.com](https://www.ai4infra.com)**
+> *"Você não precisa ser um cientista de dados para trabalhar com IA — mas precisa entender como ela funciona, escala, quebra e custa dinheiro."*
 
-![AI for Infra Pros](/docs/images/ai4infrapros.png "AI for Infra Pros")
+**Leia online em [www.ai4infra.com](https://www.ai4infra.com)**
 
----
-
-## About This Book
-
-Every AI model that reaches production sits on top of infrastructure someone had to build, scale, secure, and keep running. That someone is you.
-
-This handbook was born from years of bridging the gap between systems engineering and machine learning. It translates AI concepts into the language infrastructure, cloud, and DevOps engineers already speak — and gives you the practical depth to architect, deploy, monitor, and operate AI workloads at production scale.
-
-**This is not an AI/ML textbook.** It's a practitioner's handbook. Every chapter includes production-grade examples, decision matrices, hands-on labs, and the kind of hard-won lessons that only come from running AI infrastructure in the real world.
+![AI para Profissionais de Infraestrutura](/docs/images/ai4infrapros.png "AI para Profissionais de Infraestrutura")
 
 ---
 
-## What You'll Learn
+## Sobre Este Livro
 
-- **GPU architecture and compute** — VM families, CUDA cores vs Tensor Cores, nvidia-smi interpretation, and the memory math behind OOM errors
-- **Data pipelines for AI** — storage architecture, BlobFuse2, NVMe staging, and why I/O is the hidden bottleneck
-- **Infrastructure as Code** — production-ready Terraform and Bicep for GPU clusters, AKS node pools, and CI/CD with OIDC
-- **MLOps from an infra lens** — model registries, CI/CD for models, A/B testing infrastructure, and supply chain security
-- **Monitoring and observability** — DCGM, Managed Prometheus, KQL queries, and the six dimensions of AI observability
-- **AI security** — prompt injection defense, private endpoints, managed identities, and content safety guardrails
-- **Cost engineering** — GPU cost modeling, spot VMs for training, PTU economics, and FinOps practices
-- **Platform operations at scale** — multi-tenancy, GPU scheduling (Kueue, Volcano), SLA design, and fleet management
-- **Production troubleshooting** — 10 real-world failure scenarios with step-by-step diagnosis and resolution
-- **Career paths** — AI Infra Engineer, MLOps Engineer, AI Platform Engineer, and more
+Todo modelo de IA que chega à produção está sobre uma infraestrutura que alguém precisou construir, escalar, proteger e manter funcionando. Esse alguém é você.
+
+Este guia nasceu de anos de experiência fazendo a ponte entre engenharia de sistemas e aprendizado de máquina. Ele traduz conceitos de IA para a linguagem que engenheiros de infraestrutura, cloud e DevOps já conhecem — e oferece a profundidade prática para arquitetar, implantar, monitorar e operar cargas de trabalho de IA em escala de produção.
+
+**Este não é um livro acadêmico de IA/ML.** É um guia prático. Cada capítulo inclui exemplos de nível de produção, matrizes de decisão, laboratórios práticos e o tipo de lições que só vêm da operação de infraestrutura de IA no mundo real.
 
 ---
 
-## Table of Contents
+## O Que Você Vai Aprender
 
-### Part I — Foundations
-
-| # | Chapter | Description |
-|---|---------|-------------|
-| 1 | [Why AI Needs You](docs/chapters/01-introduction.md) | The infrastructure engineer's case for entering the AI world |
-| 2 | [Data: The Fuel That Powers Everything](docs/chapters/02-data.md) | Storage architecture, I/O bottlenecks, and data lifecycle for AI |
-| 3 | [Compute: Where Intelligence Comes to Life](docs/chapters/03-compute.md) | GPU VM families, clustering, InfiniBand, and distributed training |
-| 4 | [The GPU Deep Dive](docs/chapters/04-gpu-deep-dive.md) | CUDA, memory hierarchy, multi-GPU strategies, nvidia-smi, and debugging |
-
-### Part II — Building and Automating
-
-| # | Chapter | Description |
-|---|---------|-------------|
-| 5 | [Infrastructure as Code for AI](docs/chapters/05-iac.md) | Terraform, Bicep, GitHub Actions, and governance for AI infrastructure |
-| 6 | [Model Lifecycle and MLOps from an Infra Lens](docs/chapters/06-mlops.md) | Model registries, CI/CD for models, A/B testing, and supply chain security |
-
-### Part III — Operating and Securing
-
-| # | Chapter | Description |
-|---|---------|-------------|
-| 7 | [Monitoring and Observability for AI Workloads](docs/chapters/07-monitoring.md) | GPU metrics, Azure OpenAI monitoring, KQL queries, and alerting strategy |
-| 8 | [Security in AI Environments](docs/chapters/08-security.md) | Identity, secrets, network isolation, content safety, and resilience |
-| 9 | [Cost Engineering for AI Workloads](docs/chapters/09-cost-engineering.md) | GPU cost modeling, spot VMs, PTU economics, and FinOps practices |
-
-### Part IV — Scaling and Troubleshooting
-
-| # | Chapter | Description |
-|---|---------|-------------|
-| 10 | [AI Platform Operations at Scale](docs/chapters/10-platform-ops.md) | Multi-tenancy, GPU scheduling, SLA design, and fleet management |
-| 11 | [Azure OpenAI: Tokens, Throughput, and Provisioned Capacity](docs/chapters/11-azure-openai.md) | TPM, RPM, PTU, throttling mitigation, and high-availability patterns |
-| 12 | [The Production Troubleshooting Playbook](docs/chapters/12-troubleshooting.md) | 10 real failure scenarios with symptoms, diagnosis, and resolution |
-
-### Part V — Strategy and Reference
-
-| # | Chapter | Description |
-|---|---------|-------------|
-| 13 | [AI Use Cases for Infrastructure Engineers](docs/chapters/13-ai-use-cases.md) | Predictive failure, ops copilots, career paths, and a 30-day plan |
-| 14 | [The AI Adoption Framework](docs/chapters/14-adoption-framework.md) | A 6-phase roadmap from AI-curious to AI-capable |
-| 15 | [Visual Glossary: Infra to AI Translation Guide](docs/chapters/15-visual-glossary.md) | 55+ AI terms explained through infrastructure analogies |
+- **Arquitetura GPU e computação** — Famílias de VMs, CUDA cores vs Tensor Cores, interpretação do nvidia-smi e a matemática de memória por trás de erros OOM
+- **Pipelines de dados para IA** — Arquitetura de armazenamento, BlobFuse2, staging NVMe e por que I/O é o gargalo oculto
+- **Infraestrutura como Código** — Terraform e Bicep prontos para produção para clusters GPU, node pools AKS e CI/CD com OIDC
+- **MLOps sob a perspectiva de infra** — Registros de modelos, CI/CD para modelos, infraestrutura de testes A/B e segurança da cadeia de suprimentos
+- **Monitoramento e observabilidade** — DCGM, Managed Prometheus, consultas KQL e as seis dimensões de observabilidade de IA
+- **Segurança de IA** — Defesa contra injeção de prompt, endpoints privados, identidades gerenciadas e guardrails de segurança de conteúdo
+- **Engenharia de custos** — Modelagem de custos GPU, VMs spot para treinamento, economia de PTU e práticas de FinOps
+- **Operações de plataforma em escala** — Multi-tenancy, scheduling GPU (Kueue, Volcano), design de SLA e gerenciamento de frota
+- **Troubleshooting de produção** — 10 cenários reais de falha com diagnóstico e resolução passo a passo
+- **Caminhos de carreira** — AI Infra Engineer, MLOps Engineer, AI Platform Engineer e mais
 
 ---
 
-## Quick Start Guide
+## Sumário
 
-Each chapter is self-contained. Pick your starting point based on what you need:
+### Parte I — Fundamentos
 
-| Your Goal | Start Here |
+| # | Capítulo | Descrição |
+|---|---------|-------------|
+| 1 | [Por Que a IA Precisa de Você](docs/chapters/01-introduction.md) | O caso do engenheiro de infraestrutura para entrar no mundo da IA |
+| 2 | [Dados: O Combustível Que Move Tudo](docs/chapters/02-data.md) | Arquitetura de armazenamento, gargalos de I/O e ciclo de vida dos dados para IA |
+| 3 | [Computação: Onde a Inteligência Ganha Vida](docs/chapters/03-compute.md) | Famílias de VMs GPU, clustering, InfiniBand e treinamento distribuído |
+| 4 | [O Mergulho Profundo na GPU](docs/chapters/04-gpu-deep-dive.md) | CUDA, hierarquia de memória, estratégias multi-GPU, nvidia-smi e debugging |
+
+### Parte II — Construindo e Automatizando
+
+| # | Capítulo | Descrição |
+|---|---------|-------------|
+| 5 | [Infraestrutura como Código para IA](docs/chapters/05-iac.md) | Terraform, Bicep, GitHub Actions e governança para infraestrutura de IA |
+| 6 | [Ciclo de Vida de Modelos e MLOps sob a Perspectiva de Infra](docs/chapters/06-mlops.md) | Registros de modelos, CI/CD para modelos, testes A/B e segurança da cadeia de suprimentos |
+
+### Parte III — Operando e Protegendo
+
+| # | Capítulo | Descrição |
+|---|---------|-------------|
+| 7 | [Monitoramento e Observabilidade para Cargas de Trabalho de IA](docs/chapters/07-monitoring.md) | Métricas GPU, monitoramento Azure OpenAI, consultas KQL e estratégia de alertas |
+| 8 | [Segurança em Ambientes de IA](docs/chapters/08-security.md) | Identidade, segredos, isolamento de rede, segurança de conteúdo e resiliência |
+| 9 | [Engenharia de Custos para Cargas de Trabalho de IA](docs/chapters/09-cost-engineering.md) | Modelagem de custos GPU, VMs spot, economia de PTU e práticas de FinOps |
+
+### Parte IV — Escalando e Solucionando Problemas
+
+| # | Capítulo | Descrição |
+|---|---------|-------------|
+| 10 | [Operações de Plataforma de IA em Escala](docs/chapters/10-platform-ops.md) | Multi-tenancy, scheduling GPU, design de SLA e gerenciamento de frota |
+| 11 | [Azure OpenAI: Tokens, Throughput e Capacidade Provisionada](docs/chapters/11-azure-openai.md) | TPM, RPM, PTU, mitigação de throttling e padrões de alta disponibilidade |
+| 12 | [O Playbook de Troubleshooting de Produção](docs/chapters/12-troubleshooting.md) | 10 cenários reais de falha com sintomas, diagnóstico e resolução |
+
+### Parte V — Estratégia e Referência
+
+| # | Capítulo | Descrição |
+|---|---------|-------------|
+| 13 | [Casos de Uso de IA para Engenheiros de Infraestrutura](docs/chapters/13-ai-use-cases.md) | Falha preditiva, copilots de operação, caminhos de carreira e plano de 30 dias |
+| 14 | [O Framework de Adoção de IA](docs/chapters/14-adoption-framework.md) | Um roadmap de 6 fases de AI-curioso a AI-capaz |
+| 15 | [Glossário Visual: Guia de Tradução Infra para IA](docs/chapters/15-visual-glossary.md) | 55+ termos de IA explicados através de analogias de infraestrutura |
+
+---
+
+## Guia de Início Rápido
+
+Cada capítulo é autocontido. Escolha seu ponto de partida baseado no que você precisa:
+
+| Seu Objetivo | Comece Aqui |
 |-----------|------------|
-| Understand how AI connects to your skills | [Chapter 1 — Why AI Needs You](docs/chapters/01-introduction.md) |
-| Provision your first GPU VM | [Chapter 3 — Compute](docs/chapters/03-compute.md) |
-| Understand GPU memory and OOM errors | [Chapter 4 — The GPU Deep Dive](docs/chapters/04-gpu-deep-dive.md) |
-| Automate AI infrastructure with IaC | [Chapter 5 — Infrastructure as Code](docs/chapters/05-iac.md) |
-| Set up monitoring for AI workloads | [Chapter 7 — Monitoring and Observability](docs/chapters/07-monitoring.md) |
-| Control AI costs before they control you | [Chapter 9 — Cost Engineering](docs/chapters/09-cost-engineering.md) |
-| Fix a production issue right now | [Chapter 12 — Troubleshooting Playbook](docs/chapters/12-troubleshooting.md) |
-| Translate an AI term you just heard | [Chapter 15 — Visual Glossary](docs/chapters/15-visual-glossary.md) |
-| Get hands-on with labs | [Hands-On Labs](docs/extras/labs/) |
+| Entender como IA se conecta com suas habilidades | [Capítulo 1 — Por Que a IA Precisa de Você](docs/chapters/01-introduction.md) |
+| Provisionar sua primeira VM GPU | [Capítulo 3 — Computação](docs/chapters/03-compute.md) |
+| Entender memória GPU e erros OOM | [Capítulo 4 — O Mergulho Profundo na GPU](docs/chapters/04-gpu-deep-dive.md) |
+| Automatizar infraestrutura de IA com IaC | [Capítulo 5 — Infraestrutura como Código](docs/chapters/05-iac.md) |
+| Configurar monitoramento para cargas de trabalho de IA | [Capítulo 7 — Monitoramento e Observabilidade](docs/chapters/07-monitoring.md) |
+| Controlar custos de IA antes que eles controlem você | [Capítulo 9 — Engenharia de Custos](docs/chapters/09-cost-engineering.md) |
+| Resolver um problema de produção agora | [Capítulo 12 — Playbook de Troubleshooting](docs/chapters/12-troubleshooting.md) |
+| Traduzir um termo de IA que você acabou de ouvir | [Capítulo 15 — Glossário Visual](docs/chapters/15-visual-glossary.md) |
+| Praticar com laboratórios | [Laboratórios Práticos](docs/extras/labs/) |
 
 ---
 
 ## Extras
 
-| Resource | Description |
+| Recurso | Descrição |
 |----------|-------------|
-| [Hands-On Labs](docs/extras/labs/) | GPU VM with Bicep, AKS GPU cluster with Terraform, inference API with Azure ML |
-| [Case Studies](docs/extras/case-studies.md) | 5 production scenarios with quantified outcomes |
-| [Cheatsheets](docs/extras/cheatsheets.md) | GPU SKU comparison, security checklist, monitoring metrics, deploy commands |
-| [Technical FAQ](docs/extras/technical-faq.md) | Answers to the most common questions from infra engineers entering AI |
+| [Laboratórios Práticos](docs/extras/labs/) | VM GPU com Bicep, cluster AKS GPU com Terraform, API de inferência com Azure ML |
+| [Estudos de Caso](docs/extras/case-studies.md) | 5 cenários de produção com resultados quantificados |
+| [Cheatsheets](docs/extras/cheatsheets.md) | Comparação de SKUs GPU, checklist de segurança, métricas de monitoramento, comandos de deploy |
+| [FAQ Técnico](docs/extras/technical-faq.md) | Respostas para as perguntas mais comuns de engenheiros de infra entrando na IA |
 
 ---
 
-## Who This Book Is For
+## Para Quem É Este Livro
 
-This handbook is written for professionals with **5+ years of infrastructure experience** who are new to AI but technically sharp:
+Este guia é escrito para profissionais com **5+ anos de experiência em infraestrutura** que são novos em IA mas tecnicamente afiados:
 
-- **Infrastructure and Cloud Engineers** (Azure, AWS, GCP)
-- **DevOps and Site Reliability Engineers**
-- **Solutions and Cloud Architects**
-- **Platform Engineers**
-- **Security and Governance Professionals**
-- **Data Engineers** who want to understand the infrastructure side of AI
+- **Engenheiros de Infraestrutura e Cloud** (Azure, AWS, GCP)
+- **Engenheiros DevOps e de Confiabilidade de Sites (SRE)**
+- **Arquitetos de Soluções e Cloud**
+- **Engenheiros de Plataforma**
+- **Profissionais de Segurança e Governança**
+- **Engenheiros de Dados** que querem entender o lado de infraestrutura da IA
 
-No prior AI/ML knowledge is required. Every concept is explained through infrastructure analogies you already know.
+Nenhum conhecimento prévio de IA/ML é necessário. Cada conceito é explicado através de analogias de infraestrutura que você já conhece.
 
 ---
 
-## By the Numbers
+## Em Números
 
-| Metric | Value |
+| Métrica | Valor |
 |--------|-------|
-| Chapters | 15 (organized in 5 parts) |
-| Total words | ~61,000 |
-| Estimated pages | 220+ |
-| Hands-on labs | 3 |
-| Troubleshooting scenarios | 10 |
-| AI terms in glossary | 55+ |
-| CLI commands validated against MS Learn | All of them |
+| Capítulos | 15 (organizados em 5 partes) |
+| Total de palavras | ~61.000 |
+| Páginas estimadas | 220+ |
+| Laboratórios práticos | 3 |
+| Cenários de troubleshooting | 10 |
+| Termos de IA no glossário | 55+ |
+| Comandos CLI validados contra MS Learn | Todos |
 
 ---
 
-## Repository Structure
+## Estrutura do Repositório
 
 ```text
 ai-for-infra-pros/
 ├── docs/
-│   ├── chapters/              # 15 chapters organized in 5 parts
+│   ├── chapters/              # 15 capítulos organizados em 5 partes
 │   ├── extras/
-│   │   ├── labs/              # 3 hands-on labs (Bicep, Terraform, Azure ML)
+│   │   ├── labs/              # 3 laboratórios práticos (Bicep, Terraform, Azure ML)
 │   │   ├── case-studies.md
 │   │   ├── cheatsheets.md
 │   │   └── technical-faq.md
 │   ├── images/
-│   ├── stylesheets/           # Custom CSS for the website
-│   └── index.md               # Website landing page
-├── .github/workflows/         # GitHub Actions for auto-deploy
-├── mkdocs.yml                 # MkDocs Material configuration
-├── requirements-docs.txt      # Python dependencies
+│   ├── stylesheets/           # CSS customizado para o website
+│   └── index.md               # Página inicial do website
+├── .github/workflows/         # GitHub Actions para deploy automático
+├── mkdocs.yml                 # Configuração MkDocs Material
+├── requirements-docs.txt      # Dependências Python
 ├── README.md
 └── SUMMARY.md
 ```
 
 ---
 
-## Credits
+## Créditos
 
-Created by **Ricardo Martins**
+Criado por **Ricardo Martins**
 Principal Solutions Engineer @ Microsoft
-Author of [*Azure Governance Made Simple*](https://book.azgovernance.com/), [*Linux Hackathon*](https://linuxhackathon.com/), [*K8s Hackathon*](https://k8shackathon.com/) and [*From Server to Cluster*](https://fromservertocluster.com/)
+Autor de [*Azure Governance Made Simple*](https://book.azgovernance.com/), [*Linux Hackathon*](https://linuxhackathon.com/), [*K8s Hackathon*](https://k8shackathon.com/) e [*From Server to Cluster*](https://fromservertocluster.com/)
 [rmmartins.com](https://rmmartins.com)
 
 ---
 
-**Disclaimer:** This is an independent, personal project — not an official Microsoft publication. The views and content are solely the author's own. While many examples use Azure, the concepts, architectures, and operational practices in this book apply to any cloud platform — AWS, GCP, or on-premises.
+**Aviso:** Este é um projeto independente e pessoal — não uma publicação oficial da Microsoft. As opiniões e o conteúdo são exclusivamente do autor. Embora muitos exemplos usem Azure, os conceitos, arquiteturas e práticas operacionais deste livro se aplicam a qualquer plataforma de nuvem — AWS, GCP ou on-premises.
 
 ---
 
-> *"AI needs infrastructure. And infrastructure needs engineers who understand AI. This book is the bridge."*
+> *"A IA precisa de infraestrutura. E infraestrutura precisa de engenheiros que entendam IA. Este livro é a ponte."*
