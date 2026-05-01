@@ -4,7 +4,9 @@
 
 [![Deploy MkDocs](https://github.com/ricmmartins/ai-for-infra-pros/actions/workflows/deploy-mkdocs.yml/badge.svg)](https://github.com/ricmmartins/ai-for-infra-pros/actions/workflows/deploy-mkdocs.yml)
 
-> *"You don't need to be a data scientist to work with AI — but you do need to understand how it runs, scales, breaks, and costs money."*
+🌐 **Disponível em Português (Brasil):** [Leia em Português](https://github.com/ricmmartins/ai-for-infra-pros/tree/pt-br)
+
+> *"You don't need to be a data scientist to work with AI— but you do need to understand how it runs, scales, breaks, and costs money."*
 
 **Read online at [www.ai4infra.com](https://www.ai4infra.com)**
 
