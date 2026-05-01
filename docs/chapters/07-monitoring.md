@@ -1,157 +1,157 @@
-# Chapter 7 — Monitoring and Observability for AI Workloads
+# Capítulo 7 — Monitoramento e Observabilidade para Workloads de IA
 
-*"Everything looked green on the dashboard. And that was exactly the problem."*
-
----
-
-## The Silent Failure
-
-Your Azure OpenAI endpoint is returning 200 OK on every request. Latency looks normal — P95 is under 800ms. CPU and memory utilization are well within thresholds. The Kubernetes cluster shows all pods healthy, no restarts, no evictions. By every infrastructure metric you've ever trusted, the system is perfectly fine.
-
-But the support tickets keep coming. Users are reporting that the chatbot is "giving worse answers." The responses are technically fluent but factually wrong — hallucinations have increased, summaries miss key points, and code suggestions introduce subtle bugs. Your product manager is alarmed. The VP of Engineering wants answers by end of day.
-
-You pull up your monitoring stack. Azure Monitor: green. Application Insights: green. Grafana dashboards: all green. You're staring at a wall of healthy metrics while the system is actively failing your users.
-
-The problem? **Model drift**. A recent fine-tuning run introduced a regression in response quality. The model's outputs degraded gradually over two weeks, but no alert fired — because you're monitoring infrastructure metrics, not AI metrics. Your observability stack is built for traditional workloads where "the server is up and responding" equals "the system is working." In AI, a model can be running perfectly and still be wrong.
-
-This is the fundamental challenge of AI observability: **the infrastructure can be healthy while the workload is broken**. Traditional monitoring answers "Is it running?" AI monitoring must also answer "Is it working correctly?" and "Is it worth the cost?" This chapter teaches you to see across all six dimensions of AI observability — so you never confuse a green dashboard with a healthy system again.
+*"Estava tudo verde no dashboard. E esse era exatamente o problema."*
 
 ---
 
-## The Six Dimensions of AI Observability
+## A Falha Silenciosa
 
-Traditional infrastructure monitoring covers compute, network, and storage. That's necessary but insufficient for AI workloads. You need to monitor six dimensions simultaneously, because failures in any one of them can manifest as a degraded user experience — and the symptoms often overlap in ways that make root cause analysis tricky.
+Seu endpoint do Azure OpenAI está retornando 200 OK em todas as requisições. A latência parece normal — o P95 está abaixo de 800ms. A utilização de CPU e memória está bem dentro dos limites. O cluster Kubernetes mostra todos os pods saudáveis, sem restarts, sem evictions. Por cada métrica de infraestrutura em que você sempre confiou, o sistema está perfeitamente bem.
 
-**Infra ↔ AI Translation**: Think of it this way — monitoring a web server means watching CPU, memory, disk, and network. Monitoring an AI workload is like monitoring a web server, a database, a billing system, and a quality assurance department simultaneously. The model is not just consuming resources; it's producing outputs that have a correctness dimension traditional infrastructure doesn't have.
+Mas os tickets de suporte continuam chegando. Os usuários estão relatando que o chatbot está "dando respostas piores". As respostas são tecnicamente fluentes, mas factualmente erradas — as alucinações aumentaram, os resumos perdem pontos-chave e as sugestões de código introduzem bugs sutis. Seu product manager está alarmado. O VP de Engenharia quer respostas até o fim do dia.
 
-### 1. Compute — GPU Utilization, Memory, Temperature
+Você abre sua stack de monitoramento. Azure Monitor: verde. Application Insights: verde. Dashboards do Grafana: todos verdes. Você está olhando para uma parede de métricas saudáveis enquanto o sistema está falhando ativamente com seus usuários.
 
-This is the dimension closest to traditional monitoring. You're tracking GPU utilization percentage, HBM memory consumption, GPU temperature, power draw, and ECC (Error Correcting Code) memory errors. Low GPU utilization during inference may indicate inefficient batching. High temperatures approaching thermal throttling thresholds (typically 83°C for data center GPUs) signal cooling issues or sustained overload. ECC errors, especially uncorrectable ones, indicate hardware degradation.
+O problema? **Model drift**. Uma rodada recente de fine-tuning introduziu uma regressão na qualidade das respostas. As saídas do modelo degradaram gradualmente ao longo de duas semanas, mas nenhum alerta disparou — porque você está monitorando métricas de infraestrutura, não métricas de IA. Sua stack de observabilidade foi construída para workloads tradicionais, onde "o servidor está de pé e respondendo" equivale a "o sistema está funcionando." Em IA, um modelo pode estar rodando perfeitamente e ainda assim estar errado.
 
-### 2. Model — Accuracy, Drift, Latency Distribution, Error Rates
-
-This is the dimension that catches the failure from our opening story. You're tracking inference accuracy (when measurable), output quality scores, model version performance comparisons, and response distribution shifts. For LLMs, this includes tracking hallucination rates, refusal rates, and response coherence. Model drift happens when the statistical properties of the inputs or the model's performance change over time, even though nothing in the infrastructure changed.
-
-### 3. Network — Throughput, InfiniBand Health, Cross-Node Latency
-
-Multi-GPU training jobs and distributed inference rely heavily on network performance. You need to monitor InfiniBand link health, NCCL communication throughput, cross-node latency, and packet drops. A single degraded InfiniBand link in a multi-node training cluster can reduce throughput by 30-50% because distributed training requires all nodes to synchronize at the pace of the slowest communicator.
-
-### 4. Data — Pipeline Freshness, Quality, Ingestion Failures
-
-AI workloads consume data through pipelines, and pipeline failures are a top source of incidents. Monitor data ingestion latency, schema validation errors, missing feature values, and training data staleness. A retrieval-augmented generation (RAG) application that stops indexing new documents will keep running perfectly — it just won't know about anything that happened after the pipeline broke.
-
-### 5. Cost — GPU Spend, Token Consumption, Cost Per Inference
-
-GPUs and tokens are expensive, and costs can escalate rapidly without visibility. Track GPU-hours consumed per team or project, token consumption per model deployment, cost per inference request, and spend versus budget projections. An unoptimized prompt that sends 4,000 tokens per request instead of 500 can multiply your Azure OpenAI bill by 8× overnight.
-
-### 6. Security — Access Patterns, Prompt Injection, Data Exfiltration
-
-AI systems introduce novel security monitoring requirements. Watch for anomalous API access patterns, prompt injection attempts (inputs designed to manipulate model behavior), attempts to extract training data or system prompts, and unusual token consumption spikes that could indicate abuse. These are threats that traditional WAF and NSG logs won't catch.
-
-**Decision Matrix — What to Monitor First**
-
-| Priority | Dimension | Why |
-|----------|-----------|-----|
-| **P0** | Compute (GPU) | Hardware failures cause immediate outages |
-| **P0** | Cost | Unchecked spend can blow budgets in hours |
-| **P1** | Model | Quality degradation affects users silently |
-| **P1** | Security | Prompt injection and data exfiltration are active threats |
-| **P2** | Network | Impacts multi-node workloads significantly |
-| **P2** | Data | Pipeline freshness affects downstream accuracy |
+Esse é o desafio fundamental da observabilidade de IA: **a infraestrutura pode estar saudável enquanto o workload está quebrado**. O monitoramento tradicional responde "Está rodando?" O monitoramento de IA também precisa responder "Está funcionando corretamente?" e "Vale o custo?" Este capítulo ensina você a enxergar todas as seis dimensões da observabilidade de IA — para que você nunca mais confunda um dashboard verde com um sistema saudável.
 
 ---
 
-## GPU Monitoring Deep Dive
+## As Seis Dimensões da Observabilidade de IA
 
-GPU monitoring is the foundation of AI observability. Without it, you're flying blind on the most expensive resource in your stack. The toolchain has matured significantly, and Azure provides a managed path that eliminates most of the operational overhead.
+O monitoramento tradicional de infraestrutura cobre computação, rede e armazenamento. Isso é necessário, mas insuficiente para workloads de IA. Você precisa monitorar seis dimensões simultaneamente, porque falhas em qualquer uma delas podem se manifestar como uma experiência degradada para o usuário — e os sintomas frequentemente se sobrepõem de maneiras que tornam a análise de causa raiz complicada.
 
-### DCGM Exporter as a DaemonSet in AKS
+**Tradução Infra ↔ IA**: Pense da seguinte forma — monitorar um servidor web significa observar CPU, memória, disco e rede. Monitorar um workload de IA é como monitorar um servidor web, um banco de dados, um sistema de billing e um departamento de controle de qualidade simultaneamente. O modelo não está apenas consumindo recursos; ele está produzindo saídas que têm uma dimensão de corretude que a infraestrutura tradicional não possui.
 
-NVIDIA's Data Center GPU Manager (DCGM) Exporter runs as a DaemonSet — one pod per GPU node — and exposes GPU metrics in Prometheus format. This is the standard approach for Kubernetes-based GPU monitoring.
+### 1. Computação — Utilização de GPU, Memória, Temperatura
+
+Esta é a dimensão mais próxima do monitoramento tradicional. Você está acompanhando o percentual de utilização da GPU, consumo de memória HBM, temperatura da GPU, consumo de energia e erros de memória ECC (Error Correcting Code). Baixa utilização de GPU durante inferência pode indicar batching ineficiente. Temperaturas altas se aproximando dos limites de thermal throttling (tipicamente 83°C para GPUs de data center) sinalizam problemas de refrigeração ou sobrecarga sustentada. Erros ECC, especialmente os não corrigíveis, indicam degradação de hardware.
+
+### 2. Modelo — Acurácia, Drift, Distribuição de Latência, Taxas de Erro
+
+Esta é a dimensão que captura a falha da nossa história de abertura. Você está acompanhando a acurácia de inferência (quando mensurável), scores de qualidade de saída, comparações de desempenho entre versões do modelo e mudanças na distribuição de respostas. Para LLMs, isso inclui acompanhar taxas de alucinação, taxas de recusa e coerência das respostas. Model drift acontece quando as propriedades estatísticas das entradas ou o desempenho do modelo mudam ao longo do tempo, mesmo que nada na infraestrutura tenha mudado.
+
+### 3. Rede — Throughput, Saúde do InfiniBand, Latência entre Nós
+
+Jobs de treinamento multi-GPU e inferência distribuída dependem fortemente do desempenho de rede. Você precisa monitorar a saúde dos links InfiniBand, throughput de comunicação NCCL, latência entre nós e perda de pacotes. Um único link InfiniBand degradado em um cluster de treinamento multi-nó pode reduzir o throughput em 30-50%, porque o treinamento distribuído exige que todos os nós sincronizem no ritmo do comunicador mais lento.
+
+### 4. Dados — Frescor do Pipeline, Qualidade, Falhas de Ingestão
+
+Workloads de IA consomem dados por meio de pipelines, e falhas de pipeline são uma das principais fontes de incidentes. Monitore a latência de ingestão de dados, erros de validação de schema, valores de features ausentes e obsolescência dos dados de treinamento. Uma aplicação de RAG (Retrieval-Augmented Generation) que para de indexar novos documentos continuará funcionando perfeitamente — ela apenas não saberá sobre nada que aconteceu após o pipeline quebrar.
+
+### 5. Custo — Gastos com GPU, Consumo de Tokens, Custo por Inferência
+
+GPUs e tokens são caros, e os custos podem escalar rapidamente sem visibilidade. Acompanhe GPU-horas consumidas por equipe ou projeto, consumo de tokens por deployment de modelo, custo por requisição de inferência e projeções de gastos versus orçamento. Um prompt não otimizado que envia 4.000 tokens por requisição em vez de 500 pode multiplicar sua conta do Azure OpenAI por 8× de um dia para o outro.
+
+### 6. Segurança — Padrões de Acesso, Prompt Injection, Exfiltração de Dados
+
+Sistemas de IA introduzem requisitos de monitoramento de segurança inéditos. Fique atento a padrões anômalos de acesso à API, tentativas de prompt injection (entradas projetadas para manipular o comportamento do modelo), tentativas de extrair dados de treinamento ou system prompts e picos incomuns de consumo de tokens que podem indicar abuso. Essas são ameaças que logs tradicionais de WAF e NSG não vão capturar.
+
+**Matriz de Decisão — O Que Monitorar Primeiro**
+
+| Prioridade | Dimensão | Por quê |
+|------------|----------|---------|
+| **P0** | Computação (GPU) | Falhas de hardware causam indisponibilidade imediata |
+| **P0** | Custo | Gastos descontrolados podem estourar orçamentos em horas |
+| **P1** | Modelo | Degradação de qualidade afeta os usuários silenciosamente |
+| **P1** | Segurança | Prompt injection e exfiltração de dados são ameaças ativas |
+| **P2** | Rede | Impacta workloads multi-nó significativamente |
+| **P2** | Dados | Frescor do pipeline afeta a acurácia downstream |
+
+---
+
+## GPU Monitoring em Profundidade
+
+O monitoramento de GPU é a base da observabilidade de IA. Sem ele, você está voando às cegas no recurso mais caro da sua stack. O ferramental amadureceu significativamente, e o Azure oferece um caminho gerenciado que elimina a maior parte da sobrecarga operacional.
+
+### DCGM Exporter como DaemonSet no AKS
+
+O DCGM Exporter da NVIDIA (Data Center GPU Manager) roda como um DaemonSet — um pod por nó com GPU — e expõe métricas de GPU no formato Prometheus. Essa é a abordagem padrão para monitoramento de GPU em Kubernetes.
 
 ```bash
-# Add the NVIDIA Helm repository
+# Adicionar o repositório Helm da NVIDIA
 helm repo add nvidia https://nvidia.github.io/dcgm-exporter/helm-charts
 helm repo update
 
-# Install DCGM Exporter as a DaemonSet on GPU nodes
+# Instalar o DCGM Exporter como DaemonSet nos nós com GPU
 helm install dcgm-exporter nvidia/dcgm-exporter \
   --namespace gpu-monitoring \
   --create-namespace \
   --set nodeSelector."agentpool"="gpu"
 ```
 
-DCGM Exporter exposes metrics on port 9400 by default. Once running, Prometheus can scrape these metrics automatically.
+O DCGM Exporter expõe métricas na porta 9400 por padrão. Uma vez em execução, o Prometheus pode coletar essas métricas automaticamente.
 
-### Azure Managed Prometheus for GPU Metrics
+### Azure Managed Prometheus para Métricas de GPU
 
-Azure Managed Prometheus eliminates the need to run your own Prometheus server. Enable it on your AKS cluster and configure it to scrape DCGM metrics:
+O Azure Managed Prometheus elimina a necessidade de rodar seu próprio servidor Prometheus. Habilite-o no seu cluster AKS e configure-o para coletar métricas do DCGM:
 
 ```bash
-# Enable Azure Monitor managed service for Prometheus
+# Habilitar o serviço gerenciado Azure Monitor para Prometheus
 az aks update \
   --resource-group myResourceGroup \
   --name myAKSCluster \
   --enable-azure-monitor-metrics
 
-# Verify the monitoring add-on is enabled
+# Verificar se o add-on de monitoramento está habilitado
 az aks show \
   --resource-group myResourceGroup \
   --name myAKSCluster \
   --query "azureMonitorProfile.metrics.enabled"
 ```
 
-💡 **Pro Tip**: Azure Managed Prometheus automatically discovers and scrapes DCGM Exporter pods through Kubernetes service discovery. You don't need to manually configure scrape targets — just deploy the DCGM Exporter DaemonSet and the managed Prometheus instance will find it. If you need custom scrape configs, use the `ama-metrics-settings-configmap` ConfigMap.
+💡 **Dica Profissional**: O Azure Managed Prometheus descobre e coleta automaticamente os pods do DCGM Exporter por meio do service discovery do Kubernetes. Você não precisa configurar manualmente os targets de coleta — basta implantar o DaemonSet do DCGM Exporter e a instância do Managed Prometheus o encontrará. Se você precisar de configurações customizadas de coleta, use o ConfigMap `ama-metrics-settings-configmap`.
 
-### Key GPU Metrics and Alert Thresholds
+### Métricas-Chave de GPU e Limites de Alertas
 
-| Metric | DCGM Name | Warning | Critical | What It Means |
-|--------|-----------|---------|----------|---------------|
-| GPU Utilization | `DCGM_FI_DEV_GPU_UTIL` | < 30% sustained | < 10% sustained | Underutilization — wasting GPU spend |
-| GPU Memory Used | `DCGM_FI_DEV_FB_USED` | > 85% | > 95% | OOM risk for new workloads |
-| GPU Temperature | `DCGM_FI_DEV_GPU_TEMP` | > 78°C | > 83°C | Thermal throttling imminent |
-| ECC Errors (Uncorrectable) | `DCGM_FI_DEV_ECC_DBE_VOL_TOTAL` | > 0 | > 0 | Hardware degradation — replace GPU |
-| Memory Clock Throttle | `DCGM_FI_DEV_CLOCK_THROTTLE_REASONS` | Thermal | HW Slowdown | Performance capped by thermals or power |
+| Métrica | Nome DCGM | Aviso | Crítico | O Que Significa |
+|---------|-----------|-------|---------|-----------------|
+| Utilização de GPU | `DCGM_FI_DEV_GPU_UTIL` | < 30% sustentado | < 10% sustentado | Subutilização — desperdiçando gastos com GPU |
+| Memória de GPU Usada | `DCGM_FI_DEV_FB_USED` | > 85% | > 95% | Risco de OOM para novos workloads |
+| Temperatura da GPU | `DCGM_FI_DEV_GPU_TEMP` | > 78°C | > 83°C | Thermal throttling iminente |
+| Erros ECC (Não Corrigíveis) | `DCGM_FI_DEV_ECC_DBE_VOL_TOTAL` | > 0 | > 0 | Degradação de hardware — substituir GPU |
+| Throttle de Clock de Memória | `DCGM_FI_DEV_CLOCK_THROTTLE_REASONS` | Thermal | HW Slowdown | Desempenho limitado por temperatura ou energia |
 
-⚠️ **Production Gotcha**: Low GPU utilization isn't always a problem. Some inference workloads are latency-sensitive and intentionally keep GPU utilization low to maintain fast response times. Before alerting on low utilization, verify whether the workload is optimized for throughput (training — high utilization expected) or latency (inference — moderate utilization acceptable).
+⚠️ **Cuidado em Produção**: Baixa utilização de GPU nem sempre é um problema. Alguns workloads de inferência são sensíveis à latência e intencionalmente mantêm a utilização de GPU baixa para manter tempos de resposta rápidos. Antes de alertar sobre baixa utilização, verifique se o workload é otimizado para throughput (treinamento — alta utilização esperada) ou latência (inferência — utilização moderada aceitável).
 
-### nvidia-smi for Ad-Hoc Debugging
+### nvidia-smi para Debugging Ad-Hoc
 
-When you need to troubleshoot a specific node, `nvidia-smi` is your go-to tool (see Chapter 4 for deep-dive GPU diagnostics). Use it to get a real-time snapshot:
+Quando você precisa investigar um nó específico, `nvidia-smi` é sua ferramenta principal (veja o Capítulo 4 para diagnósticos aprofundados de GPU). Use-o para obter um snapshot em tempo real:
 
 ```bash
-# Basic GPU status
+# Status básico da GPU
 nvidia-smi
 
-# Continuous monitoring at 1-second intervals
+# Monitoramento contínuo em intervalos de 1 segundo
 nvidia-smi dmon -s pucvmet -d 1
 
-# Check GPU topology and NVLink status
+# Verificar topologia da GPU e status do NVLink
 nvidia-smi topo -m
 ```
 
 ---
 
-## Azure OpenAI Monitoring
+## Monitoramento do Azure OpenAI
 
-Azure OpenAI has its own monitoring requirements that are distinct from self-hosted model infrastructure. The key metrics revolve around token consumption, rate limiting, and perceived latency.
+O Azure OpenAI possui seus próprios requisitos de monitoramento, distintos da infraestrutura de modelos auto-hospedados. As métricas-chave giram em torno de consumo de tokens, rate limiting e latência percebida.
 
-### Key Metrics
+### Métricas-Chave
 
-**TPM (Tokens Per Minute)** measures your throughput consumption against your allocated capacity. When you hit your TPM limit, Azure throttles your requests with HTTP 429 responses. Monitor how close you are to your limit — sustained usage above 80% of your TPM allocation means you need to plan for more capacity.
+**TPM (Tokens Per Minute)** mede seu consumo de throughput em relação à capacidade alocada. Quando você atinge o limite de TPM, o Azure throttlea suas requisições com respostas HTTP 429. Monitore o quão perto você está do seu limite — uso sustentado acima de 80% da sua alocação de TPM significa que você precisa planejar mais capacidade.
 
-**RPM (Requests Per Minute)** caps the number of individual API calls regardless of token count. A flood of small requests can hit RPM limits even when TPM has headroom. This often catches teams off guard when they switch from a few large requests to many small ones.
+**RPM (Requests Per Minute)** limita o número de chamadas individuais à API, independentemente da contagem de tokens. Uma enxurrada de requisições pequenas pode atingir os limites de RPM mesmo quando o TPM ainda tem folga. Isso frequentemente pega as equipes de surpresa quando mudam de poucas requisições grandes para muitas requisições pequenas.
 
-**TTFT (Time to First Token)** measures the perceived latency for streaming responses. Users perceive latency based on when the first token appears, not when the full response completes. A TTFT above 2 seconds feels sluggish to users even if total generation time is acceptable.
+**TTFT (Time to First Token)** mede a latência percebida para respostas em streaming. Os usuários percebem a latência com base em quando o primeiro token aparece, não quando a resposta completa termina. Um TTFT acima de 2 segundos parece lento para os usuários, mesmo que o tempo total de geração seja aceitável.
 
-**HTTP 429 Rate** is the throttling signal. Any sustained 429 rate above 1% deserves investigation. Spikes during peak hours may indicate you need to implement request queuing, deploy across multiple regions, or upgrade from pay-as-you-go to Provisioned Throughput Units (PTUs).
+**Taxa de HTTP 429** é o sinal de throttling. Qualquer taxa sustentada de 429 acima de 1% merece investigação. Picos durante horários de pico podem indicar que você precisa implementar enfileiramento de requisições, implantar em múltiplas regiões ou migrar de pay-as-you-go para Provisioned Throughput Units (PTUs).
 
-### Monitoring Throttling in Practice
+### Monitorando Throttling na Prática
 
-Configure diagnostic settings on your Azure OpenAI resource to send logs to a Log Analytics workspace. Once enabled, every API call is logged with status code, latency, token counts, and deployment name. This is the data foundation for every KQL query later in this chapter.
+Configure diagnostic settings no seu recurso do Azure OpenAI para enviar logs a um workspace do Log Analytics. Uma vez habilitado, cada chamada à API é registrada com status code, latência, contagem de tokens e nome do deployment. Esta é a base de dados para cada consulta KQL mais adiante neste capítulo.
 
 ```bash
-# Enable diagnostic logging for Azure OpenAI
+# Habilitar logging de diagnóstico para Azure OpenAI
 az monitor diagnostic-settings create \
   --resource "/subscriptions/<sub-id>/resourceGroups/myRG/providers/Microsoft.CognitiveServices/accounts/myAOAI" \
   --name "aoai-diagnostics" \
@@ -160,11 +160,11 @@ az monitor diagnostic-settings create \
   --metrics '[{"category":"AllMetrics","enabled":true}]'
 ```
 
-⚠️ **Production Gotcha**: Azure OpenAI diagnostic logs can generate significant volume in busy deployments. A deployment handling 1,000 RPM produces roughly 1.4 million log entries per day. Set appropriate retention policies on your Log Analytics workspace — 30 days is sufficient for operational debugging, while compliance requirements may dictate longer retention.
+⚠️ **Cuidado em Produção**: Os logs de diagnóstico do Azure OpenAI podem gerar um volume significativo em deployments movimentados. Um deployment atendendo 1.000 RPM produz aproximadamente 1,4 milhão de registros de log por dia. Defina políticas de retenção apropriadas no seu workspace do Log Analytics — 30 dias é suficiente para debugging operacional, enquanto requisitos de compliance podem exigir retenção mais longa.
 
-### Token Consumption for Cost Attribution
+### Consumo de Tokens para Atribuição de Custos
 
-Track token usage by deployment, application, and team to understand cost drivers:
+Acompanhe o uso de tokens por deployment, aplicação e equipe para entender os direcionadores de custo:
 
 ```python
 from opentelemetry import metrics
@@ -176,7 +176,7 @@ token_counter = meter.create_counter(
     unit="tokens"
 )
 
-# After each API call, record token usage with attribution labels
+# Após cada chamada à API, registrar uso de tokens com labels de atribuição
 token_counter.add(
     response.usage.total_tokens,
     attributes={
@@ -189,39 +189,39 @@ token_counter.add(
 )
 ```
 
-**Infra ↔ AI Translation**: Think of TPM limits like bandwidth throttling and RPM limits like connection-rate limiting. You've managed both in networking for years — the same patterns apply. Token budgets are the AI equivalent of data transfer quotas.
+**Tradução Infra ↔ IA**: Pense nos limites de TPM como throttling de banda e nos limites de RPM como limitação de taxa de conexão. Você gerencia ambos em redes há anos — os mesmos padrões se aplicam. Orçamentos de tokens são o equivalente em IA das cotas de transferência de dados.
 
 ---
 
-## Application-Level Observability
+## Observabilidade em Nível de Aplicação
 
-Infrastructure metrics tell you whether the system is healthy. Application-level observability tells you whether it's working correctly and efficiently.
+Métricas de infraestrutura dizem se o sistema está saudável. A observabilidade em nível de aplicação diz se ele está funcionando corretamente e de forma eficiente.
 
-### OpenTelemetry for Distributed Tracing
+### OpenTelemetry para Distributed Tracing
 
-Modern AI applications involve multiple services: API gateways, preprocessing steps, embedding generation, vector search, LLM inference, and post-processing. OpenTelemetry provides the distributed tracing standard that lets you follow a single request through this entire pipeline.
+Aplicações modernas de IA envolvem múltiplos serviços: API gateways, etapas de pré-processamento, geração de embeddings, busca vetorial, inferência LLM e pós-processamento. O OpenTelemetry fornece o padrão de distributed tracing que permite acompanhar uma única requisição por todo esse pipeline.
 
 ```python
 from azure.monitor.opentelemetry import configure_azure_monitor
 from opentelemetry import trace
 
-# Configure Azure Monitor exporter
-# Requires APPLICATIONINSIGHTS_CONNECTION_STRING environment variable
+# Configurar o exportador do Azure Monitor
+# Requer a variável de ambiente APPLICATIONINSIGHTS_CONNECTION_STRING
 configure_azure_monitor()
 
 tracer = trace.get_tracer("inference-pipeline")
 
 def process_request(user_query):
     with tracer.start_as_current_span("inference-pipeline") as span:
-        # Step 1: Embed the query
+        # Passo 1: Gerar embedding da query
         with tracer.start_as_current_span("generate-embedding"):
             embedding = embed(user_query)
 
-        # Step 2: Retrieve context from vector store
+        # Passo 2: Recuperar contexto do vector store
         with tracer.start_as_current_span("vector-search"):
             context = search(embedding, top_k=5)
 
-        # Step 3: Generate response via LLM
+        # Passo 3: Gerar resposta via LLM
         with tracer.start_as_current_span("llm-inference") as llm_span:
             response = generate(user_query, context)
             llm_span.set_attribute("tokens.prompt", response.usage.prompt_tokens)
@@ -230,18 +230,18 @@ def process_request(user_query):
         return response
 ```
 
-### Custom Metrics for AI Workloads
+### Métricas Customizadas para Workloads de IA
 
-Beyond traces, instrument your application with metrics that capture AI-specific behavior:
+Além dos traces, instrumente sua aplicação com métricas que capturam o comportamento específico de IA:
 
-- **Inference latency percentiles** — P50, P95, and P99. The P50 tells you typical experience; P95/P99 reveal tail latency that affects your worst-served users.
-- **Tokens per second** — throughput measure for LLM inference. Dropping TPS may indicate GPU memory pressure or model degradation.
-- **Queue depth** — how many requests are waiting for GPU resources. Rising queue depth with stable throughput signals you need to scale out.
-- **Cache hit rate** — for semantic caching layers. High cache hit rates reduce both latency and cost.
+- **Percentis de latência de inferência** — P50, P95 e P99. O P50 mostra a experiência típica; P95/P99 revelam a latência de cauda que afeta seus usuários com pior atendimento.
+- **Tokens por segundo** — medida de throughput para inferência LLM. Queda no TPS pode indicar pressão de memória na GPU ou degradação do modelo.
+- **Profundidade da fila** — quantas requisições estão aguardando recursos de GPU. Profundidade de fila crescente com throughput estável sinaliza que você precisa escalar horizontalmente.
+- **Taxa de cache hit** — para camadas de semantic caching. Altas taxas de cache hit reduzem tanto latência quanto custo.
 
-### Structured Logging for ML Pipelines
+### Logging Estruturado para Pipelines de ML
 
-Standard application logs are unstructured text that's hard to query. For AI workloads, use structured logging that captures the fields you'll need during incident investigation:
+Logs padrão de aplicação são texto não estruturado difícil de consultar. Para workloads de IA, use logging estruturado que capture os campos que você precisará durante a investigação de incidentes:
 
 ```python
 import logging
@@ -263,19 +263,19 @@ class StructuredFormatter(logging.Formatter):
         return json.dumps(log_entry)
 ```
 
-Structured logs let you filter by model version, correlate by request ID, and aggregate by deployment — all critical during an incident. Without structured logging, you're grepping through free-form text at 3 AM.
+Logs estruturados permitem filtrar por versão do modelo, correlacionar por request ID e agregar por deployment — tudo crítico durante um incidente. Sem logging estruturado, você estará fazendo grep em texto livre às 3 da manhã.
 
-💡 **Pro Tip**: Always log the model version and deployment name with every trace and metric. When you deploy a new model version and latency increases by 40%, you need to correlate the performance change with the deployment event. Without version tagging, you'll waste hours investigating infrastructure when the model itself is the cause.
+💡 **Dica Profissional**: Sempre registre a versão do modelo e o nome do deployment em cada trace e métrica. Quando você implanta uma nova versão do modelo e a latência aumenta 40%, você precisa correlacionar a mudança de desempenho com o evento de deploy. Sem versionamento nos tags, você perderá horas investigando infraestrutura quando o próprio modelo é a causa.
 
 ---
 
-## KQL Queries for AI Troubleshooting
+## Consultas KQL para Troubleshooting de IA
 
-These production-ready KQL queries run against Application Insights (Log Analytics) and cover the most common AI troubleshooting scenarios. All queries use the `AppRequests` table with current column names.
+Essas consultas KQL prontas para produção rodam no Application Insights (Log Analytics) e cobrem os cenários mais comuns de troubleshooting de IA. Todas as consultas usam a tabela `AppRequests` com os nomes de coluna atuais.
 
-### 1. High-Latency Inference Requests
+### 1. Requisições de Inferência com Alta Latência
 
-Identify inference requests exceeding your latency SLO. Adjust the threshold to match your target — 2000ms is a common P95 SLO for real-time inference.
+Identifique requisições de inferência que excedem seu SLO de latência. Ajuste o limite para corresponder ao seu objetivo — 2000ms é um SLO P95 comum para inferência em tempo real.
 
 ```kusto
 AppRequests
@@ -290,9 +290,9 @@ AppRequests
 | order by P99LatencyMs desc
 ```
 
-### 2. HTTP 429 Throttling Rate Over Time
+### 2. Taxa de Throttling HTTP 429 ao Longo do Tempo
 
-Track throttling events to understand when you're hitting capacity limits and whether throttling correlates with specific time windows.
+Acompanhe eventos de throttling para entender quando você está atingindo limites de capacidade e se o throttling correlaciona com janelas de tempo específicas.
 
 ```kusto
 AppRequests
@@ -306,9 +306,9 @@ AppRequests
 | order by TimeGenerated desc
 ```
 
-### 3. GPU Utilization Correlation with Request Throughput
+### 3. Correlação de Utilização de GPU com Throughput de Requisições
 
-Correlate application request rates with GPU utilization to identify whether scaling is needed. This query joins app-level metrics with custom GPU metrics if you're sending them to the same workspace.
+Correlacione taxas de requisição da aplicação com a utilização de GPU para identificar se é necessário escalar. Esta consulta junta métricas de nível de aplicação com métricas customizadas de GPU, caso você esteja enviando-as para o mesmo workspace.
 
 ```kusto
 AppRequests
@@ -321,9 +321,9 @@ AppRequests
 | order by TimeGenerated asc
 ```
 
-### 4. Token Consumption by Deployment and Model
+### 4. Consumo de Tokens por Deployment e Modelo
 
-Track token usage across deployments using custom dimensions. This requires your application to log token counts as custom properties (see the OpenTelemetry instrumentation section above).
+Acompanhe o uso de tokens entre deployments usando custom dimensions. Isso requer que sua aplicação registre contagens de tokens como propriedades customizadas (veja a seção de instrumentação com OpenTelemetry acima).
 
 ```kusto
 AppRequests
@@ -339,9 +339,9 @@ AppRequests
 | order by TotalTokens desc
 ```
 
-### 5. Error Rate Spike Detection
+### 5. Detecção de Picos na Taxa de Erros
 
-Detect sudden increases in error rates by comparing the current hour to the rolling baseline. A spike above 2× the baseline warrants investigation.
+Detecte aumentos repentinos nas taxas de erro comparando a hora atual com a baseline histórica. Um pico acima de 2× a baseline justifica investigação.
 
 ```kusto
 let baseline = AppRequests
@@ -360,9 +360,9 @@ AppRequests
 | project AppRoleName, CurrentErrorRate, BaselineErrorRate, SpikeRatio, TotalRequests
 ```
 
-### 6. Latency Distribution by Percentile Buckets
+### 6. Distribuição de Latência por Faixas de Percentil
 
-Understand the full latency distribution, not just averages. Averages hide the pain of your tail-latency users.
+Entenda a distribuição completa de latência, não apenas as médias. Médias escondem a dor dos seus usuários de cauda de latência.
 
 ```kusto
 AppRequests
@@ -379,128 +379,128 @@ AppRequests
 | order by P99 desc
 ```
 
-⚠️ **Production Gotcha**: KQL's `percentile()` function is approximate for large datasets. For exact percentiles on critical SLO reporting, use `percentile_tdigest()` or export data for offline analysis. For operational dashboards, the default approximation is accurate enough.
+⚠️ **Cuidado em Produção**: A função `percentile()` do KQL é aproximada para datasets grandes. Para percentis exatos em relatórios críticos de SLO, use `percentile_tdigest()` ou exporte os dados para análise offline. Para dashboards operacionais, a aproximação padrão é precisa o suficiente.
 
 ---
 
-## Alerting Strategy
+## Estratégia de Alerting
 
-The goal of alerting is to notify the right person at the right time with enough context to act. In AI workloads, over-alerting is a real danger — GPU utilization spikes, token consumption fluctuations, and latency variance are all normal behaviors that can trigger false alarms if you set thresholds too aggressively.
+O objetivo do alerting é notificar a pessoa certa, no momento certo, com contexto suficiente para agir. Em workloads de IA, o excesso de alertas é um perigo real — picos de utilização de GPU, flutuações de consumo de tokens e variação de latência são todos comportamentos normais que podem disparar alarmes falsos se você definir limites muito agressivos.
 
-### What to Alert On (and What Not To)
+### O Que Alertar (e O Que Não Alertar)
 
-**Alert on these — they require human action:**
-- GPU ECC uncorrectable errors (hardware failure imminent)
-- HTTP 429 rate exceeding 5% for more than 10 minutes
-- Inference latency P99 exceeding SLO for 15+ minutes
-- GPU temperature above 83°C sustained
-- Cost spend exceeding daily budget by 20%+
-- Zero successful requests for any deployment (complete outage)
+**Alerte sobre estes — eles exigem ação humana:**
+- Erros ECC não corrigíveis de GPU (falha de hardware iminente)
+- Taxa de HTTP 429 excedendo 5% por mais de 10 minutos
+- Latência de inferência P99 excedendo o SLO por 15+ minutos
+- Temperatura da GPU acima de 83°C de forma sustentada
+- Gastos excedendo o orçamento diário em 20%+
+- Zero requisições bem-sucedidas para qualquer deployment (indisponibilidade total)
 
-**Don't alert on these — they're informational:**
-- GPU utilization fluctuations during normal operation
-- Single 429 responses (transient throttling is expected)
-- Short latency spikes during model cold starts
-- Token consumption within 80% of budget (log it, don't page)
+**Não alerte sobre estes — são informativos:**
+- Flutuações de utilização de GPU durante operação normal
+- Respostas 429 isoladas (throttling transitório é esperado)
+- Picos curtos de latência durante cold starts do modelo
+- Consumo de tokens dentro de 80% do orçamento (registre, não acorde ninguém)
 
-### Tiered Alerting
+### Alerting em Camadas
 
-| Tier | Response Time | Channel | Example Trigger |
-|------|--------------|---------|-----------------|
-| **P1 — Critical** | 5 minutes | PagerDuty / phone | Complete outage, GPU hardware failure, cost runaway |
-| **P2 — Warning** | 30 minutes | Slack / Teams | Sustained throttling, latency SLO breach, high error rate |
-| **P3 — Info** | Next business day | Email / ticket | Approaching quota limits, cost trending above forecast |
+| Camada | Tempo de Resposta | Canal | Exemplo de Gatilho |
+|--------|-------------------|-------|---------------------|
+| **P1 — Crítico** | 5 minutos | PagerDuty / telefone | Indisponibilidade total, falha de hardware de GPU, custos descontrolados |
+| **P2 — Aviso** | 30 minutos | Slack / Teams | Throttling sustentado, violação de SLO de latência, alta taxa de erros |
+| **P3 — Informativo** | Próximo dia útil | E-mail / ticket | Aproximação de limites de cota, custo tendendo acima da previsão |
 
-### Auto-Remediation Actions
+### Ações de Auto-Remediação
 
-For predictable failure modes, configure automated responses:
+Para modos de falha previsíveis, configure respostas automatizadas:
 
 ```text
-Trigger: HTTP 429 rate > 5% for 10 minutes
-  → Action: Scale out to additional Azure OpenAI deployment (load balancer failover)
+Gatilho: Taxa de HTTP 429 > 5% por 10 minutos
+  → Ação: Escalar para deployment adicional do Azure OpenAI (failover de load balancer)
 
-Trigger: GPU memory > 95% on inference pods
-  → Action: Trigger HPA to add inference replicas
+Gatilho: Memória de GPU > 95% nos pods de inferência
+  → Ação: Disparar HPA para adicionar réplicas de inferência
 
-Trigger: Request queue depth > 100 for 5 minutes
-  → Action: Scale AKS node pool, notify on-call engineer
+Gatilho: Profundidade da fila de requisições > 100 por 5 minutos
+  → Ação: Escalar node pool do AKS, notificar engenheiro de plantão
 
-Trigger: GPU temperature > 83°C
-  → Action: Reduce batch size via ConfigMap update, alert infra team
+Gatilho: Temperatura da GPU > 83°C
+  → Ação: Reduzir batch size via atualização de ConfigMap, alertar equipe de infraestrutura
 ```
 
-💡 **Pro Tip**: Start with alerting only — no auto-remediation. Once you've validated that an alert consistently represents a real problem (not a false alarm), then automate the response. Auto-remediation on a false signal can cause more damage than the original issue.
+💡 **Dica Profissional**: Comece apenas com alerting — sem auto-remediação. Uma vez que você tenha validado que um alerta consistentemente representa um problema real (não um alarme falso), então automatize a resposta. Auto-remediação sobre um sinal falso pode causar mais dano do que o problema original.
 
 ---
 
-## Dashboards That Tell a Story
+## Dashboards Que Contam uma História
 
-A dashboard should answer a specific question for a specific audience. Three dashboards cover most AI infrastructure needs.
+Um dashboard deve responder a uma pergunta específica para um público específico. Três dashboards cobrem a maioria das necessidades de infraestrutura de IA.
 
-### Executive Dashboard — "How is the AI platform performing?"
+### Dashboard Executivo — "Como está o desempenho da plataforma de IA?"
 
-This dashboard goes to leadership and finance. Keep it high-level and business-oriented.
+Este dashboard vai para a liderança e finanças. Mantenha-o em alto nível e orientado ao negócio.
 
-- **Availability**: SLA compliance percentage (target: 99.9%)
-- **Cost**: Daily and monthly GPU and token spend, trend versus budget
-- **Usage**: Total requests served, active deployments, user count
-- **Incidents**: Open P1/P2 alerts, mean time to resolution (MTTR)
+- **Disponibilidade**: Percentual de conformidade com SLA (meta: 99,9%)
+- **Custo**: Gastos diários e mensais com GPU e tokens, tendência versus orçamento
+- **Uso**: Total de requisições atendidas, deployments ativos, contagem de usuários
+- **Incidentes**: Alertas P1/P2 abertos, tempo médio de resolução (MTTR)
 
-### Engineering Dashboard — "What needs my attention?"
+### Dashboard de Engenharia — "O que precisa da minha atenção?"
 
-This is the daily driver for the infrastructure and ML platform team.
+Este é o painel do dia a dia para a equipe de infraestrutura e plataforma de ML.
 
-- **GPU Utilization**: Per-node utilization heatmap, memory pressure
-- **Latency Percentiles**: P50/P95/P99 by deployment, with SLO reference lines
-- **Error Rates**: 4xx and 5xx by endpoint, with spike annotations
-- **Throughput**: Requests per second and tokens per second, by model
-- **Queue Depth**: Pending requests waiting for GPU resources
+- **Utilização de GPU**: Heatmap de utilização por nó, pressão de memória
+- **Percentis de Latência**: P50/P95/P99 por deployment, com linhas de referência de SLO
+- **Taxas de Erro**: 4xx e 5xx por endpoint, com anotações de picos
+- **Throughput**: Requisições por segundo e tokens por segundo, por modelo
+- **Profundidade da Fila**: Requisições pendentes aguardando recursos de GPU
 
-### Capacity Dashboard — "When do we need to scale?"
+### Dashboard de Capacidade — "Quando precisamos escalar?"
 
-This dashboard supports capacity planning and procurement decisions.
+Este dashboard apoia decisões de planejamento de capacidade e aquisição.
 
-- **Quota Usage**: Current GPU quota consumption versus limits, by region
-- **Scaling Headroom**: How many additional pods/nodes can be added before hitting limits
-- **Growth Projection**: Request volume trendline with 30/60/90-day forecast
-- **Token Budget Burn Rate**: Days remaining at current consumption rate
+- **Uso de Cota**: Consumo atual de cota de GPU versus limites, por região
+- **Folga para Escalar**: Quantos pods/nós adicionais podem ser adicionados antes de atingir limites
+- **Projeção de Crescimento**: Linha de tendência do volume de requisições com previsão de 30/60/90 dias
+- **Taxa de Consumo do Orçamento de Tokens**: Dias restantes na taxa de consumo atual
 
-**Decision Matrix — Dashboard Design**
+**Matriz de Decisão — Design de Dashboard**
 
-| Audience | Refresh Rate | Data Retention | Key Questions |
-|----------|-------------|---------------|---------------|
-| **Executives** | Hourly | 90 days | "Are we on budget? Are users happy?" |
-| **Engineers** | Real-time (30s) | 30 days | "What's broken? What's degrading?" |
-| **Capacity planners** | Daily | 180 days | "When do we run out of headroom?" |
+| Público | Taxa de Atualização | Retenção de Dados | Perguntas-Chave |
+|---------|---------------------|-------------------|-----------------|
+| **Executivos** | Por hora | 90 dias | "Estamos dentro do orçamento? Os usuários estão satisfeitos?" |
+| **Engenheiros** | Tempo real (30s) | 30 dias | "O que está quebrado? O que está degradando?" |
+| **Planejadores de capacidade** | Diária | 180 dias | "Quando ficamos sem folga?" |
 
 ---
 
-## Hands-On: Set Up GPU Monitoring with Prometheus and Grafana
+## Mão na Massa: Configurando GPU Monitoring com Prometheus e Grafana
 
-This walkthrough takes you from a bare AKS cluster with GPU nodes to a fully instrumented monitoring stack. Estimated time: 20 minutes.
+Este passo a passo leva você de um cluster AKS bare com nós GPU a uma stack de monitoramento totalmente instrumentada. Tempo estimado: 20 minutos.
 
-### Prerequisites
+### Pré-requisitos
 
-- AKS cluster with GPU node pool (see Chapter 3)
-- `kubectl` and `helm` configured
-- Azure CLI authenticated
+- Cluster AKS com node pool de GPU (veja o Capítulo 3)
+- `kubectl` e `helm` configurados
+- Azure CLI autenticado
 
-### Step 1: Enable Azure Managed Prometheus and Grafana
+### Passo 1: Habilitar Azure Managed Prometheus e Grafana
 
 ```bash
-# Create an Azure Monitor workspace
+# Criar um workspace do Azure Monitor
 az monitor account create \
   --name ai-monitor-workspace \
   --resource-group myResourceGroup \
   --location eastus
 
-# Create an Azure Managed Grafana instance
+# Criar uma instância de Azure Managed Grafana
 az grafana create \
   --name ai-grafana \
   --resource-group myResourceGroup \
   --location eastus
 
-# Enable Managed Prometheus on your AKS cluster
+# Habilitar Managed Prometheus no seu cluster AKS
 az aks update \
   --resource-group myResourceGroup \
   --name myAKSCluster \
@@ -511,27 +511,27 @@ az aks update \
     "/subscriptions/<sub-id>/resourceGroups/myResourceGroup/providers/Microsoft.Dashboard/grafana/ai-grafana"
 ```
 
-### Step 2: Deploy DCGM Exporter
+### Passo 2: Implantar o DCGM Exporter
 
 ```bash
-# Add the NVIDIA Helm repository
+# Adicionar o repositório Helm da NVIDIA
 helm repo add nvidia https://nvidia.github.io/dcgm-exporter/helm-charts
 helm repo update
 
-# Install DCGM Exporter targeting GPU nodes
+# Instalar o DCGM Exporter direcionado aos nós com GPU
 helm install dcgm-exporter nvidia/dcgm-exporter \
   --namespace gpu-monitoring \
   --create-namespace \
   --set serviceMonitor.enabled=true \
   --set serviceMonitor.interval=15s
 
-# Verify pods are running on GPU nodes
+# Verificar se os pods estão rodando nos nós com GPU
 kubectl get pods -n gpu-monitoring -o wide
 ```
 
-### Step 3: Configure Custom Scrape for DCGM Metrics
+### Passo 3: Configurar Custom Scrape para Métricas DCGM
 
-Create a ConfigMap to ensure Azure Managed Prometheus scrapes the DCGM Exporter endpoints:
+Crie um ConfigMap para garantir que o Azure Managed Prometheus colete os endpoints do DCGM Exporter:
 
 ```yaml
 # dcgm-scrape-config.yaml
@@ -560,58 +560,58 @@ data:
 kubectl apply -f dcgm-scrape-config.yaml
 ```
 
-### Step 4: Import GPU Dashboard in Grafana
+### Passo 4: Importar Dashboard de GPU no Grafana
 
 ```bash
-# Get Grafana endpoint URL
+# Obter URL do endpoint do Grafana
 az grafana show \
   --name ai-grafana \
   --resource-group myResourceGroup \
   --query "properties.endpoint" -o tsv
 ```
 
-Navigate to the Grafana URL and import the NVIDIA DCGM dashboard:
+Navegue até a URL do Grafana e importe o dashboard NVIDIA DCGM:
 
-1. Go to **Dashboards → Import**
-2. Enter dashboard ID **12239** (NVIDIA DCGM Exporter community dashboard)
-3. Select your Azure Managed Prometheus data source
-4. Click **Import**
+1. Vá em **Dashboards → Import**
+2. Insira o dashboard ID **12239** (dashboard da comunidade NVIDIA DCGM Exporter)
+3. Selecione sua fonte de dados Azure Managed Prometheus
+4. Clique em **Import**
 
-You should now see GPU utilization, memory usage, temperature, power draw, and ECC error panels updating in real time.
+Agora você deve ver painéis de utilização de GPU, uso de memória, temperatura, consumo de energia e erros ECC sendo atualizados em tempo real.
 
-### Step 5: Verify Metrics Are Flowing
+### Passo 5: Verificar se as Métricas Estão Fluindo
 
 ```bash
-# Query Prometheus for DCGM metrics via kubectl
+# Consultar o Prometheus para métricas DCGM via kubectl
 kubectl run prom-test --rm -it --image=curlimages/curl -- \
   curl -s "http://dcgm-exporter.gpu-monitoring:9400/metrics" | head -20
 ```
 
-You should see metric lines like `DCGM_FI_DEV_GPU_UTIL`, `DCGM_FI_DEV_FB_USED`, and `DCGM_FI_DEV_GPU_TEMP` with current values.
+Você deve ver linhas de métricas como `DCGM_FI_DEV_GPU_UTIL`, `DCGM_FI_DEV_FB_USED` e `DCGM_FI_DEV_GPU_TEMP` com valores atuais.
 
-⚠️ **Production Gotcha**: DCGM Exporter requires the NVIDIA GPU driver and DCGM libraries to be present on the host. On AKS, the GPU driver is installed automatically via the NVIDIA device plugin DaemonSet when you provision GPU node pools. If DCGM Exporter pods are crashing, verify the GPU driver installation with `kubectl logs -n gpu-resources -l name=nvidia-device-plugin-ds`.
-
----
-
-## Chapter Checklist
-
-Before moving on, verify you have these capabilities in place:
-
-- **GPU metrics flowing** — DCGM Exporter deployed, Prometheus scraping, Grafana visualizing
-- **Azure OpenAI monitoring** — TPM/RPM tracked, 429 alerting configured, TTFT measured
-- **Distributed tracing** — OpenTelemetry instrumented across your inference pipeline
-- **KQL queries saved** — Throttling, latency, error rate, and token consumption queries bookmarked
-- **Tiered alerting** — P1/P2/P3 alerts defined with appropriate channels and response times
-- **Cost visibility** — Token consumption and GPU spend tracked per team/project/deployment
-- **Three dashboards** — Executive (cost/SLA), Engineering (latency/errors), Capacity (quotas/scaling)
-- **Security monitoring** — Access patterns and anomalous usage tracked
-- **Auto-remediation** — At least one automated response for a validated failure mode
-- **No alert fatigue** — Alert thresholds tuned to minimize false alarms
+⚠️ **Cuidado em Produção**: O DCGM Exporter requer que o driver de GPU NVIDIA e as bibliotecas DCGM estejam presentes no host. No AKS, o driver de GPU é instalado automaticamente via o DaemonSet do NVIDIA device plugin quando você provisiona node pools de GPU. Se os pods do DCGM Exporter estiverem crashando, verifique a instalação do driver de GPU com `kubectl logs -n gpu-resources -l name=nvidia-device-plugin-ds`.
 
 ---
 
-## What's Next
+## Checklist do Capítulo
 
-You can now see everything happening in your AI infrastructure. Every GPU, every token, every latency spike, every cost anomaly — you have the visibility to detect problems before they become outages and the dashboards to communicate platform health to any audience.
+Antes de seguir em frente, verifique se você tem essas capacidades implementadas:
 
-But seeing isn't enough — you need to protect it. AI systems introduce attack surfaces that traditional infrastructure never had: prompt injection, model extraction, training data poisoning, and adversarial inputs that bypass your safety filters. Chapter 8 covers security in AI environments — the new threats AI brings, and the infrastructure controls that stop them.
+- **Métricas de GPU fluindo** — DCGM Exporter implantado, Prometheus coletando, Grafana visualizando
+- **Monitoramento do Azure OpenAI** — TPM/RPM acompanhados, alerting de 429 configurado, TTFT medido
+- **Distributed tracing** — OpenTelemetry instrumentado em todo o seu pipeline de inferência
+- **Consultas KQL salvas** — Consultas de throttling, latência, taxa de erros e consumo de tokens favoritas
+- **Alerting em camadas** — Alertas P1/P2/P3 definidos com canais e tempos de resposta apropriados
+- **Visibilidade de custos** — Consumo de tokens e gastos com GPU rastreados por equipe/projeto/deployment
+- **Três dashboards** — Executivo (custo/SLA), Engenharia (latência/erros), Capacidade (cotas/escala)
+- **Monitoramento de segurança** — Padrões de acesso e uso anômalo rastreados
+- **Auto-remediação** — Pelo menos uma resposta automatizada para um modo de falha validado
+- **Sem fadiga de alertas** — Limites de alertas ajustados para minimizar alarmes falsos
+
+---
+
+## Próximos Passos
+
+Agora você pode ver tudo o que está acontecendo na sua infraestrutura de IA. Cada GPU, cada token, cada pico de latência, cada anomalia de custo — você tem a visibilidade para detectar problemas antes que se tornem indisponibilidades e os dashboards para comunicar a saúde da plataforma a qualquer público.
+
+Mas enxergar não é suficiente — você precisa proteger. Sistemas de IA introduzem superfícies de ataque que a infraestrutura tradicional nunca teve: prompt injection, extração de modelo, envenenamento de dados de treinamento e entradas adversárias que burlam seus filtros de segurança. O Capítulo 8 cobre segurança em ambientes de IA — as novas ameaças que a IA traz e os controles de infraestrutura que as detêm.

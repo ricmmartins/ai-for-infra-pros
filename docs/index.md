@@ -6,13 +6,13 @@ hide:
 
 <div class="hero" markdown>
 
-# AI for Infra Pros
+# AI para Profissionais de Infraestrutura
 
-<p class="subtitle">The Practical Handbook for Infrastructure Engineers Entering the AI Era</p>
+<p class="subtitle">O Guia Prático para Engenheiros de Infraestrutura Entrando na Era da IA</p>
 
-> *"You don't need to be a data scientist to work with AI — but you do need to understand how it runs, scales, breaks, and costs money."*
+> *"Você não precisa ser um cientista de dados para trabalhar com IA — mas precisa entender como ela funciona, escala, quebra e custa dinheiro."*
 
-![AI for Infra Pros](images/ai4infrapros.png){ loading=lazy }
+![AI para Profissionais de Infraestrutura](images/ai4infrapros.png){ loading=lazy }
 
 </div>
 
@@ -22,161 +22,161 @@ hide:
 
 <div class="stat-card" markdown>
 <span class="number">15</span>
-<span class="label">Chapters in 5 Parts</span>
+<span class="label">Capítulos em 5 Partes</span>
 </div>
 
 <div class="stat-card" markdown>
 <span class="number">61K+</span>
-<span class="label">Words</span>
+<span class="label">Palavras</span>
 </div>
 
 <div class="stat-card" markdown>
 <span class="number">220+</span>
-<span class="label">Pages</span>
+<span class="label">Páginas</span>
 </div>
 
 <div class="stat-card" markdown>
 <span class="number">3</span>
-<span class="label">Hands-On Labs</span>
+<span class="label">Laboratórios Práticos</span>
 </div>
 
 <div class="stat-card" markdown>
 <span class="number">10</span>
-<span class="label">Troubleshooting Scenarios</span>
+<span class="label">Cenários de Troubleshooting</span>
 </div>
 
 <div class="stat-card" markdown>
 <span class="number">55+</span>
-<span class="label">AI Terms in Glossary</span>
+<span class="label">Termos de IA no Glossário</span>
 </div>
 
 </div>
 
 ---
 
-## About This Book
+## Sobre Este Livro
 
-Every AI model that reaches production sits on top of infrastructure someone had to build, scale, secure, and keep running. **That someone is you.**
+Todo modelo de IA que chega à produção está sobre uma infraestrutura que alguém precisou construir, escalar, proteger e manter funcionando. **Esse alguém é você.**
 
-This handbook was born from years of bridging the gap between systems engineering and machine learning. It translates AI concepts into the language infrastructure, cloud, and DevOps engineers already speak — and gives you the practical depth to architect, deploy, monitor, and operate AI workloads at production scale.
+Este guia nasceu de anos de experiência fazendo a ponte entre engenharia de sistemas e aprendizado de máquina. Ele traduz conceitos de IA para a linguagem que engenheiros de infraestrutura, cloud e DevOps já conhecem — e oferece a profundidade prática para arquitetar, implantar, monitorar e operar cargas de trabalho de IA em escala de produção.
 
-**This is not an AI/ML textbook.** It's a practitioner's handbook. Every chapter includes production-grade examples, decision matrices, hands-on labs, and the kind of hard-won lessons that only come from running AI infrastructure in the real world.
-
----
-
-## What You'll Learn
-
-- **GPU architecture and compute** — VM families, CUDA cores vs Tensor Cores, nvidia-smi interpretation, and the memory math behind OOM errors
-- **Data pipelines for AI** — storage architecture, BlobFuse2, NVMe staging, and why I/O is the hidden bottleneck
-- **Infrastructure as Code** — production-ready Terraform and Bicep for GPU clusters, AKS node pools, and CI/CD with OIDC
-- **MLOps from an infra lens** — model registries, CI/CD for models, A/B testing infrastructure, and supply chain security
-- **Monitoring and observability** — DCGM, Managed Prometheus, KQL queries, and the six dimensions of AI observability
-- **AI security** — prompt injection defense, private endpoints, managed identities, and content safety guardrails
-- **Cost engineering** — GPU cost modeling, spot VMs for training, PTU economics, and FinOps practices
-- **Platform operations at scale** — multi-tenancy, GPU scheduling (Kueue, Volcano), SLA design, and fleet management
-- **Production troubleshooting** — 10 real-world failure scenarios with step-by-step diagnosis and resolution
-- **Career paths** — AI Infra Engineer, MLOps Engineer, AI Platform Engineer, and more
+**Este não é um livro acadêmico de IA/ML.** É um guia prático. Cada capítulo inclui exemplos de nível de produção, matrizes de decisão, laboratórios práticos e o tipo de lições que só vêm da operação de infraestrutura de IA no mundo real.
 
 ---
 
-## Quick Start Guide
+## O Que Você Vai Aprender
 
-Each chapter is self-contained. Pick your starting point based on what you need:
+- **Arquitetura GPU e computação** — Famílias de VMs, CUDA cores vs Tensor Cores, interpretação do nvidia-smi e a matemática de memória por trás de erros OOM
+- **Pipelines de dados para IA** — Arquitetura de armazenamento, BlobFuse2, staging NVMe e por que I/O é o gargalo oculto
+- **Infraestrutura como Código** — Terraform e Bicep prontos para produção para clusters GPU, node pools AKS e CI/CD com OIDC
+- **MLOps sob a perspectiva de infra** — Registros de modelos, CI/CD para modelos, infraestrutura de testes A/B e segurança da cadeia de suprimentos
+- **Monitoramento e observabilidade** — DCGM, Managed Prometheus, consultas KQL e as seis dimensões de observabilidade de IA
+- **Segurança de IA** — Defesa contra injeção de prompt, endpoints privados, identidades gerenciadas e guardrails de segurança de conteúdo
+- **Engenharia de custos** — Modelagem de custos GPU, VMs spot para treinamento, economia de PTU e práticas de FinOps
+- **Operações de plataforma em escala** — Multi-tenancy, scheduling GPU (Kueue, Volcano), design de SLA e gerenciamento de frota
+- **Troubleshooting de produção** — 10 cenários reais de falha com diagnóstico e resolução passo a passo
+- **Caminhos de carreira** — AI Infra Engineer, MLOps Engineer, AI Platform Engineer e mais
+
+---
+
+## Guia de Início Rápido
+
+Cada capítulo é autocontido. Escolha seu ponto de partida baseado no que você precisa:
 
 <div class="quick-start-grid" markdown>
 
 <div class="qs-card" markdown>
-**Understand how AI connects to your skills**
-[Chapter 1 — Why AI Needs You](chapters/01-introduction.md)
+**Entender como IA se conecta com suas habilidades**
+[Capítulo 1 — Por Que a IA Precisa de Você](chapters/01-introduction.md)
 </div>
 
 <div class="qs-card" markdown>
-**Provision your first GPU VM**
-[Chapter 3 — Compute](chapters/03-compute.md)
+**Provisionar sua primeira VM GPU**
+[Capítulo 3 — Computação](chapters/03-compute.md)
 </div>
 
 <div class="qs-card" markdown>
-**Understand GPU memory and OOM errors**
-[Chapter 4 — The GPU Deep Dive](chapters/04-gpu-deep-dive.md)
+**Entender memória GPU e erros OOM**
+[Capítulo 4 — O Mergulho Profundo na GPU](chapters/04-gpu-deep-dive.md)
 </div>
 
 <div class="qs-card" markdown>
-**Automate AI infrastructure with IaC**
-[Chapter 5 — Infrastructure as Code](chapters/05-iac.md)
+**Automatizar infraestrutura de IA com IaC**
+[Capítulo 5 — Infraestrutura como Código](chapters/05-iac.md)
 </div>
 
 <div class="qs-card" markdown>
-**Set up monitoring for AI workloads**
-[Chapter 7 — Monitoring](chapters/07-monitoring.md)
+**Configurar monitoramento para workloads de IA**
+[Capítulo 7 — Monitoramento](chapters/07-monitoring.md)
 </div>
 
 <div class="qs-card" markdown>
-**Control AI costs before they control you**
-[Chapter 9 — Cost Engineering](chapters/09-cost-engineering.md)
+**Controlar custos de IA antes que eles controlem você**
+[Capítulo 9 — Engenharia de Custos](chapters/09-cost-engineering.md)
 </div>
 
 <div class="qs-card" markdown>
-**Fix a production issue right now**
-[Chapter 12 — Troubleshooting](chapters/12-troubleshooting.md)
+**Resolver um problema de produção agora**
+[Capítulo 12 — Troubleshooting](chapters/12-troubleshooting.md)
 </div>
 
 <div class="qs-card" markdown>
-**Translate an AI term you just heard**
-[Chapter 15 — Visual Glossary](chapters/15-visual-glossary.md)
+**Traduzir um termo de IA que você acabou de ouvir**
+[Capítulo 15 — Glossário Visual](chapters/15-visual-glossary.md)
 </div>
 
 </div>
 
 ---
 
-## Who This Book Is For
+## Para Quem É Este Livro
 
-This handbook is written for professionals with **5+ years of infrastructure experience** who are new to AI but technically sharp:
+Este guia é escrito para profissionais com **5+ anos de experiência em infraestrutura** que são novos em IA mas tecnicamente afiados:
 
-- **Infrastructure and Cloud Engineers** (Azure, AWS, GCP)
-- **DevOps and Site Reliability Engineers**
-- **Solutions and Cloud Architects**
-- **Platform Engineers**
-- **Security and Governance Professionals**
-- **Data Engineers** who want to understand the infrastructure side of AI
+- **Engenheiros de Infraestrutura e Cloud** (Azure, AWS, GCP)
+- **Engenheiros DevOps e de Confiabilidade de Sites (SRE)**
+- **Arquitetos de Soluções e Cloud**
+- **Engenheiros de Plataforma**
+- **Profissionais de Segurança e Governança**
+- **Engenheiros de Dados** que querem entender o lado de infraestrutura da IA
 
-No prior AI/ML knowledge is required. Every concept is explained through infrastructure analogies you already know.
+Nenhum conhecimento prévio de IA/ML é necessário. Cada conceito é explicado através de analogias de infraestrutura que você já conhece.
 
 ---
 
-## Learning Path
+## Trilha de Aprendizado
 
-This book is part of a complete learning ecosystem for infrastructure professionals.
+Este livro faz parte de um ecossistema completo de aprendizado para profissionais de infraestrutura.
 
 <div class="grid cards" markdown>
 
 - :fontawesome-brands-linux: **[Linux Hackathon](https://linuxhackathon.com/)**
 
-    Master Linux fundamentals. 20 hands-on challenges.
+    Domine os fundamentos de Linux. 20 desafios práticos.
 
 - :material-book-open-variant: **[From Server to Cluster](https://fromservertocluster.com/)**
 
-    Bridge your Linux skills to Kubernetes. 15 chapters.
+    Faça a ponte das suas habilidades Linux para Kubernetes. 15 capítulos.
 
 - :material-kubernetes: **[K8s Hackathon](https://k8shackathon.com/)**
 
-    Kubernetes mastery. 20 challenges covering CKA + CKAD + CKS.
+    Maestria em Kubernetes. 20 desafios cobrindo CKA + CKAD + CKS.
 
-- :material-robot: **[AI for Infra Pros](https://ai4infra.com/)** *(You are here)*
+- :material-robot: **[AI for Infra Pros](https://ai4infra.com/)** *(Você está aqui)*
 
-    AI/ML for infrastructure engineers. From GPUs to MLOps.
+    IA/ML para engenheiros de infraestrutura. De GPUs a MLOps.
 
 </div>
 
 ---
 
-## Credits
+## Créditos
 
-Created by **Ricardo Martins**
+Criado por **Ricardo Martins**
 
 :fontawesome-solid-briefcase: Principal Solutions Engineer @ Microsoft
 
-:fontawesome-solid-book: Author of [*Azure Governance Made Simple*](https://book.azgovernance.com/), [*Linux Hackathon*](https://linuxhackathon.com/), [*K8s Hackathon*](https://k8shackathon.com/) and [*From Server to Cluster*](https://fromservertocluster.com/)
+:fontawesome-solid-book: Autor de [*Azure Governance Made Simple*](https://book.azgovernance.com/), [*Linux Hackathon*](https://linuxhackathon.com/), [*K8s Hackathon*](https://k8shackathon.com/) e [*From Server to Cluster*](https://fromservertocluster.com/)
 
 :fontawesome-solid-globe: [rmmartins.com](https://rmmartins.com)
 
@@ -184,10 +184,10 @@ Created by **Ricardo Martins**
 
 <div class="disclaimer" markdown>
 
-**Disclaimer:** This is an independent, personal project — not an official Microsoft publication. The views and content are solely the author's own. While many examples use Azure, the concepts, architectures, and operational practices in this book apply to any cloud platform — AWS, GCP, or on-premises. If you manage infrastructure, this book was written for you, regardless of your cloud provider.
+**Aviso:** Este é um projeto independente e pessoal — não uma publicação oficial da Microsoft. As opiniões e o conteúdo são exclusivamente do autor. Embora muitos exemplos usem Azure, os conceitos, arquiteturas e práticas operacionais deste livro se aplicam a qualquer plataforma de nuvem — AWS, GCP ou on-premises. Se você gerencia infraestrutura, este livro foi escrito para você, independentemente do seu provedor de nuvem.
 
 </div>
 
 ---
 
-> *"AI needs infrastructure. And infrastructure needs engineers who understand AI. This book is the bridge."*
+> *"A IA precisa de infraestrutura. E infraestrutura precisa de engenheiros que entendam IA. Este livro é a ponte."*

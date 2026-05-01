@@ -1,26 +1,26 @@
-# Chapter 12 — The Production Troubleshooting Playbook
+# Capítulo 12 — O Guia de Troubleshooting para Produção
 
-*"Everything works in staging. Production has opinions."*
-
----
-
-## Keep This Chapter Bookmarked
-
-This chapter is organized as a collection of real-world failure scenarios — the ones that generate 2 AM pages, derail sprint demos, and make you question your career choices. Each scenario follows the same format:
-
-**Symptoms → Diagnosis → Root Cause → Resolution → Prevention**
-
-These aren't hypothetical. They're distilled from hundreds of production incidents across GPU infrastructure, Kubernetes AI workloads, and Azure OpenAI deployments. Some you'll hit on your first day. Others will ambush you six months in, right when you think everything is stable.
-
-Read through them once to build pattern recognition. Then keep this chapter bookmarked — you'll come back to it.
+*"Tudo funciona em staging. Produção tem opinião própria."*
 
 ---
 
-## Scenario 1: NVIDIA Driver Crash After Kernel Update
+## Mantenha Este Capítulo nos Favoritos
 
-### Symptoms
+Este capítulo está organizado como uma coleção de cenários reais de falha — aqueles que geram alertas às 2 da manhã, arruínam demos de sprint e fazem você questionar suas escolhas de carreira. Cada cenário segue o mesmo formato:
 
-Monday morning. The ML team reports that all GPU workloads failed over the weekend. Nobody deployed anything. You SSH into the VM and run:
+**Sintomas → Diagnóstico → Causa Raiz → Resolução → Prevenção**
+
+Esses cenários não são hipotéticos. Eles foram destilados de centenas de incidentes de produção em infraestrutura de GPU, workloads de IA no Kubernetes e deployments do Azure OpenAI. Alguns você vai encontrar no primeiro dia. Outros vão te emboscar seis meses depois, justo quando você acha que tudo está estável.
+
+Leia todos uma vez para construir reconhecimento de padrões. Depois mantenha este capítulo nos favoritos — você vai voltar aqui.
+
+---
+
+## Cenário 1: Crash do Driver NVIDIA Após Atualização do Kernel
+
+### Sintomas
+
+Segunda-feira de manhã. O time de ML reporta que todos os workloads de GPU falharam durante o fim de semana. Ninguém fez deploy de nada. Você conecta via SSH na VM e executa:
 
 ```bash
 $ nvidia-smi
@@ -28,11 +28,11 @@ NVIDIA-SMI has failed because it couldn't communicate with the NVIDIA driver.
 Make sure that the latest NVIDIA driver is installed and running.
 ```
 
-GPU containers won't start. Training jobs are dead. The VM itself is fine — CPU workloads run normally.
+Containers de GPU não iniciam. Jobs de treinamento estão mortos. A VM em si está bem — workloads de CPU funcionam normalmente.
 
-### Diagnosis
+### Diagnóstico
 
-Start with the kernel ring buffer:
+Comece pelo ring buffer do kernel:
 
 ```bash
 $ dmesg | grep -i nvidia
@@ -45,7 +45,7 @@ $ dpkg -l | grep nvidia-driver
 ii  nvidia-driver-535    535.183.01-0ubuntu1    amd64
 ```
 
-The NVIDIA driver is installed for a different kernel version. Check what happened:
+O driver NVIDIA está instalado para uma versão diferente do kernel. Verifique o que aconteceu:
 
 ```bash
 $ cat /var/log/apt/history.log | grep -A 5 "linux-image"
@@ -54,13 +54,13 @@ Commandline: /usr/bin/unattended-upgrade
 Install: linux-image-6.5.0-44-generic:amd64 (6.5.0-44.44~22.04.1)
 ```
 
-### Root Cause
+### Causa Raiz
 
-Ubuntu's `unattended-upgrades` service automatically installed a new kernel version. The NVIDIA kernel module is compiled against a specific kernel. When the VM rebooted into the new kernel, there was no matching NVIDIA module — the driver silently broke.
+O serviço `unattended-upgrades` do Ubuntu instalou automaticamente uma nova versão do kernel. O módulo do kernel NVIDIA é compilado para um kernel específico. Quando a VM reiniciou com o novo kernel, não havia módulo NVIDIA correspondente — o driver quebrou silenciosamente.
 
-### Resolution
+### Resolução
 
-**Option A — Reinstall the driver extension (Azure VMs):**
+**Opção A — Reinstalar a extensão do driver (VMs Azure):**
 
 ```bash
 az vm extension set \
@@ -71,24 +71,24 @@ az vm extension set \
   --version 1.9
 ```
 
-This rebuilds the kernel module against the current kernel.
+Isso recompila o módulo do kernel para o kernel atual.
 
-**Option B — Pin the kernel version:**
+**Opção B — Fixar a versão do kernel:**
 
 ```bash
 sudo apt-mark hold linux-image-$(uname -r) linux-headers-$(uname -r)
 ```
 
-Then reinstall the driver for the current kernel:
+Depois reinstale o driver para o kernel atual:
 
 ```bash
 sudo apt install --reinstall nvidia-driver-535
 sudo reboot
 ```
 
-### Prevention
+### Prevenção
 
-- **Disable unattended kernel upgrades** on all GPU VMs. Add to `/etc/apt/apt.conf.d/50unattended-upgrades`:
+- **Desabilite atualizações automáticas do kernel** em todas as VMs de GPU. Adicione em `/etc/apt/apt.conf.d/50unattended-upgrades`:
 
 ```
 Unattended-Upgrade::Package-Blacklist {
@@ -98,18 +98,18 @@ Unattended-Upgrade::Package-Blacklist {
 };
 ```
 
-- **Use the Azure NVIDIA GPU Driver Extension** for driver lifecycle management instead of manual installs. The extension handles kernel compatibility automatically.
-- **Pin kernel versions** in your IaC templates and treat kernel upgrades as planned maintenance events.
+- **Use a Extensão de Driver GPU NVIDIA do Azure** para gerenciamento do ciclo de vida do driver em vez de instalações manuais. A extensão cuida da compatibilidade com o kernel automaticamente.
+- **Fixe versões do kernel** nos seus templates de IaC e trate atualizações de kernel como eventos de manutenção planejada.
 
-⚠️ **Production Gotcha**: This failure is completely silent. The VM boots normally, passes health checks, and responds to SSH. Only GPU workloads fail. If you don't monitor `nvidia-smi` output, you won't know until users complain.
+⚠️ **Gotcha de Produção**: Essa falha é completamente silenciosa. A VM inicia normalmente, passa nos health checks e responde ao SSH. Somente workloads de GPU falham. Se você não monitorar a saída do `nvidia-smi`, só vai saber quando os usuários reclamarem.
 
 ---
 
-## Scenario 2: CUDA Out of Memory During Fine-Tuning
+## Cenário 2: CUDA Out of Memory Durante Fine-Tuning
 
-### Symptoms
+### Sintomas
 
-A fine-tuning job starts successfully, runs for 10–30 minutes, then crashes:
+Um job de fine-tuning inicia com sucesso, roda por 10–30 minutos e depois crasha:
 
 ```
 RuntimeError: CUDA out of memory. Tried to allocate 2.00 GiB
@@ -117,64 +117,64 @@ RuntimeError: CUDA out of memory. Tried to allocate 2.00 GiB
 1.08 GiB free; 78.50 GiB reserved in total by PyTorch)
 ```
 
-The team is confused: "It worked fine for the first 500 steps."
+O time está confuso: "Funcionou bem nos primeiros 500 steps."
 
-### Diagnosis
+### Diagnóstico
 
-Monitor GPU memory over time:
+Monitore a memória da GPU ao longo do tempo:
 
 ```bash
 # Snapshot
 $ nvidia-smi
 
-# Continuous monitoring (every 1 second)
+# Monitoramento contínuo (a cada 1 segundo)
 $ watch -n 1 nvidia-smi
 
-# Log memory usage to CSV for analysis
+# Registrar uso de memória em CSV para análise
 $ nvidia-smi --query-gpu=timestamp,memory.used,memory.free,utilization.gpu \
   --format=csv -l 5 > gpu_memory.csv
 ```
 
-Calculate expected memory requirements using the formula from Chapter 4:
+Calcule os requisitos de memória esperados usando a fórmula do Capítulo 4:
 
 ```
-Total GPU Memory ≈ Parameters + Gradients + Optimizer States + Activations
+Memória Total da GPU ≈ Parâmetros + Gradientes + Estados do Otimizador + Ativações
 ```
 
-For a 7B parameter model with Adam optimizer in FP16/BF16:
+Para um modelo de 7B parâmetros com otimizador Adam em FP16/BF16:
 
-| Component | Memory |
+| Componente | Memória |
 |---|---|
-| Parameters (BF16) | ~14 GB |
-| Gradients (BF16) | ~14 GB |
-| Optimizer States (FP32, Adam) | ~56 GB |
-| Activations (batch-dependent) | Variable |
-| **Minimum total** | **~84 GB + activations** |
+| Parâmetros (BF16) | ~14 GB |
+| Gradientes (BF16) | ~14 GB |
+| Estados do Otimizador (FP32, Adam) | ~56 GB |
+| Ativações (dependente do batch) | Variável |
+| **Mínimo total** | **~84 GB + ativações** |
 
-### Root Cause
+### Causa Raiz
 
-The batch size was set to 8. At the start of training, short sequences in the dataset produced small activation tensors. As the data loader reached longer sequences, activation memory grew until it exceeded the remaining GPU memory. The OOM didn't happen at step 1 because the first batches fit — the longest sequences arrived later.
+O batch size estava configurado em 8. No início do treinamento, sequências curtas no dataset produziam tensores de ativação pequenos. Conforme o data loader alcançava sequências mais longas, a memória de ativação crescia até exceder a memória restante da GPU. O OOM não aconteceu no step 1 porque os primeiros batches cabiam — as sequências mais longas chegaram depois.
 
-### Resolution
+### Resolução
 
-**Immediate fix — reduce batch size:**
+**Correção imediata — reduzir o batch size:**
 
 ```python
 training_args = TrainingArguments(
-    per_device_train_batch_size=2,  # Reduced from 8
-    gradient_accumulation_steps=4,  # Maintain effective batch size
+    per_device_train_batch_size=2,  # Reduzido de 8
+    gradient_accumulation_steps=4,  # Manter o batch size efetivo
 )
 ```
 
-**Better fix — enable gradient checkpointing:**
+**Correção melhor — habilitar gradient checkpointing:**
 
 ```python
 model.gradient_checkpointing_enable()
 ```
 
-This trades ~20–30% slower training for 60–80% reduction in activation memory.
+Isso troca ~20–30% de velocidade de treinamento por 60–80% de redução na memória de ativação.
 
-**For larger models — use parameter-efficient fine-tuning:**
+**Para modelos maiores — usar fine-tuning eficiente em parâmetros:**
 
 ```python
 from peft import LoraConfig, get_peft_model
@@ -190,23 +190,23 @@ model.print_trainable_parameters()
 # trainable params: 6.5M || all params: 6.74B || trainable%: 0.096%
 ```
 
-LoRA trains <1% of parameters, slashing gradient and optimizer memory by 100×.
+LoRA treina <1% dos parâmetros, reduzindo a memória de gradientes e do otimizador em 100×.
 
-### Prevention
+### Prevenção
 
-- **Always calculate memory requirements before starting** using the formula from Chapter 4. If the math says it won't fit, don't run it.
-- **Set `max_seq_length` explicitly** to cap activation memory at the longest sequence you expect.
-- **Use `gradient_accumulation_steps`** to maintain effective batch size while keeping per-GPU batch size small.
+- **Sempre calcule os requisitos de memória antes de começar** usando a fórmula do Capítulo 4. Se a conta diz que não vai caber, não execute.
+- **Defina `max_seq_length` explicitamente** para limitar a memória de ativação no comprimento máximo de sequência esperado.
+- **Use `gradient_accumulation_steps`** para manter o batch size efetivo enquanto mantém o batch size por GPU pequeno.
 
-💡 **Pro Tip**: If you see OOM errors that happen at random steps (not consistently at step N), suspect variable-length sequences. Set `max_seq_length` and pad/truncate to eliminate the variance.
+💡 **Dica Pro**: Se você vê erros de OOM que acontecem em steps aleatórios (não consistentemente no step N), desconfie de sequências de comprimento variável. Defina `max_seq_length` e faça pad/truncate para eliminar a variância.
 
 ---
 
-## Scenario 3: AKS GPU Pods Stuck in Pending
+## Cenário 3: Pods GPU no AKS Presos em Pending
 
-### Symptoms
+### Sintomas
 
-A GPU training pod has been in `Pending` state for 20 minutes:
+Um pod de treinamento de GPU está no estado `Pending` há 20 minutos:
 
 ```bash
 $ kubectl get pods -n ml-team
@@ -214,9 +214,9 @@ NAME                        READY   STATUS    RESTARTS   AGE
 training-job-7b-xyz         0/1     Pending   0          20m
 ```
 
-### Diagnosis
+### Diagnóstico
 
-Check the events:
+Verifique os eventos:
 
 ```bash
 $ kubectl describe pod training-job-7b-xyz -n ml-team
@@ -228,7 +228,7 @@ Events:
     9 node(s) didn't match Pod's node affinity/selector.
 ```
 
-The taint message is the key. Check the GPU node pool taints:
+A mensagem de taint é a chave. Verifique os taints do node pool de GPU:
 
 ```bash
 $ kubectl get nodes -l accelerator=nvidia -o custom-columns=\
@@ -237,37 +237,37 @@ NAME                                TAINTS
 aks-gpunp-12345-vmss000000          [map[effect:NoSchedule key:sku value:gpu]]
 ```
 
-Now check the pod spec for tolerations:
+Agora verifique o spec do pod para tolerations:
 
 ```bash
 $ kubectl get pod training-job-7b-xyz -n ml-team -o jsonpath='{.spec.tolerations}' | jq .
 ```
 
-No GPU toleration present.
+Nenhum toleration de GPU presente.
 
-### Root Cause
+### Causa Raiz
 
-AKS GPU node pools apply the taint `sku=gpu:NoSchedule` by default. Pods must include a matching toleration to be scheduled on GPU nodes. The pod spec was missing this toleration — so the scheduler saw GPU nodes as ineligible and couldn't find any node with GPUs and without taints.
+Node pools de GPU no AKS aplicam o taint `sku=gpu:NoSchedule` por padrão. Pods devem incluir um toleration correspondente para serem agendados nos nós de GPU. O spec do pod estava sem esse toleration — então o scheduler viu os nós de GPU como inelegíveis e não conseguiu encontrar nenhum nó com GPUs e sem taints.
 
-Other common causes include:
+Outras causas comuns incluem:
 
-- **GPU quota exhausted**: The cluster autoscaler can't provision new GPU nodes because the subscription hit its GPU vCPU quota.
-- **Node pool at max size**: The autoscaler wants to scale up but the node pool is already at `maxCount`.
+- **Quota de GPU esgotada**: O cluster autoscaler não consegue provisionar novos nós de GPU porque a subscription atingiu a quota de vCPU de GPU.
+- **Node pool no tamanho máximo**: O autoscaler quer escalar para cima, mas o node pool já está no `maxCount`.
 
-Check both:
+Verifique ambos:
 
 ```bash
-# Check regional GPU quota
+# Verificar quota regional de GPU
 $ az vm list-usage --location eastus -o table | grep -i "standard NC\|standard ND"
 
-# Check node pool scaling limits
+# Verificar limites de escala do node pool
 $ az aks nodepool show --cluster-name myAKS --resource-group myRG \
   --name gpunp --query '{min:minCount, max:maxCount, current:count}'
 ```
 
-### Resolution
+### Resolução
 
-**Fix the toleration** — add this to the pod spec:
+**Corrigir o toleration** — adicione isso ao spec do pod:
 
 ```yaml
 spec:
@@ -283,30 +283,30 @@ spec:
           nvidia.com/gpu: 1
 ```
 
-**If quota is the issue:**
+**Se a quota é o problema:**
 
 ```bash
-# Request a quota increase via CLI
+# Solicitar aumento de quota via CLI
 az quota create --resource-name "StandardNDSv2Family" \
   --scope "/subscriptions/{sub-id}/providers/Microsoft.Compute/locations/eastus" \
   --limit-object value=48 limit-object-type=LimitValue
 ```
 
-### Prevention
+### Prevenção
 
-- **Template all GPU pod specs** with the correct toleration pre-configured. Use Helm chart defaults or OPA/Gatekeeper policies that inject tolerations automatically.
-- **Set up quota monitoring alerts** that fire at 80% GPU quota usage (see Chapter 9).
-- **Configure cluster autoscaler correctly**: set `maxCount` with headroom so the autoscaler can respond to demand.
+- **Padronize todos os specs de pods GPU** com o toleration correto pré-configurado. Use defaults de Helm charts ou políticas OPA/Gatekeeper que injetam tolerations automaticamente.
+- **Configure alertas de monitoramento de quota** que disparam a 80% de uso da quota de GPU (veja Capítulo 9).
+- **Configure o cluster autoscaler corretamente**: defina `maxCount` com folga para que o autoscaler possa responder à demanda.
 
-⚠️ **Production Gotcha**: A pod stuck in Pending produces no logs — there's no container to log from. Always check `kubectl describe pod` for events, not `kubectl logs`.
+⚠️ **Gotcha de Produção**: Um pod preso em Pending não produz logs — não há container para gerar logs. Sempre verifique `kubectl describe pod` para eventos, não `kubectl logs`.
 
 ---
 
-## Scenario 4: Azure OpenAI 429 Storm
+## Cenário 4: Tempestade de 429 no Azure OpenAI
 
-### Symptoms
+### Sintomas
 
-Your application dashboard shows 30%+ of Azure OpenAI requests returning HTTP 429. Users report slow responses or timeouts. The error payload looks like:
+O dashboard da sua aplicação mostra 30%+ das requisições ao Azure OpenAI retornando HTTP 429. Usuários reportam respostas lentas ou timeouts. O payload de erro é assim:
 
 ```json
 {
@@ -317,12 +317,12 @@ Your application dashboard shows 30%+ of Azure OpenAI requests returning HTTP 42
 }
 ```
 
-### Diagnosis
+### Diagnóstico
 
-Check your deployment's TPM and RPM usage in Azure Monitor:
+Verifique o uso de TPM e RPM do seu deployment no Azure Monitor:
 
 ```bash
-# Check current deployment metrics
+# Verificar métricas atuais do deployment
 az monitor metrics list \
   --resource "/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.CognitiveServices/accounts/{account}" \
   --metric "TokenTransaction" \
@@ -331,9 +331,9 @@ az monitor metrics list \
   --filter "ModelDeploymentName eq 'gpt-4o-prod'"
 ```
 
-Look at the `Retry-After` header values in the 429 responses — they tell you how far over quota you are. A `Retry-After: 1` means you barely exceeded the limit. A `Retry-After: 30` means you're dramatically over.
+Observe os valores do header `Retry-After` nas respostas 429 — eles indicam o quanto você está acima da quota. Um `Retry-After: 1` significa que você mal excedeu o limite. Um `Retry-After: 30` significa que você está dramaticamente acima.
 
-Check the deployment's provisioned TPM:
+Verifique o TPM provisionado do deployment:
 
 ```bash
 az cognitiveservices account deployment show \
@@ -343,13 +343,13 @@ az cognitiveservices account deployment show \
   --query "properties.rateLimits"
 ```
 
-### Root Cause
+### Causa Raiz
 
-The Standard (pay-as-you-go) deployment was provisioned with 80K TPM. A product launch drove a burst of traffic that peaked at 200K+ TPM. Standard deployments enforce hard rate limits — once you exceed the provisioned TPM or RPM, every additional request gets a 429.
+O deployment Standard (pay-as-you-go) foi provisionado com 80K TPM. Um lançamento de produto gerou um pico de tráfego que chegou a 200K+ TPM. Deployments Standard aplicam rate limits rígidos — uma vez que você excede o TPM ou RPM provisionado, cada requisição adicional recebe um 429.
 
-### Resolution
+### Resolução
 
-**Immediate — implement exponential backoff with jitter:**
+**Imediato — implementar exponential backoff com jitter:**
 
 ```python
 import time
@@ -370,74 +370,74 @@ def call_with_backoff(client, messages, max_retries=5):
             time.sleep(wait)
 ```
 
-**Short-term — add a secondary deployment for overflow:**
+**Curto prazo — adicionar um deployment secundário para overflow:**
 
-Create a second deployment in a different region and route overflow traffic to it using Azure API Management or application-level logic.
+Crie um segundo deployment em uma região diferente e direcione o tráfego excedente para ele usando o Azure API Management ou lógica no nível da aplicação.
 
-**Long-term — evaluate Provisioned Throughput Units (PTU):**
+**Longo prazo — avaliar Provisioned Throughput Units (PTU):**
 
-For predictable, high-volume workloads, PTU provides guaranteed throughput without rate limiting. No 429s — you pay for reserved capacity regardless of usage (see Chapter 9 for the cost analysis).
+Para workloads previsíveis e de alto volume, PTU fornece throughput garantido sem rate limiting. Sem 429s — você paga por capacidade reservada independentemente do uso (veja Capítulo 9 para a análise de custos).
 
-### Prevention
+### Prevenção
 
-- **Multi-deployment architecture**: Use Azure API Management with load-balancing policies across 2–3 deployments in different regions.
-- **Alert at 80% quota**: Set up Azure Monitor alerts that fire when TPM usage reaches 80% of provisioned capacity.
-- **Implement a token-aware queue**: Estimate token count before sending requests and throttle client-side when approaching limits.
-- **Use usage tracking**: Log token counts per request to forecast capacity needs before launches.
+- **Arquitetura multi-deployment**: Use o Azure API Management com políticas de load balancing entre 2–3 deployments em regiões diferentes.
+- **Alerte a 80% da quota**: Configure alertas no Azure Monitor que disparam quando o uso de TPM atinge 80% da capacidade provisionada.
+- **Implemente uma fila com consciência de tokens**: Estime a contagem de tokens antes de enviar requisições e faça throttling no lado do cliente ao se aproximar dos limites.
+- **Use rastreamento de uso**: Registre a contagem de tokens por requisição para prever necessidades de capacidade antes de lançamentos.
 
-💡 **Pro Tip**: The most common mistake is retrying 429s immediately in a tight loop. This makes the storm worse. Always respect the `Retry-After` header and add random jitter to prevent thundering herd.
+💡 **Dica Pro**: O erro mais comum é fazer retry de 429s imediatamente em um loop apertado. Isso piora a tempestade. Sempre respeite o header `Retry-After` e adicione jitter aleatório para evitar thundering herd.
 
 ---
 
-## Scenario 5: Inference Latency Spike
+## Cenário 5: Pico de Latência na Inferência
 
-### Symptoms
+### Sintomas
 
-P99 latency for your model inference endpoint jumps from 200 ms to 3 seconds. No deployments were made. No configuration changes. Users start reporting "the AI is slow."
+A latência P99 do seu endpoint de inferência do modelo pula de 200 ms para 3 segundos. Nenhum deploy foi feito. Nenhuma mudança de configuração. Usuários começam a reportar "a IA está lenta."
 
-### Diagnosis
+### Diagnóstico
 
-Check the infrastructure layer by layer:
+Verifique a camada de infraestrutura, nível por nível:
 
 ```bash
-# GPU utilization — is the GPU actually busy?
+# Utilização da GPU — a GPU está realmente ocupada?
 $ nvidia-smi --query-gpu=utilization.gpu,utilization.memory,temperature.gpu \
   --format=csv -l 2
 
-# Container restarts — did the serving container crash?
+# Restarts de container — o container de serving crashou?
 $ kubectl get pods -n inference -w
 $ kubectl describe pod model-serve-abc -n inference | grep -A 5 "Last State"
 
-# Check for cold starts — was the container recently created?
+# Verificar cold starts — o container foi criado recentemente?
 $ kubectl get pods -n inference -o custom-columns=\
 NAME:.metadata.name,START:.status.startTime,READY:.status.conditions[0].lastTransitionTime
 ```
 
-Check if model loading is the bottleneck:
+Verifique se o carregamento do modelo é o gargalo:
 
 ```bash
-# Check container startup logs for model load time
+# Verificar logs de startup do container para tempo de carregamento do modelo
 $ kubectl logs model-serve-abc -n inference | grep -i "model loaded\|loading model\|startup"
 [2024-07-15 08:12:03] Loading model from /models/llama-7b...
 [2024-07-15 08:14:47] Model loaded in 164.2 seconds
 ```
 
-A 164-second model load time means every container restart creates a nearly 3-minute latency hole.
+Um tempo de carregamento de modelo de 164 segundos significa que cada restart de container cria um buraco de latência de quase 3 minutos.
 
-### Root Cause
+### Causa Raiz
 
-Three common causes, often overlapping:
+Três causas comuns, frequentemente sobrepostas:
 
-1. **Container cold start**: The inference pod was evicted (OOM, node drain, spot node reclaim) and restarted. Model weights are loaded from Azure Blob Storage on startup — downloading 14+ GB over the network takes minutes.
-2. **GPU thermal throttling**: Sustained 100% GPU utilization pushed the GPU temperature above the throttle threshold (typically 83°C), causing automatic clock reduction.
-3. **Noisy neighbor**: Another pod on the same node is consuming CPU, memory, or network bandwidth needed for preprocessing or postprocessing.
+1. **Cold start do container**: O pod de inferência foi despejado (OOM, node drain, reivindicação de nó spot) e reiniciou. Os pesos do modelo são carregados do Azure Blob Storage na inicialização — baixar 14+ GB pela rede leva minutos.
+2. **Thermal throttling da GPU**: Utilização sustentada de 100% da GPU elevou a temperatura acima do limiar de throttling (tipicamente 83°C), causando redução automática do clock.
+3. **Vizinho barulhento**: Outro pod no mesmo nó está consumindo CPU, memória ou banda de rede necessários para pré-processamento ou pós-processamento.
 
-### Resolution
+### Resolução
 
-**For cold starts — pre-load models and cache locally:**
+**Para cold starts — pré-carregar modelos e cachear localmente:**
 
 ```yaml
-# Use an init container to download model weights to local NVMe
+# Usar um init container para baixar pesos do modelo para NVMe local
 initContainers:
   - name: model-loader
     image: mcr.microsoft.com/azure-cli:latest
@@ -452,31 +452,31 @@ initContainers:
         mountPath: /local-cache
 ```
 
-**For cold starts — configure readiness probes correctly:**
+**Para cold starts — configurar readiness probes corretamente:**
 
 ```yaml
 readinessProbe:
   httpGet:
     path: /health
     port: 8080
-  initialDelaySeconds: 180  # Give the model time to load
+  initialDelaySeconds: 180  # Dar tempo para o modelo carregar
   periodSeconds: 10
   failureThreshold: 3
 ```
 
-This prevents Kubernetes from routing traffic to a pod that's still loading the model.
+Isso impede que o Kubernetes direcione tráfego para um pod que ainda está carregando o modelo.
 
-**For thermal throttling:**
+**Para thermal throttling:**
 
 ```bash
-# Check GPU temperature
+# Verificar temperatura da GPU
 $ nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader
 82
 
-# If consistently above 80°C, reduce concurrent requests or add cooling
+# Se consistentemente acima de 80°C, reduza requisições concorrentes ou adicione refrigeração
 ```
 
-**For noisy neighbors — isolate GPU inference pods:**
+**Para vizinhos barulhentos — isolar pods de inferência GPU:**
 
 ```yaml
 resources:
@@ -487,41 +487,41 @@ resources:
   limits:
     cpu: "8"
     memory: "32Gi"
-    nvidia.com/gpu: 1  # GPUs are always exclusive per container
+    nvidia.com/gpu: 1  # GPUs são sempre exclusivas por container
 ```
 
-Set `requests = limits` for both CPU and memory to get a Guaranteed QoS class, which prevents eviction and noisy-neighbor CPU contention.
+Defina `requests = limits` tanto para CPU quanto para memória para obter a classe de QoS Guaranteed, que previne eviction e contenção de CPU por vizinhos barulhentos.
 
-### Prevention
+### Prevenção
 
-- **Set `minReplicas` > 0** in your Horizontal Pod Autoscaler to avoid scaling to zero.
-- **Use local NVMe cache** on ND/NC-series VMs for model weights. Loading from local SSD takes seconds; loading from Blob Storage takes minutes.
-- **Configure liveness and readiness probes** with adequate `initialDelaySeconds` for model loading.
-- **Monitor GPU temperature** and set alerts at 80°C.
+- **Defina `minReplicas` > 0** no seu Horizontal Pod Autoscaler para evitar escalar para zero.
+- **Use cache NVMe local** em VMs ND/NC-series para pesos do modelo. Carregar do SSD local leva segundos; carregar do Blob Storage leva minutos.
+- **Configure liveness e readiness probes** com `initialDelaySeconds` adequado para o carregamento do modelo.
+- **Monitore a temperatura da GPU** e configure alertas a 80°C.
 
-⚠️ **Production Gotcha**: Readiness probes with default `initialDelaySeconds` (0) will mark a model-serving pod as "ready" before the model is actually loaded. Kubernetes routes traffic to it, requests hit an uninitialized model, and users see errors. Always set `initialDelaySeconds` to at least your model load time.
+⚠️ **Gotcha de Produção**: Readiness probes com `initialDelaySeconds` padrão (0) vão marcar um pod de model serving como "ready" antes do modelo estar de fato carregado. O Kubernetes direciona tráfego para ele, requisições atingem um modelo não inicializado, e os usuários veem erros. Sempre defina `initialDelaySeconds` para pelo menos o tempo de carregamento do seu modelo.
 
 ---
 
-## Scenario 6: Distributed Training Hangs at Gradient Sync
+## Cenário 6: Treinamento Distribuído Trava na Sincronização de Gradientes
 
-### Symptoms
+### Sintomas
 
-A multi-node training job stops making progress. The terminal shows no new log output. GPU utilization drops to 0% across all nodes. No error messages appear. The job just... hangs.
+Um job de treinamento multi-nó para de progredir. O terminal não mostra nova saída de log. A utilização da GPU cai para 0% em todos os nós. Nenhuma mensagem de erro aparece. O job simplesmente... trava.
 
 ```bash
-$ nvidia-smi  # On any node
+$ nvidia-smi  # Em qualquer nó
 +-----------------------------------------------------------------------------+
 | Processes:                                                                  |
 |  GPU   GI   CI        PID   Type   Process name                GPU Memory  |
 |  0     N/A  N/A     12345    C   python                          78000MiB  |
 +-----------------------------------------------------------------------------+
-# GPU memory allocated but utilization at 0%
+# Memória da GPU alocada mas utilização em 0%
 ```
 
-### Diagnosis
+### Diagnóstico
 
-Enable NCCL debug logging and restart:
+Habilite o debug logging do NCCL e reinicie:
 
 ```bash
 export NCCL_DEBUG=INFO
@@ -530,7 +530,7 @@ export NCCL_SOCKET_IFNAME=eth0
 torchrun --nproc_per_node=8 --nnodes=4 --node_rank=0 train.py
 ```
 
-Check InfiniBand status on each node:
+Verifique o status do InfiniBand em cada nó:
 
 ```bash
 $ ibstat
@@ -538,12 +538,12 @@ CA 'mlx5_0'
     CA type: MT4123
     Number of ports: 1
     Port 1:
-        State: Down          # <-- Problem! Should be "Active"
+        State: Down          # <-- Problema! Deveria ser "Active"
         Physical state: Disabled
         Rate: 0
 ```
 
-Compare with a healthy node:
+Compare com um nó saudável:
 
 ```bash
 $ ibstat
@@ -556,28 +556,28 @@ CA 'mlx5_0'
         Rate: 200             # 200 Gb/s HDR InfiniBand
 ```
 
-### Root Cause
+### Causa Raiz
 
-One node in the 4-node training cluster lost InfiniBand connectivity. NCCL's `all-reduce` operation requires every participant to complete before any node can proceed. A single failed node blocks the entire job indefinitely — NCCL waits forever by default.
+Um nó no cluster de treinamento de 4 nós perdeu conectividade InfiniBand. A operação `all-reduce` do NCCL requer que todos os participantes completem antes que qualquer nó possa prosseguir. Um único nó com falha bloqueia o job inteiro indefinidamente — o NCCL espera para sempre por padrão.
 
-This is particularly insidious because:
-- The job doesn't crash — it silently hangs
-- The other 3 nodes (24 GPUs) sit idle, burning money
-- No error appears in standard training logs
+Isso é particularmente traiçoeiro porque:
+- O job não crasha — ele trava silenciosamente
+- Os outros 3 nós (24 GPUs) ficam ociosos, queimando dinheiro
+- Nenhum erro aparece nos logs padrão de treinamento
 
-### Resolution
+### Resolução
 
-**Identify and replace the failed node:**
+**Identificar e substituir o nó com falha:**
 
 ```bash
-# Run on all nodes to find which has InfiniBand down
+# Executar em todos os nós para encontrar qual tem InfiniBand down
 for node in node-0 node-1 node-2 node-3; do
     echo "=== $node ==="
     ssh $node "ibstat | grep -A 2 'Port 1'"
 done
 ```
 
-**Set NCCL timeout so jobs fail fast instead of hanging:**
+**Configurar timeout do NCCL para que jobs falhem rápido em vez de travar:**
 
 ```python
 import datetime
@@ -585,25 +585,25 @@ import torch.distributed as dist
 
 dist.init_process_group(
     backend="nccl",
-    timeout=datetime.timedelta(minutes=10)  # Fail after 10 min, not forever
+    timeout=datetime.timedelta(minutes=10)  # Falhar após 10 min, não para sempre
 )
 ```
 
-**Remove the failed node and restart from checkpoint:**
+**Remover o nó com falha e reiniciar do checkpoint:**
 
 ```bash
-# Restart with 3 nodes, loading from latest checkpoint
+# Reiniciar com 3 nós, carregando do último checkpoint
 torchrun --nproc_per_node=8 --nnodes=3 --node_rank=0 \
   train.py --resume_from_checkpoint ./checkpoints/step-15000/
 ```
 
-### Prevention
+### Prevenção
 
-- **Run pre-job InfiniBand health checks** before starting multi-node training:
+- **Execute health checks de InfiniBand pré-job** antes de iniciar treinamento multi-nó:
 
 ```bash
 #!/bin/bash
-# ib-health-check.sh — Run on every node before training
+# ib-health-check.sh — Executar em cada nó antes do treinamento
 IB_STATE=$(ibstat | grep "State:" | head -1 | awk '{print $2}')
 if [ "$IB_STATE" != "Active" ]; then
     echo "FAIL: InfiniBand not active on $(hostname)"
@@ -612,19 +612,19 @@ fi
 echo "PASS: InfiniBand active on $(hostname)"
 ```
 
-- **Set `NCCL_TIMEOUT`** to a reasonable value (5–10 minutes) so hung jobs fail with actionable errors instead of blocking silently.
-- **Checkpoint frequently** — every 15–30 minutes for large jobs. The cost of writing a checkpoint is negligible compared to losing hours of training.
-- **Use Azure CycleCloud or AKS job schedulers** that can detect unresponsive nodes and restart jobs automatically.
+- **Configure `NCCL_TIMEOUT`** para um valor razoável (5–10 minutos) para que jobs travados falhem com erros acionáveis em vez de bloquear silenciosamente.
+- **Faça checkpoint frequentemente** — a cada 15–30 minutos para jobs grandes. O custo de escrever um checkpoint é negligível comparado a perder horas de treinamento.
+- **Use Azure CycleCloud ou job schedulers do AKS** que podem detectar nós não responsivos e reiniciar jobs automaticamente.
 
-💡 **Pro Tip**: If `ibstat` shows `Active` but training still hangs, run `ib_write_bw` between node pairs to test actual InfiniBand bandwidth. A link can be "Active" but degraded.
+💡 **Dica Pro**: Se `ibstat` mostra `Active` mas o treinamento ainda trava, execute `ib_write_bw` entre pares de nós para testar a largura de banda real do InfiniBand. Um link pode estar "Active" mas degradado.
 
 ---
 
-## Scenario 7: Model Serving Container Crash Loop
+## Cenário 7: Container de Model Serving em Crash Loop
 
-### Symptoms
+### Sintomas
 
-Your inference pod restarts every 2–3 minutes:
+Seu pod de inferência reinicia a cada 2–3 minutos:
 
 ```bash
 $ kubectl get pods -n inference
@@ -632,9 +632,9 @@ NAME                        READY   STATUS             RESTARTS   AGE
 model-serve-abc-12345       0/1     CrashLoopBackOff   7          14m
 ```
 
-### Diagnosis
+### Diagnóstico
 
-Check the reason for the last termination:
+Verifique o motivo da última terminação:
 
 ```bash
 $ kubectl describe pod model-serve-abc-12345 -n inference | grep -A 10 "Last State"
@@ -645,9 +645,9 @@ $ kubectl describe pod model-serve-abc-12345 -n inference | grep -A 10 "Last Sta
       Finished:     Mon, 15 Jul 2024 08:12:47 +0000
 ```
 
-`OOMKilled` with exit code 137 means the Linux kernel's OOM killer terminated the process because it exceeded the container's memory limit.
+`OOMKilled` com exit code 137 significa que o OOM killer do kernel Linux terminou o processo porque ele excedeu o limite de memória do container.
 
-Check the container's memory limit vs. actual needs:
+Verifique o limite de memória do container vs. necessidades reais:
 
 ```bash
 $ kubectl get pod model-serve-abc-12345 -n inference \
@@ -664,17 +664,17 @@ $ kubectl get pod model-serve-abc-12345 -n inference \
 }
 ```
 
-A 7B parameter model in FP16 is ~14 GB on disk. But loading it requires CPU RAM first — the model weights are read into CPU memory before being transferred to GPU memory. With a 16 GB limit, there's no headroom.
+Um modelo de 7B parâmetros em FP16 tem ~14 GB em disco. Mas carregá-lo requer RAM de CPU primeiro — os pesos do modelo são lidos na memória de CPU antes de serem transferidos para a memória da GPU. Com um limite de 16 GB, não há margem.
 
-### Root Cause
+### Causa Raiz
 
-Three common causes for model serving crash loops:
+Três causas comuns para crash loops de model serving:
 
-1. **Memory limit too low**: Model loading uses CPU RAM as a staging area. A 14 GB model needs ~28 GB of CPU RAM during loading (file read + tensor deserialization). The 16 GB limit triggers OOMKilled.
-2. **Corrupted model file**: An incomplete download from Blob Storage produces a truncated model file. The loading code crashes with a deserialization error.
-3. **Missing Python dependencies**: The container image is missing a library the model requires (common with custom model architectures).
+1. **Limite de memória muito baixo**: O carregamento do modelo usa RAM de CPU como área de staging. Um modelo de 14 GB precisa de ~28 GB de RAM de CPU durante o carregamento (leitura do arquivo + desserialização dos tensores). O limite de 16 GB dispara o OOMKilled.
+2. **Arquivo de modelo corrompido**: Um download incompleto do Blob Storage produz um arquivo de modelo truncado. O código de carregamento crasha com um erro de desserialização.
+3. **Dependências Python faltando**: A imagem do container está sem uma biblioteca que o modelo necessita (comum com arquiteturas de modelo customizadas).
 
-Check logs before the OOMKilled:
+Verifique os logs antes do OOMKilled:
 
 ```bash
 $ kubectl logs model-serve-abc-12345 -n inference --previous
@@ -683,52 +683,52 @@ Loaded 48/64 shards [==========>          ] 75%
 Killed
 ```
 
-Loading at 75% confirms the OOMKilled — CPU RAM ran out before all shards were loaded.
+Carregamento em 75% confirma o OOMKilled — a RAM de CPU acabou antes de todos os shards serem carregados.
 
-### Resolution
+### Resolução
 
-**Increase memory limits** — set to at least 2× the model weight file size:
+**Aumentar limites de memória** — defina pelo menos 2× o tamanho do arquivo de pesos do modelo:
 
 ```yaml
 resources:
   requests:
-    memory: "32Gi"        # Model size × 2 for loading overhead
+    memory: "32Gi"        # Tamanho do modelo × 2 para overhead de carregamento
     nvidia.com/gpu: 1
   limits:
-    memory: "32Gi"        # Set equal to requests for Guaranteed QoS
+    memory: "32Gi"        # Definir igual ao requests para QoS Guaranteed
     nvidia.com/gpu: 1
 ```
 
-**For corrupted model files:**
+**Para arquivos de modelo corrompidos:**
 
 ```bash
-# Verify model file integrity
+# Verificar integridade do arquivo do modelo
 $ md5sum /models/model-7b.safetensors
 $ az storage blob show --container-name models --name model-7b.safetensors \
   --account-name mystorageaccount --query "properties.contentMd5"
 ```
 
-**For missing dependencies:**
+**Para dependências faltando:**
 
 ```bash
 $ kubectl logs model-serve-abc-12345 -n inference --previous | tail -20
-# Look for ImportError, ModuleNotFoundError
+# Procure por ImportError, ModuleNotFoundError
 ```
 
-### Prevention
+### Prevenção
 
-- **Set `requests = limits`** for memory on all GPU inference pods. This guarantees a Guaranteed QoS class and prevents the kubelet from setting a low cgroup memory limit.
-- **Rule of thumb**: CPU memory limit = model weight file size × 2. This accounts for the loading overhead where weights exist in both file buffer and tensor form simultaneously.
-- **Test containers locally** with `docker run --memory=32g` before deploying to Kubernetes.
-- **Use `safetensors` format** instead of pickle-based formats. Safetensors supports memory-mapped loading, which drastically reduces peak CPU RAM usage.
+- **Defina `requests = limits`** para memória em todos os pods de inferência GPU. Isso garante a classe de QoS Guaranteed e impede que o kubelet defina um limite baixo de memória do cgroup.
+- **Regra prática**: Limite de memória de CPU = tamanho do arquivo de pesos do modelo × 2. Isso contabiliza o overhead de carregamento onde os pesos existem tanto no buffer de arquivo quanto em formato tensor simultaneamente.
+- **Teste containers localmente** com `docker run --memory=32g` antes de fazer deploy no Kubernetes.
+- **Use o formato `safetensors`** em vez de formatos baseados em pickle. Safetensors suporta carregamento com memory-mapped, o que reduz drasticamente o pico de uso de RAM de CPU.
 
 ---
 
-## Scenario 8: GPU Quota Exhaustion
+## Cenário 8: Esgotamento de Quota de GPU
 
-### Symptoms
+### Sintomas
 
-Your Terraform deployment fails:
+Seu deployment Terraform falha:
 
 ```
 Error: creating Virtual Machine: compute.VirtualMachinesClient#CreateOrUpdate:
@@ -738,7 +738,7 @@ approved Standard NDSv2 Family vCPUs Quota. Current usage: 96,
 Additional Required: 40, (Effective) Limit: 96."
 ```
 
-Or via Azure CLI:
+Ou via Azure CLI:
 
 ```bash
 $ az vm create --resource-group myRG --name gpu-vm --image UbuntuLTS \
@@ -747,9 +747,9 @@ $ az vm create --resource-group myRG --name gpu-vm --image UbuntuLTS \
 exceeding approved quota.
 ```
 
-### Diagnosis
+### Diagnóstico
 
-Check current GPU quota usage:
+Verifique o uso atual de quota de GPU:
 
 ```bash
 $ az vm list-usage --location eastus -o table | grep -i "standard ND"
@@ -758,7 +758,7 @@ Name                          CurrentValue    Limit
 Standard NDSv2 Family vCPUs   96              96
 Standard NDAMSv5 Family vCPUs 0               0
 
-# See what's consuming the quota
+# Ver o que está consumindo a quota
 $ az vm list -g myRG -o table --query "[?contains(hardwareProfile.vmSize,'ND')]"
 Name          ResourceGroup    Location    VmSize
 -----------   ---------------  ----------  ----------------------
@@ -767,32 +767,32 @@ train-node-1  myRG             eastus      Standard_ND40rs_v2
 dev-gpu-01    myRG             eastus      Standard_ND40rs_v2
 ```
 
-Three ND40rs_v2 VMs × 40 vCPUs = 120 requested, but quota is 96 — so two are running (80 vCPUs) and one partially allocated. The third VM and any new ones will fail.
+Três VMs ND40rs_v2 × 40 vCPUs = 120 solicitadas, mas a quota é 96 — então duas estão rodando (80 vCPUs) e uma parcialmente alocada. A terceira VM e quaisquer novas vão falhar.
 
-### Root Cause
+### Causa Raiz
 
-GPU quotas in Azure are per-subscription, per-region, per-VM-family. Default quotas for GPU families are typically **0** — you must request increases explicitly. Common reasons for exhaustion:
+Quotas de GPU no Azure são por subscription, por região, por família de VM. Quotas padrão para famílias de GPU são tipicamente **0** — você deve solicitar aumentos explicitamente. Razões comuns para esgotamento:
 
-- Running VMs that should have been deallocated (forgotten dev/test VMs)
-- Multiple teams deploying in the same subscription without coordination
-- Requesting a VM family you've never used before (quota = 0)
+- VMs rodando que deveriam ter sido desalocadas (VMs de dev/test esquecidas)
+- Múltiplos times fazendo deploy na mesma subscription sem coordenação
+- Solicitando uma família de VM que você nunca usou antes (quota = 0)
 
-### Resolution
+### Resolução
 
-**Immediate — deallocate unused GPU VMs:**
+**Imediato — desalocar VMs de GPU não utilizadas:**
 
 ```bash
-# Find stopped-but-still-allocated VMs (these consume quota!)
+# Encontrar VMs paradas-mas-ainda-alocadas (estas consomem quota!)
 $ az vm list -g myRG --show-details -o table \
   --query "[?powerState!='VM deallocated' && contains(hardwareProfile.vmSize,'ND')]"
 
-# Deallocate (not just stop)
+# Desalocar (não apenas parar)
 $ az vm deallocate --resource-group myRG --name dev-gpu-01
 ```
 
-⚠️ **Production Gotcha**: `az vm stop` keeps the VM allocated — it still consumes quota and you still pay for the compute. Only `az vm deallocate` releases the resources.
+⚠️ **Gotcha de Produção**: `az vm stop` mantém a VM alocada — ela ainda consome quota e você ainda paga pelo compute. Somente `az vm deallocate` libera os recursos.
 
-**Request a quota increase:**
+**Solicitar aumento de quota:**
 
 ```bash
 az quota create \
@@ -802,20 +802,20 @@ az quota create \
   --resource-type "dedicated"
 ```
 
-Quota increases for GPU VMs can take 1–5 business days. Plan ahead.
+Aumentos de quota para VMs de GPU podem levar de 1 a 5 dias úteis. Planeje com antecedência.
 
-**Try a different region** if you need capacity immediately:
+**Tente uma região diferente** se você precisa de capacidade imediatamente:
 
 ```bash
 $ az vm list-skus --location westus2 --size Standard_ND40rs_v2 \
   --query "[].{Name:name, Restrictions:restrictions}" -o table
 ```
 
-### Prevention
+### Prevenção
 
-- **Build a GPU quota monitoring dashboard** in Azure Monitor. Track `CurrentValue / Limit` ratio per VM family per region.
-- **Set alerts at 80% quota usage** so you have time to request increases before hitting the wall.
-- **Add pre-flight quota checks to IaC pipelines**:
+- **Construa um dashboard de monitoramento de quota de GPU** no Azure Monitor. Acompanhe a razão `CurrentValue / Limit` por família de VM por região.
+- **Configure alertas a 80% de uso da quota** para ter tempo de solicitar aumentos antes de bater no limite.
+- **Adicione verificações de quota pré-deploy nos pipelines de IaC**:
 
 ```bash
 #!/bin/bash
@@ -834,33 +834,33 @@ fi
 echo "PASS: $AVAILABLE vCPUs available"
 ```
 
-- **Tag GPU VMs with expiry dates** and automate deallocation of expired resources.
+- **Marque VMs de GPU com datas de expiração** e automatize a desalocação de recursos expirados.
 
 ---
 
-## Scenario 9: BlobFuse2 Mount Failures
+## Cenário 9: Falhas na Montagem do BlobFuse2
 
-### Symptoms
+### Sintomas
 
-A training job starts but can't find its dataset:
+Um job de treinamento inicia mas não encontra seu dataset:
 
 ```
 FileNotFoundError: [Errno 2] No such file or directory: '/mnt/data/training/dataset.parquet'
 ```
 
-The mount point exists but is empty:
+O ponto de montagem existe mas está vazio:
 
 ```bash
 $ ls /mnt/data/
-# (empty)
+# (vazio)
 
 $ mount | grep blobfuse
-# (no output — mount failed silently)
+# (sem saída — a montagem falhou silenciosamente)
 ```
 
-### Diagnosis
+### Diagnóstico
 
-Check BlobFuse2 logs:
+Verifique os logs do BlobFuse2:
 
 ```bash
 $ journalctl -u blobfuse2-mount.service --since "1 hour ago"
@@ -868,12 +868,12 @@ blobfuse2[1234]: Error: Failed to authenticate. StatusCode=403
 AuthorizationFailure. This request is not authorized to perform
 this operation using this permission.
 
-# Or check directly if run manually
+# Ou verifique diretamente se executou manualmente
 $ blobfuse2 mount /mnt/data --config-file=/etc/blobfuse2/config.yaml 2>&1
 Error: authorization failure: identity not authorized
 ```
 
-Check managed identity assignment:
+Verifique a atribuição de managed identity:
 
 ```bash
 $ az vm identity show --resource-group myRG --name gpu-vm-01
@@ -884,20 +884,20 @@ $ az vm identity show --resource-group myRG --name gpu-vm-01
   }
 }
 
-# Check RBAC on the storage account
+# Verificar RBAC na conta de armazenamento
 $ az role assignment list --scope "/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Storage/storageAccounts/mldatastorage" \
   --query "[?principalName=='my-ml-identity'].{Role:roleDefinitionName}" -o table
-# (empty — no role assignment!)
+# (vazio — sem atribuição de role!)
 ```
 
-### Root Cause
+### Causa Raiz
 
-Two primary causes:
+Duas causas principais:
 
-1. **Missing RBAC**: The VM's managed identity was not assigned the `Storage Blob Data Reader` role on the storage account. The identity exists, but has no permissions to read blobs.
-2. **Storage firewall blocking**: The storage account's network rules are set to "Selected networks" and the VM's VNet/subnet is not in the allowed list.
+1. **RBAC faltando**: A managed identity da VM não recebeu a role `Storage Blob Data Reader` na conta de armazenamento. A identidade existe, mas não tem permissões para ler blobs.
+2. **Firewall do storage bloqueando**: As regras de rede da conta de armazenamento estão definidas como "Redes selecionadas" e a VNet/subnet da VM não está na lista de permitidos.
 
-Check the firewall:
+Verifique o firewall:
 
 ```bash
 $ az storage account show --name mldatastorage --resource-group myRG \
@@ -906,19 +906,19 @@ $ az storage account show --name mldatastorage --resource-group myRG \
 
 $ az storage account network-rule list --account-name mldatastorage \
   --query "virtualNetworkRules[].virtualNetworkResourceId" -o table
-# VM's subnet not listed
+# Subnet da VM não listada
 ```
 
-### Resolution
+### Resolução
 
-**Fix RBAC:**
+**Corrigir RBAC:**
 
 ```bash
-# Get the managed identity principal ID
+# Obter o principal ID da managed identity
 PRINCIPAL_ID=$(az identity show --name my-ml-identity --resource-group myRG \
   --query principalId -o tsv)
 
-# Assign Storage Blob Data Reader
+# Atribuir Storage Blob Data Reader
 az role assignment create \
   --assignee-object-id $PRINCIPAL_ID \
   --assignee-principal-type ServicePrincipal \
@@ -926,7 +926,7 @@ az role assignment create \
   --scope "/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Storage/storageAccounts/mldatastorage"
 ```
 
-**Fix storage firewall:**
+**Corrigir firewall do storage:**
 
 ```bash
 az storage account network-rule add \
@@ -936,7 +936,7 @@ az storage account network-rule add \
   --subnet gpu-subnet
 ```
 
-Then remount:
+Depois remonte:
 
 ```bash
 $ blobfuse2 mount /mnt/data --config-file=/etc/blobfuse2/config.yaml
@@ -944,12 +944,12 @@ $ ls /mnt/data/training/
 dataset.parquet  validation.parquet
 ```
 
-### Prevention
+### Prevenção
 
-- **Provision storage + RBAC together in IaC.** Never create a storage account without also creating the role assignment in the same template:
+- **Provisione storage + RBAC juntos no IaC.** Nunca crie uma conta de armazenamento sem também criar a atribuição de role no mesmo template:
 
 ```hcl
-# Terraform example — storage + RBAC in one module
+# Exemplo Terraform — storage + RBAC em um módulo
 resource "azurerm_role_assignment" "ml_storage_reader" {
   scope                = azurerm_storage_account.ml_data.id
   role_definition_name = "Storage Blob Data Reader"
@@ -957,148 +957,148 @@ resource "azurerm_role_assignment" "ml_storage_reader" {
 }
 ```
 
-- **Include VNet rules in Terraform** so storage firewall rules are always in sync with network topology.
-- **Test mounts in CI** — add a pipeline step that mounts the storage and verifies file access before deploying training jobs.
+- **Inclua regras de VNet no Terraform** para que as regras de firewall do storage estejam sempre sincronizadas com a topologia de rede.
+- **Teste montagens no CI** — adicione uma etapa no pipeline que monta o storage e verifica o acesso aos arquivos antes de fazer deploy de jobs de treinamento.
 
-💡 **Pro Tip**: RBAC role assignments can take up to 10 minutes to propagate. If you just created the assignment and the mount still fails, wait and retry. Don't start adding storage keys as a workaround.
+💡 **Dica Pro**: Atribuições de role RBAC podem levar até 10 minutos para propagar. Se você acabou de criar a atribuição e a montagem ainda falha, espere e tente novamente. Não comece a adicionar storage keys como workaround.
 
 ---
 
-## Scenario 10: Model Quality Degradation in Production
+## Cenário 10: Degradação da Qualidade do Modelo em Produção
 
-### Symptoms
+### Sintomas
 
-No infrastructure alarms fired. No deployments happened. But the product team reports that AI output quality has visibly degraded:
+Nenhum alarme de infraestrutura disparou. Nenhum deploy aconteceu. Mas o time de produto reporta que a qualidade das saídas de IA degradou visivelmente:
 
-- Customer satisfaction scores dropped 15% over two weeks
-- Internal quality reviews show the model producing less relevant responses
-- Error rates haven't changed — the model responds, it just responds poorly
+- Scores de satisfação do cliente caíram 15% ao longo de duas semanas
+- Revisões internas de qualidade mostram o modelo produzindo respostas menos relevantes
+- Taxas de erro não mudaram — o modelo responde, só responde mal
 
-### Diagnosis
+### Diagnóstico
 
-This is the hardest scenario because infrastructure metrics look perfectly normal. You need to work with the ML team to trace the issue:
+Este é o cenário mais difícil porque as métricas de infraestrutura parecem perfeitamente normais. Você precisa trabalhar com o time de ML para rastrear o problema:
 
-**Step 1 — Verify the model version:**
+**Passo 1 — Verificar a versão do modelo:**
 
 ```bash
-# Check which model version is actually serving
+# Verificar qual versão do modelo está realmente servindo
 $ kubectl get deployment model-serve -n inference \
   -o jsonpath='{.spec.template.spec.containers[0].image}'
 myregistry.azurecr.io/llm-serve:v2.3.1
 
-# Compare against the expected version
+# Comparar com a versão esperada
 $ az acr repository show-tags --name myregistry --repository llm-serve --top 5 -o table
 ```
 
-**Step 2 — Check the data pipeline:**
+**Passo 2 — Verificar o pipeline de dados:**
 
 ```bash
-# When was the training dataset last updated?
+# Quando o dataset de treinamento foi atualizado pela última vez?
 $ az storage blob show --container-name datasets --name training-data.parquet \
   --account-name mldatastorage \
   --query "properties.lastModified"
-"2024-05-15T08:00:00+00:00"   # 2 months stale
+"2024-05-15T08:00:00+00:00"   # 2 meses desatualizado
 ```
 
-**Step 3 — Compare current vs. baseline outputs:**
+**Passo 3 — Comparar saídas atuais vs. baseline:**
 
-Run the same evaluation prompts through the production model and compare against known-good baseline responses. Use automated evaluation metrics (BLEU, ROUGE, or LLM-as-judge) to quantify the difference.
+Execute os mesmos prompts de avaliação no modelo de produção e compare contra respostas de baseline conhecidas como boas. Use métricas de avaliação automatizadas (BLEU, ROUGE, ou LLM-as-judge) para quantificar a diferença.
 
-### Root Cause
+### Causa Raiz
 
-Three common causes:
+Três causas comuns:
 
-1. **Data drift**: Production queries have shifted in topic, style, or complexity since the model was trained. The model's training data no longer represents what users actually ask.
-2. **Wrong model version**: A rollback or misconfigured CI/CD pipeline deployed an older, less capable model version.
-3. **Upstream API change**: For RAG (retrieval-augmented generation) architectures, the search API or embedding model changed its response format, breaking the retrieval pipeline silently.
+1. **Data drift**: Consultas em produção mudaram em tópico, estilo ou complexidade desde que o modelo foi treinado. Os dados de treinamento do modelo não representam mais o que os usuários realmente perguntam.
+2. **Versão errada do modelo**: Um rollback ou pipeline de CI/CD mal configurado fez deploy de uma versão mais antiga e menos capaz do modelo.
+3. **Mudança na API upstream**: Para arquiteturas RAG (retrieval-augmented generation), a API de busca ou o modelo de embedding mudou seu formato de resposta, quebrando o pipeline de recuperação silenciosamente.
 
-### Resolution
+### Resolução
 
-- **Data drift**: Retrain or fine-tune on a fresh dataset that includes recent production queries (with appropriate privacy controls).
-- **Wrong model version**: Correct the deployment manifest and redeploy the intended version.
-- **Upstream API change**: Audit the entire inference pipeline — embedding model, search index, prompt template, and serving model — for version mismatches.
+- **Data drift**: Retreine ou faça fine-tune em um dataset atualizado que inclua consultas recentes de produção (com controles de privacidade apropriados).
+- **Versão errada do modelo**: Corrija o manifesto de deployment e faça redeploy da versão correta.
+- **Mudança na API upstream**: Audite todo o pipeline de inferência — modelo de embedding, índice de busca, template de prompt e modelo de serving — para incompatibilidades de versão.
 
-### Prevention
+### Prevenção
 
-- **Automated model quality monitoring**: Run a suite of evaluation prompts on a schedule (daily or weekly) and alert when scores drop below a threshold.
-- **A/B testing for model updates**: Never replace a production model wholesale. Route 5–10% of traffic to the new version and compare metrics before full rollover.
-- **Data drift detection**: Monitor the statistical distribution of incoming queries vs. training data. Tools like Azure Machine Learning's data drift monitor can automate this.
-- **Version pinning in deployment manifests**: Use immutable image tags (never `latest`) and track model versions in your deployment pipeline.
+- **Monitoramento automatizado de qualidade do modelo**: Execute um conjunto de prompts de avaliação em um cronograma (diário ou semanal) e alerte quando os scores caírem abaixo de um limiar.
+- **Testes A/B para atualizações de modelo**: Nunca substitua um modelo de produção por completo. Direcione 5–10% do tráfego para a nova versão e compare métricas antes da troca completa.
+- **Detecção de data drift**: Monitore a distribuição estatística das consultas recebidas vs. dados de treinamento. Ferramentas como o monitor de data drift do Azure Machine Learning podem automatizar isso.
+- **Fixação de versão nos manifestos de deployment**: Use tags de imagem imutáveis (nunca `latest`) e rastreie versões do modelo no seu pipeline de deployment.
 
-⚠️ **Production Gotcha**: Quality degradation is the only production issue on this list where all infrastructure metrics look green. GPU utilization is normal. Latency is normal. Error rates are normal. The model is just confidently producing bad outputs. This is why model quality monitoring is separate from infrastructure monitoring — and equally important.
-
----
-
-## Quick Reference: Diagnostic Command Cheatsheet
-
-### GPU Diagnostics
-
-| Command | What It Shows |
-|---|---|
-| `nvidia-smi` | GPU utilization, memory, temperature, running processes |
-| `nvidia-smi -l 2` | Continuous GPU monitoring (every 2 seconds) |
-| `nvidia-smi topo -m` | GPU-to-GPU interconnect topology (NVLink vs. PCIe) |
-| `nvidia-smi --query-gpu=timestamp,memory.used,memory.free,utilization.gpu,temperature.gpu --format=csv -l 5` | Structured metrics output for logging |
-| `dmesg \| grep -i nvidia` | Kernel messages about NVIDIA driver loading |
-| `ibstat` | InfiniBand port state, link speed, physical status |
-| `ib_write_bw` | InfiniBand bandwidth test between node pairs |
-| `dcgmi diag -r 3` | NVIDIA DCGM full diagnostic (stress test + health check) |
-
-### Kubernetes GPU Diagnostics
-
-| Command | What It Shows |
-|---|---|
-| `kubectl get pods -o wide` | Pod status, node placement, restarts |
-| `kubectl describe pod <name>` | Events, scheduling failures, OOMKilled reasons |
-| `kubectl logs <pod> --previous` | Logs from the last crashed container |
-| `kubectl get nodes -l accelerator=nvidia` | GPU-capable nodes |
-| `kubectl top nodes` | Node CPU/memory utilization |
-| `kubectl get events --sort-by=.lastTimestamp` | Recent cluster events |
-| `kubectl describe node <name> \| grep nvidia.com/gpu` | GPU capacity and allocatable on a node |
-
-### Azure Resource Diagnostics
-
-| Command | What It Shows |
-|---|---|
-| `az vm list-usage --location <region> -o table` | vCPU quota usage per VM family |
-| `az vm get-instance-view --name <vm> -g <rg>` | VM power state, extension statuses |
-| `az aks nodepool show --cluster-name <aks> -g <rg> -n <pool>` | Node pool size, autoscaler config |
-| `az monitor metrics list --resource <id> --metric <name>` | Azure Monitor metrics for any resource |
-| `az storage account show --name <acct> --query networkRuleSet` | Storage firewall configuration |
-| `az cognitiveservices account deployment show --name <acct> -g <rg> --deployment-name <dep>` | OpenAI deployment config and rate limits |
-
-### Storage and Connectivity
-
-| Command | What It Shows |
-|---|---|
-| `blobfuse2 mount <path> --config-file=<cfg>` | Mount Azure Blob Storage |
-| `journalctl -u blobfuse2-mount.service` | BlobFuse2 mount service logs |
-| `az role assignment list --scope <resource-id>` | RBAC roles on a resource |
-| `az storage account network-rule list --account-name <acct>` | Storage firewall VNet rules |
+⚠️ **Gotcha de Produção**: Degradação de qualidade é o único problema de produção nesta lista onde todas as métricas de infraestrutura estão verdes. Utilização de GPU está normal. Latência está normal. Taxas de erro estão normais. O modelo está apenas produzindo saídas ruins com confiança. É por isso que monitoramento de qualidade do modelo é separado do monitoramento de infraestrutura — e igualmente importante.
 
 ---
 
-## Chapter Checklist
+## Referência Rápida: Cheatsheet de Comandos de Diagnóstico
 
-Before you close this chapter, make sure you have:
+### Diagnósticos de GPU
 
-- **GPU driver monitoring** in place — alerts on `nvidia-smi` failures, not just GPU utilization
-- **Kernel pinning** configured on GPU VMs to prevent unattended upgrade breakage
-- **Memory calculations** done before training jobs start — use the formula from Chapter 4
-- **GPU pod templates** with correct `sku=gpu:NoSchedule` tolerations as defaults
-- **Exponential backoff with jitter** implemented in all Azure OpenAI client code
-- **Readiness probes** with adequate `initialDelaySeconds` on model-serving containers
-- **NCCL timeout** configured for distributed training jobs (don't let hangs run forever)
-- **Container memory limits** set to 2× model weight size for inference pods
-- **GPU quota monitoring** with alerts at 80% usage per VM family per region
-- **Storage RBAC and firewall rules** provisioned alongside storage accounts in IaC
-- **Model quality monitoring** separate from infrastructure monitoring
-- **Checkpoint frequency** set for distributed training (every 15–30 minutes minimum)
+| Comando | O que Mostra |
+|---|---|
+| `nvidia-smi` | Utilização da GPU, memória, temperatura, processos em execução |
+| `nvidia-smi -l 2` | Monitoramento contínuo da GPU (a cada 2 segundos) |
+| `nvidia-smi topo -m` | Topologia de interconexão GPU-para-GPU (NVLink vs. PCIe) |
+| `nvidia-smi --query-gpu=timestamp,memory.used,memory.free,utilization.gpu,temperature.gpu --format=csv -l 5` | Saída de métricas estruturadas para logging |
+| `dmesg \| grep -i nvidia` | Mensagens do kernel sobre carregamento do driver NVIDIA |
+| `ibstat` | Estado da porta InfiniBand, velocidade do link, status físico |
+| `ib_write_bw` | Teste de largura de banda InfiniBand entre pares de nós |
+| `dcgmi diag -r 3` | Diagnóstico completo do NVIDIA DCGM (stress test + health check) |
+
+### Diagnósticos de GPU no Kubernetes
+
+| Comando | O que Mostra |
+|---|---|
+| `kubectl get pods -o wide` | Status do pod, posicionamento no nó, restarts |
+| `kubectl describe pod <name>` | Eventos, falhas de agendamento, motivos de OOMKilled |
+| `kubectl logs <pod> --previous` | Logs do último container que crashou |
+| `kubectl get nodes -l accelerator=nvidia` | Nós com capacidade de GPU |
+| `kubectl top nodes` | Utilização de CPU/memória dos nós |
+| `kubectl get events --sort-by=.lastTimestamp` | Eventos recentes do cluster |
+| `kubectl describe node <name> \| grep nvidia.com/gpu` | Capacidade e alocável de GPU em um nó |
+
+### Diagnósticos de Recursos Azure
+
+| Comando | O que Mostra |
+|---|---|
+| `az vm list-usage --location <region> -o table` | Uso de quota de vCPU por família de VM |
+| `az vm get-instance-view --name <vm> -g <rg>` | Estado de energia da VM, status das extensões |
+| `az aks nodepool show --cluster-name <aks> -g <rg> -n <pool>` | Tamanho do node pool, configuração do autoscaler |
+| `az monitor metrics list --resource <id> --metric <name>` | Métricas do Azure Monitor para qualquer recurso |
+| `az storage account show --name <acct> --query networkRuleSet` | Configuração de firewall do storage |
+| `az cognitiveservices account deployment show --name <acct> -g <rg> --deployment-name <dep>` | Configuração do deployment OpenAI e rate limits |
+
+### Storage e Conectividade
+
+| Comando | O que Mostra |
+|---|---|
+| `blobfuse2 mount <path> --config-file=<cfg>` | Montar Azure Blob Storage |
+| `journalctl -u blobfuse2-mount.service` | Logs do serviço de montagem BlobFuse2 |
+| `az role assignment list --scope <resource-id>` | Roles RBAC em um recurso |
+| `az storage account network-rule list --account-name <acct>` | Regras de VNet do firewall do storage |
 
 ---
 
-## What's Next
+## Checklist do Capítulo
 
-These scenarios cover the most common production failures in AI infrastructure. But troubleshooting is reactive — you're fixing things after they break. What about proactive AI?
+Antes de fechar este capítulo, certifique-se de que você tem:
 
-Chapter 13 shows how you can apply AI to your own infrastructure work: predictive failure detection, log anomaly analysis, and ops copilots that help you diagnose issues before users notice them. The same AI capabilities you've been building infrastructure for? They can work *for* you too.
+- **Monitoramento de driver GPU** ativo — alertas em falhas do `nvidia-smi`, não apenas utilização de GPU
+- **Fixação de kernel** configurada em VMs de GPU para prevenir quebras por atualizações automáticas
+- **Cálculos de memória** feitos antes de jobs de treinamento começarem — use a fórmula do Capítulo 4
+- **Templates de pods GPU** com tolerations `sku=gpu:NoSchedule` corretos como padrão
+- **Exponential backoff com jitter** implementado em todo código cliente do Azure OpenAI
+- **Readiness probes** com `initialDelaySeconds` adequado em containers de model serving
+- **Timeout do NCCL** configurado para jobs de treinamento distribuído (não deixe travamentos rodarem para sempre)
+- **Limites de memória de container** definidos como 2× o tamanho dos pesos do modelo para pods de inferência
+- **Monitoramento de quota de GPU** com alertas a 80% de uso por família de VM por região
+- **RBAC de storage e regras de firewall** provisionados junto com contas de armazenamento no IaC
+- **Monitoramento de qualidade do modelo** separado do monitoramento de infraestrutura
+- **Frequência de checkpoint** definida para treinamento distribuído (mínimo a cada 15–30 minutos)
+
+---
+
+## Próximos Passos
+
+Esses cenários cobrem as falhas de produção mais comuns em infraestrutura de IA. Mas troubleshooting é reativo — você está corrigindo coisas depois que elas quebram. E quanto à IA proativa?
+
+O Capítulo 13 mostra como você pode aplicar IA ao seu próprio trabalho de infraestrutura: detecção preditiva de falhas, análise de anomalias em logs e copilots de operações que ajudam a diagnosticar problemas antes que os usuários percebam. As mesmas capacidades de IA para as quais você vem construindo infraestrutura? Elas podem trabalhar *para* você também.

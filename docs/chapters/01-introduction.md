@@ -1,272 +1,272 @@
-# Chapter 1 — Why AI Needs You
+﻿# Capítulo 1 — Por Que a IA Precisa de Você
 
-> "The best AI infrastructure I've ever seen wasn't built by a machine learning engineer. It was built by a sysadmin who got curious."
-
----
-
-## The Monday Morning Message
-
-It's 8:47 AM on a Monday. You're halfway through your coffee, reviewing a Terraform plan for a network redesign, when a Slack message lights up your screen. It's from the data science team lead:
-
-> *"Hey — we need 8 GPU VMs provisioned by Wednesday for a fine-tuning job. We also need a private endpoint for the model inference API, and can you set up monitoring for TPM? Thanks!"*
-
-You read it twice. GPU VMs? Fine-tuning? You know what a private endpoint is — you've built hundreds. Monitoring? That's your bread and butter. But what on earth is "TPM" in this context? It's not Trusted Platform Module — it's **Tokens Per Minute**, a throughput metric for large language models. You don't know that yet, but here's the thing: everything else in that request is pure infrastructure.
-
-Provisioning compute. Configuring network security. Setting up observability. You've been doing this for years. The only difference is the workload type. This book exists to close that gap — to translate what you already know into the language of AI, and to make you the engineer every AI team is desperate to find.
+> "A melhor infraestrutura de IA que já vi não foi construída por um engenheiro de machine learning. Foi construída por um sysadmin que ficou curioso."
 
 ---
 
-## What AI Actually Is (From Your Perspective)
+## A Mensagem de Segunda-Feira de Manhã
 
-Let's cut through the hype. If you strip away the buzzwords, AI is a workload. It consumes compute, storage, and network — just like every other workload you've ever managed. The difference is in the *shape* of that consumption: more parallel compute, larger datasets, and different performance metrics.
+São 8h47 de uma segunda-feira. Você está no meio do seu café, revisando um plano de Terraform para um redesign de rede, quando uma mensagem no Slack ilumina sua tela. É do líder do time de data science:
 
-Here's how the AI landscape breaks down, explained in terms you already understand:
+> *"E aí — precisamos de 8 VMs com GPU provisionadas até quarta-feira para um job de fine-tuning. Também precisamos de um private endpoint para a API de inferência do modelo, e você pode configurar o monitoramento de TPM? Valeu!"*
 
-**Artificial Intelligence (AI)** is the broad discipline. Think of it as "cloud computing" — a huge umbrella that covers everything from simple automation to complex reasoning systems. **Machine Learning (ML)** is a subset where systems learn patterns from data instead of being explicitly programmed. If AI is "cloud," then ML is "IaaS" — a specific, practical layer within it. **Deep Learning (DL)** goes deeper still, using neural networks with many layers to handle complex tasks like image recognition and language generation. It's the equivalent of a highly optimized, purpose-built service.
+Você lê duas vezes. VMs com GPU? Fine-tuning? Você sabe o que é um private endpoint — já criou centenas. Monitoramento? Isso é o seu arroz com feijão. Mas o que diabos é "TPM" nesse contexto? Não é Trusted Platform Module — é **Tokens Per Minute** (Tokens por Minuto), uma métrica de throughput para large language models. Você ainda não sabe disso, mas a questão é: todo o resto nesse pedido é pura infraestrutura.
 
-### The AI Stack: Three Layers You Already Know
+Provisionar compute. Configurar segurança de rede. Montar observabilidade. Você faz isso há anos. A única diferença é o tipo de workload. Este livro existe para preencher essa lacuna — traduzir o que você já sabe para a linguagem da IA, e fazer de você o engenheiro que todo time de IA está desesperado para encontrar.
 
-Every AI system rests on three pillars, and you'll recognize them immediately:
+---
 
-| AI Layer | What It Does | Your Infrastructure Equivalent |
+## O Que a IA Realmente É (Do Seu Ponto de Vista)
+
+Vamos cortar o hype. Se você tirar os buzzwords, IA é um workload. Ela consome compute, storage e rede — assim como qualquer outro workload que você já gerenciou. A diferença está no *formato* desse consumo: mais computação paralela, datasets maiores e métricas de desempenho diferentes.
+
+Veja como o panorama da IA se divide, explicado em termos que você já conhece:
+
+**Inteligência Artificial (IA)** é a disciplina ampla. Pense nela como "computação em nuvem" — um enorme guarda-chuva que abrange desde automação simples até sistemas complexos de raciocínio. **Machine Learning (ML)** é um subconjunto em que os sistemas aprendem padrões a partir de dados em vez de serem explicitamente programados. Se IA é "cloud", então ML é "IaaS" — uma camada específica e prática dentro dela. **Deep Learning (DL)** vai mais fundo ainda, usando redes neurais com muitas camadas para lidar com tarefas complexas como reconhecimento de imagens e geração de linguagem. É o equivalente a um serviço altamente otimizado e construído sob medida.
+
+### O Stack de IA: Três Camadas Que Você Já Conhece
+
+Todo sistema de IA se apoia em três pilares, e você vai reconhecê-los imediatamente:
+
+| Camada de IA | O Que Faz | Seu Equivalente em Infraestrutura |
 |----------|-------------|-------------------------------|
-| **Data** | Feeds the model with examples to learn from | Storage — Blob, Data Lake, NFS, databases |
-| **Model** | Learns patterns and makes predictions | The application — your compiled binary that runs on compute |
-| **Infrastructure** | Powers everything underneath | Your domain — compute, network, security, observability |
+| **Dados** | Alimenta o modelo com exemplos para aprender | Storage — Blob, Data Lake, NFS, bancos de dados |
+| **Modelo** | Aprende padrões e faz previsões | A aplicação — seu binário compilado que roda em compute |
+| **Infraestrutura** | Sustenta tudo por baixo | Seu domínio — compute, rede, segurança, observabilidade |
 
-The model is the application. The data is what it consumes and produces. The infrastructure is everything that makes it run reliably, securely, and at scale. That last part? That's you.
+O modelo é a aplicação. Os dados são o que ele consome e produz. A infraestrutura é tudo que faz isso funcionar de forma confiável, segura e em escala. Essa última parte? É você.
 
-### Infra ↔ AI Translation
+### Tradução Infra ↔ IA
 
-This is the mental model that will carry you through the entire book. When someone on the AI team uses unfamiliar jargon, map it back to what you know:
+Este é o modelo mental que vai acompanhar você ao longo de todo o livro. Quando alguém do time de IA usar um jargão desconhecido, mapeie de volta para o que você já sabe:
 
-| AI Concept | Infrastructure Equivalent | Why It Maps |
+| Conceito de IA | Equivalente em Infraestrutura | Por Que o Mapeamento Funciona |
 |-----------|--------------------------|-------------|
-| A trained model | A compiled binary | It's a static artifact produced by a build process, deployed to serve requests |
-| Training a model | A batch job | Long-running, compute-intensive process that reads data and produces an output artifact |
-| Inference | An API call | A request comes in, the model processes it, a response goes out — just like any microservice |
-| Fine-tuning | Patching a binary | You take an existing artifact and customize it for your environment |
-| A dataset | A database or data lake | Structured input that the workload depends on |
-| A training pipeline | A CI/CD pipeline | Automated workflow: ingest → process → build → validate → deploy |
-| Model registry | Artifact repository | Versioned storage for deployable artifacts (think Azure Container Registry, but for models) |
-| GPU cluster | High-performance compute tier | Specialized hardware allocated for demanding workloads |
+| Um modelo treinado | Um binário compilado | É um artefato estático produzido por um processo de build, implantado para atender requisições |
+| Treinar um modelo | Um batch job | Processo de longa duração, intensivo em compute, que lê dados e produz um artefato de saída |
+| Inferência | Uma chamada de API | Uma requisição entra, o modelo processa, uma resposta sai — igual a qualquer microsserviço |
+| Fine-tuning | Aplicar um patch em um binário | Você pega um artefato existente e customiza para o seu ambiente |
+| Um dataset | Um banco de dados ou data lake | Entrada estruturada da qual o workload depende |
+| Um pipeline de treinamento | Um pipeline de CI/CD | Workflow automatizado: ingestão → processamento → build → validação → deploy |
+| Model registry | Repositório de artefatos | Armazenamento versionado para artefatos implantáveis (pense no Azure Container Registry, mas para modelos) |
+| Cluster de GPUs | Camada de compute de alto desempenho | Hardware especializado alocado para workloads exigentes |
 
-💡 **Pro Tip**: When you're in a meeting and the data science team starts talking about "epochs," "hyperparameters," and "loss functions," don't panic. Those are *their* tuning knobs — the equivalent of your connection pool sizes, cache TTLs, and autoscale thresholds. You don't need to master their knobs. You need to understand what their knobs demand from your infrastructure.
+💡 **Dica**: Quando você estiver numa reunião e o time de data science começar a falar sobre "epochs," "hiperparâmetros" e "loss functions," não entre em pânico. Esses são os *ajustes finos deles* — o equivalente aos seus tamanhos de connection pool, TTLs de cache e thresholds de autoscale. Você não precisa dominar os ajustes deles. Você precisa entender o que esses ajustes *exigem da sua infraestrutura*.
 
 ---
 
-## Traditional Infrastructure vs. AI Infrastructure
+## Infraestrutura Tradicional vs. Infraestrutura de IA
 
-Here's the good news: AI infrastructure isn't a foreign planet. It's more like a new neighborhood in a city you already know. The streets follow the same grid, the utilities work the same way — but the buildings look different and the tenants have unusual requirements.
+Aqui vai a boa notícia: infraestrutura de IA não é um planeta estrangeiro. É mais como um bairro novo numa cidade que você já conhece. As ruas seguem o mesmo padrão, os serviços básicos funcionam da mesma forma — mas os prédios parecem diferentes e os inquilinos têm exigências incomuns.
 
-### What Changes
+### O Que Muda
 
-| Dimension | Traditional Infrastructure | AI Infrastructure | What You Need to Learn |
+| Dimensão | Infraestrutura Tradicional | Infraestrutura de IA | O Que Você Precisa Aprender |
 |-----------|---------------------------|-------------------|----------------------|
-| **Compute** | CPUs, general-purpose VMs | GPUs (NVIDIA T4, A100, H100), multi-GPU nodes | GPU SKU families, CUDA compatibility, vGPU vs. passthrough |
-| **Storage** | SSD/HDD, SAN/NAS, managed disks | Data Lakes, Blob with high-throughput tiers, local NVMe for scratch | I/O patterns for training (sequential reads), checkpoint storage |
-| **Networking** | 1–25 GbE Ethernet, load balancers | InfiniBand (up to 400 Gb/s), RDMA, GPU-to-GPU communication | Multi-node training topologies, NCCL configuration |
-| **Deployment** | VMs, App Services, containers | Inference endpoints, model-as-a-service, GPU-enabled containers | Managed endpoints vs. self-hosted, cold start behavior |
-| **Observability** | CPU %, memory, disk I/O, request latency | GPU utilization, VRAM usage, tokens/second, time-to-first-token | New metric categories, GPU-specific telemetry collection |
-| **Cost Model** | $/hour per VM, reserved instances | $/hour per GPU (10-30× CPU cost), PTUs for managed AI services | GPU-specific cost governance, scheduling, auto-shutdown |
+| **Compute** | CPUs, VMs de propósito geral | GPUs (NVIDIA T4, A100, H100), nós multi-GPU | Famílias de SKU de GPU, compatibilidade CUDA, vGPU vs. passthrough |
+| **Storage** | SSD/HDD, SAN/NAS, managed disks | Data Lakes, Blob com tiers de alto throughput, NVMe local para scratch | Padrões de I/O para treinamento (leituras sequenciais), armazenamento de checkpoints |
+| **Rede** | Ethernet 1–25 GbE, load balancers | InfiniBand (até 400 Gb/s), RDMA, comunicação GPU-to-GPU | Topologias de treinamento multi-nó, configuração NCCL |
+| **Deploy** | VMs, App Services, containers | Inference endpoints, model-as-a-service, containers com GPU | Endpoints gerenciados vs. self-hosted, comportamento de cold start |
+| **Observabilidade** | CPU %, memória, disk I/O, latência de requisição | Utilização de GPU, uso de VRAM, tokens/segundo, time-to-first-token | Novas categorias de métricas, coleta de telemetria específica de GPU |
+| **Modelo de Custo** | $/hora por VM, reservas de instância | $/hora por GPU (10-30× o custo de CPU), PTUs para serviços gerenciados de IA | Governança de custos específica para GPU, agendamento, auto-shutdown |
 
-### What Stays the Same
+### O Que Permanece Igual
 
-This is equally important — maybe more so. These fundamentals don't change just because the workload runs on GPUs:
+Isso é igualmente importante — talvez até mais. Esses fundamentos não mudam só porque o workload roda em GPUs:
 
-- **Security**: Network segmentation, private endpoints, identity management, encryption at rest and in transit. A GPU VM still needs an NSG. An inference API still needs authentication.
-- **Networking**: VNets, subnets, DNS, load balancing, private connectivity. The packets still flow the same way.
-- **Infrastructure as Code**: Bicep, Terraform, ARM templates. GPU VMs are still Azure resources with properties and parameters.
-- **Monitoring and alerting**: You're still setting thresholds, building dashboards, and responding to incidents. The metrics just have different names.
-- **Incident response**: When the model inference API goes down at 2 AM, someone still needs to triage it. That someone should be you.
-- **Cost management**: Budgets, tagging, right-sizing, reserved capacity. If anything, cost governance is *more* critical with AI workloads.
+- **Segurança**: Segmentação de rede, private endpoints, gerenciamento de identidade, criptografia em repouso e em trânsito. Uma VM com GPU ainda precisa de um NSG. Uma API de inferência ainda precisa de autenticação.
+- **Rede**: VNets, subnets, DNS, load balancing, conectividade privada. Os pacotes continuam fluindo da mesma forma.
+- **Infraestrutura como Código**: Bicep, Terraform, templates ARM. VMs com GPU ainda são recursos do Azure com propriedades e parâmetros.
+- **Monitoramento e alertas**: Você ainda define thresholds, constrói dashboards e responde a incidentes. As métricas apenas têm nomes diferentes.
+- **Resposta a incidentes**: Quando a API de inferência do modelo cai às 2 da manhã, alguém ainda precisa fazer a triagem. Esse alguém deveria ser você.
+- **Gestão de custos**: Orçamentos, tagging, right-sizing, capacidade reservada. Se tem algo diferente, é que a governança de custos é *ainda mais* crítica com workloads de IA.
 
-⚠️ **Production Gotcha**: Don't assume AI workloads need entirely new tooling. Teams often over-invest in specialized "ML platforms" while ignoring basic infrastructure hygiene. The most common production failures in AI systems aren't model accuracy problems — they're the same old culprits: disk full, network timeout, expired certificate, missing RBAC permission. Your instincts are right.
+⚠️ **Pegadinha de Produção**: Não assuma que workloads de IA precisam de ferramentas totalmente novas. Times frequentemente investem demais em "plataformas de ML" especializadas enquanto ignoram a higiene básica de infraestrutura. As falhas de produção mais comuns em sistemas de IA não são problemas de acurácia do modelo — são os mesmos velhos culpados: disco cheio, timeout de rede, certificado expirado, permissão RBAC faltando. Seus instintos estão certos.
 
 ---
 
-## Where You Fit: The AI Stack Needs Infrastructure Engineers
+## Onde Você Se Encaixa: O Stack de IA Precisa de Engenheiros de Infraestrutura
 
-The AI industry has a staffing problem, and it's not what you think. There are plenty of data scientists who can build models in Jupyter notebooks. What's critically scarce are engineers who can take those models and run them reliably in production. That's the gap. That's where you come in.
+A indústria de IA tem um problema de pessoal, e não é o que você imagina. Há muitos data scientists que sabem construir modelos em Jupyter notebooks. O que é criticamente escasso são engenheiros que conseguem pegar esses modelos e rodá-los de forma confiável em produção. Essa é a lacuna. É aí que você entra.
 
-### Three Worlds Colliding
+### Três Mundos em Colisão
 
-AI projects sit at the intersection of three disciplines that historically operated in silos:
+Projetos de IA ficam na interseção de três disciplinas que historicamente operavam em silos:
 
-| Role | What They Bring | What They Typically Lack |
+| Papel | O Que Trazem | O Que Normalmente Falta |
 |------|----------------|------------------------|
-| **Developers** | Application logic, APIs, frontend integration | GPU infrastructure knowledge, network architecture |
-| **Data Scientists / ML Engineers** | Model development, training, evaluation | Production operations, security, cost awareness |
-| **Infrastructure Engineers** | Reliability, security, scalability, cost governance | AI/ML vocabulary, model lifecycle understanding |
+| **Desenvolvedores** | Lógica de aplicação, APIs, integração com frontend | Conhecimento de infraestrutura de GPU, arquitetura de rede |
+| **Data Scientists / Engenheiros de ML** | Desenvolvimento de modelos, treinamento, avaliação | Operações de produção, segurança, consciência de custos |
+| **Engenheiros de Infraestrutura** | Confiabilidade, segurança, escalabilidade, governança de custos | Vocabulário de IA/ML, entendimento do ciclo de vida de modelos |
 
-When these worlds collide without a common language, bad things happen. The data science team provisions GPU VMs directly through the portal — no IaC, no tagging, no auto-shutdown policies. The developers expose the model API on a public endpoint because "it's just for testing." Nobody monitors GPU utilization, so half the expensive compute sits idle.
+Quando esses mundos colidem sem uma linguagem comum, coisas ruins acontecem. O time de data science provisiona VMs com GPU diretamente pelo portal — sem IaC, sem tagging, sem políticas de auto-shutdown. Os desenvolvedores expõem a API do modelo em um endpoint público porque "é só para testes." Ninguém monitora a utilização de GPU, então metade do compute caro fica ocioso.
 
-You've seen this pattern before. It's the same chaos that happened when developers first got cloud access without guardrails. And just like cloud governance, the solution is infrastructure engineering discipline applied to a new workload type.
+Você já viu esse padrão antes. É o mesmo caos que aconteceu quando os desenvolvedores ganharam acesso à cloud pela primeira vez sem guardrails. E assim como a governança de cloud, a solução é a disciplina de engenharia de infraestrutura aplicada a um novo tipo de workload.
 
-### What Goes Wrong Without Infrastructure Expertise
+### O Que Dá Errado Sem Expertise de Infraestrutura
 
-These aren't hypothetical scenarios. They're real patterns I've seen repeatedly across organizations adopting AI:
+Estes não são cenários hipotéticos. São padrões reais que eu vi repetidamente em organizações adotando IA:
 
-**Ungoverned GPU sprawl.** A data scientist requests four `Standard_NC24ads_A100_v4` VMs for a training experiment. No resource locks, no budget alerts, no tagging. Three weeks later, the VMs are still running — nobody remembers who provisioned them or whether the experiment finished. Monthly cost: $35,000+.
+**Sprawl desgovernado de GPUs.** Um data scientist solicita quatro VMs `Standard_NC24ads_A100_v4` para um experimento de treinamento. Sem resource locks, sem alertas de orçamento, sem tagging. Três semanas depois, as VMs ainda estão rodando — ninguém lembra quem provisionou ou se o experimento terminou. Custo mensal: mais de $35.000.
 
-**Exposed inference endpoints.** The ML team deploys a model to an Azure Machine Learning managed endpoint with a public IP. No private endpoint, no WAF, no API management. The model serves responses that include proprietary business logic and customer data patterns.
+**Inference endpoints expostos.** O time de ML faz deploy de um modelo em um managed endpoint do Azure Machine Learning com IP público. Sem private endpoint, sem WAF, sem API management. O modelo serve respostas que incluem lógica de negócios proprietária e padrões de dados de clientes.
 
-**Blind spots in observability.** The team monitors model accuracy but not infrastructure health. When inference latency spikes from 200ms to 8 seconds, nobody can tell whether it's the model, the compute, the network, or a noisy neighbor. There are no GPU metrics in the monitoring stack.
+**Pontos cegos na observabilidade.** O time monitora a acurácia do modelo, mas não a saúde da infraestrutura. Quando a latência de inferência dispara de 200ms para 8 segundos, ninguém consegue dizer se é o modelo, o compute, a rede ou um noisy neighbor. Não há métricas de GPU no stack de monitoramento.
 
-⚠️ **Production Gotcha — The $50K GPU Weekend**: A team provisioned 8 × `Standard_ND96asr_v4` VMs (A100 GPUs) on a Friday afternoon for a training run they expected to finish by Saturday morning. The training job crashed at 3 AM due to a checkpoint storage misconfiguration, but the VMs kept running. Nobody had set up auto-shutdown policies or budget alerts. Monday morning surprise: **$53,000 in compute charges** for 60 hours of idle GPU time. An infrastructure engineer would have configured `auto-shutdown`, set a budget alert at $5,000, and stored checkpoints on Blob with lifecycle policies. Fifteen minutes of infrastructure work would have saved $48,000.
+⚠️ **Pegadinha de Produção — O Final de Semana de $50K em GPU**: Um time provisionou 8 × VMs `Standard_ND96asr_v4` (GPUs A100) numa sexta-feira à tarde para um job de treinamento que esperavam terminar até sábado de manhã. O job de treinamento crashou às 3 da manhã por causa de uma configuração incorreta do armazenamento de checkpoints, mas as VMs continuaram rodando. Ninguém tinha configurado políticas de auto-shutdown ou alertas de orçamento. Surpresa de segunda-feira de manhã: **$53.000 em cobranças de compute** por 60 horas de tempo ocioso de GPU. Um engenheiro de infraestrutura teria configurado `auto-shutdown`, definido um alerta de orçamento em $5.000 e armazenado os checkpoints em Blob com lifecycle policies. Quinze minutos de trabalho de infraestrutura teriam economizado $48.000.
 
 ---
 
-## The AI-Ready Infrastructure Professional
+## O Profissional de Infraestrutura Preparado para IA
 
-You don't need to reinvent yourself. You need to extend your existing expertise into a new domain. Think of it like when virtualization arrived — you didn't stop being a server engineer. You learned a new abstraction layer and became more valuable. AI infrastructure is the same transition.
+Você não precisa se reinventar. Você precisa estender sua expertise existente para um novo domínio. Pense como quando a virtualização chegou — você não parou de ser um engenheiro de servidores. Você aprendeu uma nova camada de abstração e se tornou mais valioso. Infraestrutura de IA é a mesma transição.
 
-### Skills You Already Have That Transfer Directly
+### Habilidades Que Você Já Tem e Se Transferem Diretamente
 
-Take inventory of what you bring to the table. It's more than you think:
+Faça o inventário do que você traz para a mesa. É mais do que você imagina:
 
-| Your Existing Skill | How It Applies to AI |
+| Sua Habilidade Atual | Como se Aplica à IA |
 |---------------------|---------------------|
-| VM provisioning and management | GPU VM SKU selection, CUDA driver management, multi-GPU configuration |
-| Network architecture | Private endpoints for model APIs, VNet integration, InfiniBand for distributed training |
-| Kubernetes (AKS) | GPU node pools, NVIDIA device plugin, model serving on containers |
-| Storage architecture | Data lake design, high-throughput storage for training, checkpoint management |
-| IaC (Terraform/Bicep) | Automating AI infrastructure — same resources, new parameters |
-| Monitoring and alerting | GPU telemetry, inference latency dashboards, token throughput alerts |
-| Security and compliance | Model endpoint authentication, data encryption, network isolation |
-| Cost management | GPU cost governance, reserved instances for GPUs, spot instances for training |
-| Incident response | Triaging inference failures, GPU memory errors, storage bottlenecks |
+| Provisionamento e gestão de VMs | Seleção de SKU de GPU, gerenciamento de drivers CUDA, configuração multi-GPU |
+| Arquitetura de rede | Private endpoints para APIs de modelo, integração com VNet, InfiniBand para treinamento distribuído |
+| Kubernetes (AKS) | Node pools com GPU, NVIDIA device plugin, servir modelos em containers |
+| Arquitetura de storage | Design de data lake, storage de alto throughput para treinamento, gerenciamento de checkpoints |
+| IaC (Terraform/Bicep) | Automatizando infraestrutura de IA — mesmos recursos, novos parâmetros |
+| Monitoramento e alertas | Telemetria de GPU, dashboards de latência de inferência, alertas de throughput de tokens |
+| Segurança e compliance | Autenticação de endpoints de modelo, criptografia de dados, isolamento de rede |
+| Gestão de custos | Governança de custos de GPU, reservas de instância para GPUs, spot instances para treinamento |
+| Resposta a incidentes | Triagem de falhas de inferência, erros de memória de GPU, gargalos de storage |
 
-### New Skills to Add
+### Novas Habilidades para Adicionar
 
-The gap is narrower than you think. Here's what you'll learn through this book:
+A lacuna é menor do que você imagina. Aqui está o que você vai aprender ao longo deste livro:
 
-- **GPU fundamentals**: SKU families (NC, ND, NV), CUDA compatibility, GPU memory (VRAM) as a capacity constraint, multi-GPU interconnects
-- **Model lifecycle**: How models go from training to deployment, what "serving" means, versioning and rollback strategies
-- **AI observability**: New metrics like tokens per second, time-to-first-token, GPU utilization and VRAM pressure, inference queue depth
-- **AI-specific networking**: InfiniBand topology for multi-node training, NCCL communication patterns, bandwidth requirements between GPU nodes
-- **Managed AI services**: Azure OpenAI deployment types (standard vs. provisioned), Azure Machine Learning endpoints, AI Foundry
+- **Fundamentos de GPU**: Famílias de SKU (NC, ND, NV), compatibilidade CUDA, memória da GPU (VRAM) como restrição de capacidade, interconexões multi-GPU
+- **Ciclo de vida de modelos**: Como modelos vão do treinamento ao deploy, o que significa "serving", estratégias de versionamento e rollback
+- **Observabilidade de IA**: Novas métricas como tokens por segundo, time-to-first-token, utilização de GPU e pressão de VRAM, profundidade da fila de inferência
+- **Rede específica para IA**: Topologia InfiniBand para treinamento multi-nó, padrões de comunicação NCCL, requisitos de largura de banda entre nós de GPU
+- **Serviços gerenciados de IA**: Tipos de deploy do Azure OpenAI (standard vs. provisioned), endpoints do Azure Machine Learning, AI Foundry
 
-💡 **Pro Tip**: You don't need to learn Python, TensorFlow, or PyTorch. You don't need to understand backpropagation or gradient descent. You need to understand what those tools and processes *demand from infrastructure*. When a data scientist says "my training job needs 8 A100 GPUs with NVLink and 2 TB of NVMe scratch space," you need to know which Azure VM SKU delivers that — not how the training algorithm works internally.
+💡 **Dica**: Você não precisa aprender Python, TensorFlow ou PyTorch. Você não precisa entender backpropagation ou gradient descent. Você precisa entender o que essas ferramentas e processos *exigem da infraestrutura*. Quando um data scientist diz "meu job de treinamento precisa de 8 GPUs A100 com NVLink e 2 TB de espaço NVMe para scratch," você precisa saber qual SKU de VM do Azure entrega isso — e não como o algoritmo de treinamento funciona internamente.
 
-### Career Paths in AI Infrastructure
+### Caminhos de Carreira em Infraestrutura de IA
 
-This isn't a niche. It's a rapidly growing field with multiple trajectories:
+Isso não é um nicho. É um campo em rápido crescimento com múltiplas trajetórias:
 
-| Role | Focus Area | Key Skills |
+| Papel | Área de Foco | Habilidades-Chave |
 |------|-----------|-----------|
-| **AI Infrastructure Engineer** | Provisioning and managing GPU compute, storage, and networking for AI workloads | GPU SKUs, InfiniBand, high-performance storage, IaC |
-| **MLOps Engineer** | Automating the model lifecycle — training, validation, deployment, monitoring | CI/CD for models, model registries, A/B deployment |
-| **AI Cloud Architect** | Designing end-to-end AI platforms, reference architectures, governance frameworks | Azure AI services, cost optimization, security architecture |
-| **AI Platform Engineer** | Building internal platforms that enable data science teams to self-serve | Kubernetes, developer experience, API management, quotas |
+| **Engenheiro de Infraestrutura de IA** | Provisionamento e gerenciamento de GPU compute, storage e rede para workloads de IA | SKUs de GPU, InfiniBand, storage de alto desempenho, IaC |
+| **Engenheiro de MLOps** | Automatizando o ciclo de vida do modelo — treinamento, validação, deploy, monitoramento | CI/CD para modelos, model registries, deploy A/B |
+| **Arquiteto de Cloud para IA** | Projetando plataformas de IA de ponta a ponta, arquiteturas de referência, frameworks de governança | Serviços de IA do Azure, otimização de custos, arquitetura de segurança |
+| **Engenheiro de Plataforma de IA** | Construindo plataformas internas que permitem aos times de data science operar com autonomia | Kubernetes, developer experience, API management, quotas |
 
-**Decision Matrix — Where to Start**:
-- If you're strong in **compute and networking** → start with AI Infrastructure Engineer
-- If you're strong in **automation and CI/CD** → start with MLOps Engineer
-- If you're strong in **architecture and governance** → start with AI Cloud Architect
-- If you're strong in **Kubernetes and platform tooling** → start with AI Platform Engineer
+**Matriz de Decisão — Por Onde Começar**:
+- Se você é forte em **compute e rede** → comece como Engenheiro de Infraestrutura de IA
+- Se você é forte em **automação e CI/CD** → comece como Engenheiro de MLOps
+- Se você é forte em **arquitetura e governança** → comece como Arquiteto de Cloud para IA
+- Se você é forte em **Kubernetes e ferramentas de plataforma** → comece como Engenheiro de Plataforma de IA
 
 ---
 
-## Key Terms You'll Encounter
+## Termos-Chave Que Você Vai Encontrar
 
-Here's an expanded glossary with infrastructure analogies for every term. Bookmark this section — you'll reference it throughout the book.
+Aqui está um glossário expandido com analogias de infraestrutura para cada termo. Marque esta seção — você vai consultá-la ao longo de todo o livro.
 
-| Term | Definition | Infrastructure Analogy |
+| Termo | Definição | Analogia de Infraestrutura |
 |------|-----------|----------------------|
-| **Inference** | Running a trained model to get predictions from new input | An API call — request in, response out. This is the "production" phase. |
-| **Training** | The process of teaching a model by feeding it data | A batch job — long-running, compute-intensive, produces an artifact (the trained model) |
-| **Fine-tuning** | Customizing a pre-trained model with your specific data | Patching a binary — you take an existing artifact and adapt it for your environment |
-| **GPU** | Graphics Processing Unit — hardware optimized for parallel math operations | A co-processor, like a network offload card but for matrix math. Thousands of small cores working in parallel. |
-| **CUDA** | NVIDIA's framework for programming GPUs | A driver and runtime framework — like the hypervisor layer that lets your workload talk to the hardware |
-| **VRAM** | Video RAM — the GPU's dedicated memory | Think of it as the GPU's "RAM." Models must fit in VRAM to run. It's the most common capacity constraint. |
-| **LLM** | Large Language Model (GPT, Llama, Mistral) | A large, stateful application that requires significant compute and memory to serve |
-| **Token** | A chunk of text (~4 characters) that the model processes | The unit of work — like a packet in networking or a transaction in a database |
-| **TPM** | Tokens Per Minute — throughput metric for language models | Requests per second (RPS) equivalent — measures how much work the model can do |
-| **PTU** | Provisioned Throughput Unit — reserved capacity in Azure OpenAI | Reserved instances — you pay for guaranteed capacity rather than pay-as-you-go |
-| **MLOps** | DevOps practices applied to the machine learning lifecycle | DevOps for models — version control, CI/CD, monitoring, rollback, but for model artifacts |
-| **ONNX** | Open Neural Network Exchange — portable model format | Like an OVA/OVF for VMs — a standardized format that runs across different runtimes |
-| **Checkpoint** | A snapshot of model state saved during training | A VM snapshot or database backup — lets you resume training from a known good state |
-| **Epoch** | One complete pass through the training dataset | Like a full backup cycle — the job processes every record once |
-| **Inference endpoint** | An API that serves model predictions | A web service endpoint — same concepts of scaling, load balancing, and health probes |
+| **Inferência** | Executar um modelo treinado para obter previsões a partir de novos dados de entrada | Uma chamada de API — requisição entra, resposta sai. Esta é a fase de "produção". |
+| **Treinamento** | O processo de ensinar um modelo alimentando-o com dados | Um batch job — longa duração, intensivo em compute, produz um artefato (o modelo treinado) |
+| **Fine-tuning** | Customizar um modelo pré-treinado com seus dados específicos | Aplicar um patch em um binário — você pega um artefato existente e o adapta para o seu ambiente |
+| **GPU** | Graphics Processing Unit — hardware otimizado para operações matemáticas paralelas | Um coprocessador, como uma placa de offload de rede, mas para cálculos matriciais. Milhares de pequenos núcleos trabalhando em paralelo. |
+| **CUDA** | Framework da NVIDIA para programação de GPUs | Um framework de driver e runtime — como a camada de hypervisor que permite ao seu workload conversar com o hardware |
+| **VRAM** | Video RAM — a memória dedicada da GPU | Pense nela como a "RAM" da GPU. Modelos precisam caber na VRAM para rodar. É a restrição de capacidade mais comum. |
+| **LLM** | Large Language Model (GPT, Llama, Mistral) | Uma aplicação grande e stateful que requer compute e memória significativos para ser servida |
+| **Token** | Um pedaço de texto (~4 caracteres) que o modelo processa | A unidade de trabalho — como um pacote em redes ou uma transação em um banco de dados |
+| **TPM** | Tokens Per Minute — métrica de throughput para modelos de linguagem | Equivalente a requisições por segundo (RPS) — mede quanto trabalho o modelo consegue fazer |
+| **PTU** | Provisioned Throughput Unit — capacidade reservada no Azure OpenAI | Instâncias reservadas — você paga por capacidade garantida em vez de pay-as-you-go |
+| **MLOps** | Práticas de DevOps aplicadas ao ciclo de vida de machine learning | DevOps para modelos — controle de versão, CI/CD, monitoramento, rollback, mas para artefatos de modelo |
+| **ONNX** | Open Neural Network Exchange — formato portável de modelo | Como um OVA/OVF para VMs — um formato padronizado que roda em diferentes runtimes |
+| **Checkpoint** | Um snapshot do estado do modelo salvo durante o treinamento | Um snapshot de VM ou backup de banco de dados — permite retomar o treinamento de um estado bom conhecido |
+| **Epoch** | Uma passagem completa pelo dataset de treinamento | Como um ciclo de backup completo — o job processa todos os registros uma vez |
+| **Inference endpoint** | Uma API que serve previsões do modelo | Um endpoint de web service — mesmos conceitos de escala, load balancing e health probes |
 
-**Infra ↔ AI Translation — The One-Liner Cheat Sheet**: A trained model is a compiled binary. Training is a batch job. Inference is an API call. A dataset is a database. A training pipeline is a CI/CD pipeline. If you can hold this mental model, you can navigate any AI architecture conversation.
+**Tradução Infra ↔ IA — A Cola Rápida de Uma Linha**: Um modelo treinado é um binário compilado. Treinamento é um batch job. Inferência é uma chamada de API. Um dataset é um banco de dados. Um pipeline de treinamento é um pipeline de CI/CD. Se você conseguir manter esse modelo mental, consegue navegar qualquer conversa de arquitetura de IA.
 
 ---
 
-## Hands-On: Your First AI Infrastructure Exploration
+## Mão na Massa: Sua Primeira Exploração de Infraestrutura de IA
 
-Let's get practical. You don't need to train a model or write Python. You need to understand what GPU compute is available to you and what your subscription limits look like. This is reconnaissance — the same first step you'd take before architecting any new workload.
+Vamos ao prático. Você não precisa treinar um modelo ou escrever Python. Você precisa entender qual compute de GPU está disponível para você e quais são os limites da sua assinatura. Isso é reconhecimento — o mesmo primeiro passo que você daria antes de arquitetar qualquer novo workload.
 
-### Step 1: Discover GPU VM SKUs in Your Region
+### Passo 1: Descubra os SKUs de VMs com GPU na Sua Região
 
-Open your terminal and run the following command, replacing `<your-region>` with your Azure region (e.g., `eastus2`, `westus3`, `swedencentral`):
+Abra seu terminal e execute o seguinte comando, substituindo `<sua-regiao>` pela sua região do Azure (ex.: `eastus2`, `westus3`, `swedencentral`):
 
 ```bash
-az vm list-skus --location <your-region> --size Standard_N --output table
+az vm list-skus --location <sua-regiao> --size Standard_N --output table
 ```
 
-This filters for the `Standard_N` family, which includes all GPU-accelerated VMs in Azure. You'll see SKU names like `Standard_NC24ads_A100_v4`, `Standard_ND96asr_v4`, and `Standard_NV36ads_A10_v5`.
+Isso filtra pela família `Standard_N`, que inclui todas as VMs aceleradas por GPU no Azure. Você verá nomes de SKU como `Standard_NC24ads_A100_v4`, `Standard_ND96asr_v4` e `Standard_NV36ads_A10_v5`.
 
-💡 **Pro Tip**: Pay attention to three GPU VM family prefixes:
-- **NC** — Compute-optimized GPUs for training and inference (NVIDIA T4, A100)
-- **ND** — High-end GPUs designed for distributed deep learning with InfiniBand (A100, H100)
-- **NV** — Visualization and lightweight inference GPUs (AMD Radeon, NVIDIA A10)
+💡 **Dica**: Preste atenção em três prefixos de família de VMs com GPU:
+- **NC** — GPUs otimizadas para compute, voltadas para treinamento e inferência (NVIDIA T4, A100)
+- **ND** — GPUs de alto desempenho projetadas para deep learning distribuído com InfiniBand (A100, H100)
+- **NV** — GPUs para visualização e inferência leve (AMD Radeon, NVIDIA A10)
 
-For production AI workloads, you'll mostly work with NC and ND series. The ND series VMs with InfiniBand are what large-scale training jobs require.
+Para workloads de IA em produção, você vai trabalhar principalmente com as séries NC e ND. As VMs da série ND com InfiniBand são o que os jobs de treinamento em larga escala exigem.
 
-### Step 2: Check Your GPU Quota
+### Passo 2: Verifique Sua Quota de GPU
 
-Having SKUs available in a region doesn't mean you can deploy them. You need quota. Run this command to see your current GPU-family vCPU limits and usage:
+Ter SKUs disponíveis em uma região não significa que você pode implantá-los. Você precisa de quota. Execute este comando para ver seus limites atuais de vCPU por família de GPU e o uso corrente:
 
 ```bash
-az vm list-usage --location <your-region> --output table | Select-String -Pattern "NC|ND|NV"
+az vm list-usage --location <sua-regiao> --output table | Select-String -Pattern "NC|ND|NV"
 ```
 
-> **Note**: On Linux/macOS, replace `Select-String -Pattern "NC|ND|NV"` with `grep -E "NC|ND|NV"`.
+> **Nota**: No Linux/macOS, substitua `Select-String -Pattern "NC|ND|NV"` por `grep -E "NC|ND|NV"`.
 
-This shows you how many vCPUs you've used and your current limit for each GPU family. If the limit is 0, you'll need to request a quota increase before deploying any GPU VMs.
+Isso mostra quantas vCPUs você usou e seu limite atual para cada família de GPU. Se o limite for 0, você precisará solicitar um aumento de quota antes de implantar qualquer VM com GPU.
 
-### Questions to Explore
+### Perguntas para Explorar
 
-Now that you have the output, try answering these:
+Agora que você tem o resultado, tente responder:
 
-1. Which VM SKU uses the **NVIDIA T4** GPU? (Hint: look for `NC*T4*` in the name — great for inference workloads)
-2. Which SKU uses the **NVIDIA A100**? (Hint: look for `NC*A100*` or `ND*A100*` — the workhorse for training)
-3. What's the difference in **vCPU count** between the smallest and largest GPU SKU available?
-4. What are your current **vCPU quotas** for the NC and ND families? Would you be able to deploy a single A100 VM today?
-5. How many **GPUs per VM** do the ND-series SKUs offer? (Some provide up to 8 GPUs in a single node)
+1. Qual SKU de VM usa a GPU **NVIDIA T4**? (Dica: procure por `NC*T4*` no nome — ótimo para workloads de inferência)
+2. Qual SKU usa a **NVIDIA A100**? (Dica: procure por `NC*A100*` ou `ND*A100*` — o cavalo de batalha do treinamento)
+3. Qual é a diferença na **contagem de vCPUs** entre o menor e o maior SKU de GPU disponível?
+4. Quais são suas **quotas de vCPU** atuais para as famílias NC e ND? Você conseguiria fazer deploy de uma única VM A100 hoje?
+5. Quantas **GPUs por VM** os SKUs da série ND oferecem? (Alguns fornecem até 8 GPUs em um único nó)
 
-⚠️ **Production Gotcha**: GPU quota requests in Azure can take **24–72 hours** for approval, sometimes longer for high-demand SKUs like A100 and H100. If a project has a Wednesday deadline, don't wait until Tuesday to request quota. Build quota planning into your AI project kickoff process — just like you'd plan IP address space or subscription limits for any large deployment.
-
----
-
-## Chapter Checklist
-
-Before moving on, make sure you're comfortable with these concepts:
-
-- **AI is an infrastructure workload**, not a data science mystery. It consumes compute, storage, and network — your domain.
-- **The AI stack has three layers**: data (storage), model (the application), and infrastructure (your responsibility).
-- **A trained model is a compiled binary.** Training is a batch job. Inference is an API call. You already know these patterns.
-- **AI infrastructure changes some things** (GPUs instead of CPUs, InfiniBand instead of Ethernet, tokens instead of requests) **but keeps the fundamentals** (security, networking, IaC, monitoring, cost governance).
-- **Infrastructure engineers are critically needed** in AI — data scientists can build models but struggle with production operations, security, and cost management.
-- **You don't need to learn Python or ML theory.** You need to learn what AI workloads demand from infrastructure.
-- **GPU VMs come in families**: NC (compute/training), ND (distributed deep learning), NV (visualization). Quota must be requested in advance.
-- **Career paths exist**: AI Infrastructure Engineer, MLOps Engineer, AI Cloud Architect, AI Platform Engineer — all build on your current skills.
+⚠️ **Pegadinha de Produção**: Solicitações de quota de GPU no Azure podem levar de **24 a 72 horas** para aprovação, às vezes mais para SKUs de alta demanda como A100 e H100. Se um projeto tem prazo na quarta-feira, não espere até terça para solicitar quota. Incorpore o planejamento de quota no kickoff do seu projeto de IA — da mesma forma que você planejaria espaço de endereços IP ou limites de assinatura para qualquer grande implantação.
 
 ---
 
-## What's Next
+## Checklist do Capítulo
 
-Now that you understand why AI needs your skills, let's look at the fuel that powers it all — **data**. In Chapter 2, you'll learn how data flows from raw storage to trained model, why I/O performance is the bottleneck most teams discover too late, and how your storage architecture decisions directly impact whether a training job takes 4 hours or 4 days.
+Antes de seguir em frente, certifique-se de que está confortável com estes conceitos:
 
-The infrastructure decisions you make around data — what tier, what format, what throughput — will determine whether the AI team sees you as an order-taker or a strategic partner. Let's make sure it's the latter.
-
-**Next up**: [Chapter 2 — Data: The Fuel That Powers AI](02-data.md)
+- **IA é um workload de infraestrutura**, não um mistério de data science. Ela consome compute, storage e rede — seu domínio.
+- **O stack de IA tem três camadas**: dados (storage), modelo (a aplicação) e infraestrutura (sua responsabilidade).
+- **Um modelo treinado é um binário compilado.** Treinamento é um batch job. Inferência é uma chamada de API. Você já conhece esses padrões.
+- **A infraestrutura de IA muda algumas coisas** (GPUs em vez de CPUs, InfiniBand em vez de Ethernet, tokens em vez de requisições) **mas mantém os fundamentos** (segurança, rede, IaC, monitoramento, governança de custos).
+- **Engenheiros de infraestrutura são criticamente necessários** na IA — data scientists sabem construir modelos, mas enfrentam dificuldades com operações de produção, segurança e gestão de custos.
+- **Você não precisa aprender Python ou teoria de ML.** Você precisa aprender o que os workloads de IA exigem da infraestrutura.
+- **VMs com GPU vêm em famílias**: NC (compute/treinamento), ND (deep learning distribuído), NV (visualização). Quota deve ser solicitada com antecedência.
+- **Caminhos de carreira existem**: Engenheiro de Infraestrutura de IA, Engenheiro de MLOps, Arquiteto de Cloud para IA, Engenheiro de Plataforma de IA — todos se constroem sobre suas habilidades atuais.
 
 ---
 
-## References
+## O Que Vem a Seguir
+
+Agora que você entende por que a IA precisa das suas habilidades, vamos olhar para o combustível que alimenta tudo — os **dados**. No Capítulo 2, você vai aprender como os dados fluem do storage bruto até o modelo treinado, por que o desempenho de I/O é o gargalo que a maioria dos times descobre tarde demais, e como suas decisões de arquitetura de storage impactam diretamente se um job de treinamento leva 4 horas ou 4 dias.
+
+As decisões de infraestrutura que você toma em relação aos dados — qual tier, qual formato, qual throughput — vão determinar se o time de IA vê você como um executor de pedidos ou como um parceiro estratégico. Vamos garantir que seja a segunda opção.
+
+**Próximo**: [Capítulo 2 — Dados: O Combustível Que Alimenta a IA](02-data.md)
+
+---
+
+## Referências
 
 - [Azure VM sizes overview](https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/overview)
 - [GPU-optimized VM sizes — NC family](https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/gpu-accelerated/nc-family)

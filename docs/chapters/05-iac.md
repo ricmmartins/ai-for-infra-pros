@@ -1,89 +1,89 @@
-# Chapter 5 — Infrastructure as Code for AI
+# Capítulo 5 — Infrastructure as Code para IA
 
-*"If you can't destroy and rebuild your entire AI environment from a single command, you don't own it — it owns you."*
-
----
-
-## The $4,000 Typo
-
-It started as a win. You manually provisioned a GPU cluster in East US 2 for an ML experiment — an AKS cluster with a Standard_NC6s_v3 node pool, accelerated networking, the right NVIDIA drivers, proper taints. It took most of a day, but it worked. The training job ran, the team was happy, and you moved on.
-
-Three weeks later, the same team needs the identical setup in West US 3. No problem, you think. You open the Azure portal and start clicking. You reference a Slack thread for the VM SKU, a wiki page for the network config, and your own memory for everything else. Two days later, it's "done."
-
-Except it isn't. Someone fat-fingered the VM SKU. Instead of `Standard_NC6s_v3` (a GPU-equipped VM at around $3.80/hr), the node pool is running `Standard_D16s_v5` — a general-purpose CPU VM with no GPU at all. The training job launches, finds no CUDA device, falls back to CPU, and grinds along at a fraction of the expected speed. Nobody notices for three days because the job doesn't fail — it just runs slowly. By the time someone checks, the cluster has burned through $4,000 in compute on a VM that can't do the one thing it was provisioned for.
-
-That was the last time I provisioned AI infrastructure by hand. The lesson wasn't that people make typos. The lesson was that AI infrastructure is too expensive, too complex, and too important to live in anyone's head. It needs to live in code.
+*"Se você não consegue destruir e reconstruir todo o seu ambiente de IA com um único comando, você não é dono dele — ele é dono de você."*
 
 ---
 
-## Why IaC Is Non-Negotiable for AI
+## O Erro de Digitação de US$ 4.000
 
-Infrastructure as Code isn't a nice-to-have for AI workloads. It's a survival mechanism. Traditional web applications are forgiving — a misconfigured App Service might cost you an extra $50/month. A misconfigured GPU cluster costs you thousands per day.
+Começou como uma vitória. Você provisionou manualmente um cluster GPU em East US 2 para um experimento de ML — um cluster AKS com um node pool Standard_NC6s_v3, rede acelerada, os drivers NVIDIA corretos, taints configurados. Levou quase um dia inteiro, mas funcionou. O job de treinamento rodou, o time ficou feliz e você seguiu em frente.
 
-### Complexity
+Três semanas depois, o mesmo time precisa de uma configuração idêntica em West US 3. Sem problema, você pensa. Abre o portal do Azure e começa a clicar. Consulta uma thread no Slack para o SKU da VM, uma página na wiki para a configuração de rede, e a própria memória para o resto. Dois dias depois, está "pronto."
 
-AI environments have more moving parts than almost any other infrastructure pattern. You're managing GPU quotas that vary by region and subscription. You're dealing with driver versions that must match specific CUDA toolkits. You're configuring node pools with taints and tolerations so GPU workloads land on the right hardware. You're setting up accelerated networking, InfiniBand for multi-node training, ephemeral NVMe disks for checkpoint storage, and private endpoints for model registries. No human can hold all of that in their head reliably.
+Só que não está. Alguém digitou o SKU da VM errado. Em vez de `Standard_NC6s_v3` (uma VM com GPU a cerca de US$ 3,80/h), o node pool está rodando `Standard_D16s_v5` — uma VM de propósito geral com CPU, sem GPU alguma. O job de treinamento inicia, não encontra nenhum dispositivo CUDA, faz fallback para CPU e avança a uma fração da velocidade esperada. Ninguém percebe por três dias porque o job não falha — ele apenas roda devagar. Quando alguém finalmente verifica, o cluster já consumiu US$ 4.000 em computação numa VM que não consegue fazer a única coisa para a qual foi provisionada.
 
-### Cost
-
-A single NVIDIA A100 VM (`Standard_NC24ads_A100_v4`) runs approximately $3.67/hr. A four-node training cluster costs about $14.68/hr — over $350/day. At those rates, every minute of misconfiguration is money on fire. IaC lets you provision exactly what you need, when you need it, and tear it down the moment you're done. That discipline is the difference between a manageable GPU bill and a budget-busting surprise.
-
-### Reproducibility
-
-Machine learning experiments must be repeatable. If a model achieves breakthrough accuracy on a Tuesday, the team needs to know they can recreate the exact same infrastructure on a Wednesday. Same VM SKU, same driver version, same network topology, same storage configuration. IaC makes this trivial — you run the same code and get the same environment, every time.
-
-### Compliance and Auditability
-
-Regulated industries need to know who changed what, when, and why. When your infrastructure is defined in code and stored in Git, you get that audit trail for free. Every change is a pull request. Every pull request has a reviewer. Every deployment is traceable to a commit hash. Try getting that from a portal session.
-
-**Infra ↔ AI Translation**: When an ML engineer says "I need the same environment as last week's experiment," they're asking for infrastructure reproducibility. When a compliance officer says "show me what changed," they're asking for an audit trail. IaC answers both questions with the same artifact: a versioned configuration file.
+Essa foi a última vez que provisionei infraestrutura de IA manualmente. A lição não era que pessoas cometem erros de digitação. A lição era que a infraestrutura de IA é cara demais, complexa demais e importante demais para viver na cabeça de alguém. Ela precisa viver em código.
 
 ---
 
-## The IaC Landscape for AI
+## Por Que IaC É Inegociável para IA
 
-Not every tool is right for every job. The AI infrastructure space has four primary approaches, each with distinct strengths.
+Infrastructure as Code não é um "seria legal ter" para workloads de IA. É um mecanismo de sobrevivência. Aplicações web tradicionais são tolerantes — um App Service mal configurado pode custar uns US$ 50/mês a mais. Um cluster GPU mal configurado custa milhares por dia.
 
-**Decision Matrix: Choosing Your IaC Tool**
+### Complexidade
 
-| Criteria | Terraform | Bicep | Azure CLI | Pulumi |
+Ambientes de IA têm mais partes móveis do que quase qualquer outro padrão de infraestrutura. Você gerencia cotas de GPU que variam por região e subscription. Lida com versões de driver que precisam corresponder a toolkits CUDA específicos. Configura node pools com taints e tolerations para que workloads GPU caiam no hardware certo. Configura rede acelerada, InfiniBand para treinamento multi-nó, discos NVMe efêmeros para armazenamento de checkpoints, e private endpoints para registries de modelos. Nenhum ser humano consegue manter tudo isso na cabeça de forma confiável.
+
+### Custo
+
+Uma única VM NVIDIA A100 (`Standard_NC24ads_A100_v4`) custa aproximadamente US$ 3,67/h. Um cluster de treinamento com quatro nós custa cerca de US$ 14,68/h — mais de US$ 350/dia. Nessas taxas, cada minuto de configuração incorreta é dinheiro queimando. IaC permite que você provisione exatamente o que precisa, quando precisa, e destrua tudo no momento em que terminar. Essa disciplina é a diferença entre uma conta de GPU gerenciável e uma surpresa que estoura o orçamento.
+
+### Reprodutibilidade
+
+Experimentos de machine learning precisam ser repetíveis. Se um modelo atinge uma acurácia excepcional numa terça-feira, o time precisa saber que consegue recriar exatamente a mesma infraestrutura numa quarta-feira. Mesmo SKU de VM, mesma versão do driver, mesma topologia de rede, mesma configuração de storage. IaC torna isso trivial — você executa o mesmo código e obtém o mesmo ambiente, sempre.
+
+### Conformidade e Auditabilidade
+
+Setores regulados precisam saber quem mudou o quê, quando e por quê. Quando sua infraestrutura é definida em código e armazenada no Git, você ganha essa trilha de auditoria de graça. Cada mudança é um pull request. Cada pull request tem um revisor. Cada deploy é rastreável até um commit hash. Tente conseguir isso a partir de uma sessão no portal.
+
+**Infra ↔ IA — Tradução**: Quando um engenheiro de ML diz "preciso do mesmo ambiente do experimento da semana passada", ele está pedindo reprodutibilidade de infraestrutura. Quando um auditor de conformidade diz "me mostre o que mudou", ele está pedindo uma trilha de auditoria. IaC responde a ambas as perguntas com o mesmo artefato: um arquivo de configuração versionado.
+
+---
+
+## O Panorama de IaC para IA
+
+Nem toda ferramenta é ideal para todo trabalho. O espaço de infraestrutura de IA tem quatro abordagens principais, cada uma com pontos fortes distintos.
+
+**Matriz de Decisão: Escolhendo Sua Ferramenta de IaC**
+
+| Critério | Terraform | Bicep | Azure CLI | Pulumi |
 |----------|-----------|-------|-----------|--------|
-| **Paradigm** | Declarative | Declarative | Imperative | Declarative (code) |
-| **Multi-cloud** | ✅ Yes | ❌ Azure only | ❌ Azure only | ✅ Yes |
-| **State management** | Remote state file | None (ARM handles it) | None | Remote state file |
-| **Language** | HCL | Bicep DSL | Bash/PowerShell | Python, TypeScript, Go, C# |
-| **Learning curve** | Moderate | Low (Azure users) | Low | Moderate–High |
-| **Module ecosystem** | Massive (Registry) | Growing (modules) | N/A | Growing |
-| **AI/GPU support** | Excellent | Excellent | Good | Good |
-| **Best for** | Multi-cloud platforms | Azure-native teams | Quick automation | Developer-first teams |
+| **Paradigma** | Declarativo | Declarativo | Imperativo | Declarativo (código) |
+| **Multi-cloud** | ✅ Sim | ❌ Somente Azure | ❌ Somente Azure | ✅ Sim |
+| **Gerenciamento de estado** | Arquivo de state remoto | Nenhum (ARM gerencia) | Nenhum | Arquivo de state remoto |
+| **Linguagem** | HCL | Bicep DSL | Bash/PowerShell | Python, TypeScript, Go, C# |
+| **Curva de aprendizado** | Moderada | Baixa (usuários Azure) | Baixa | Moderada–Alta |
+| **Ecossistema de módulos** | Massivo (Registry) | Em crescimento (módulos) | N/A | Em crescimento |
+| **Suporte a IA/GPU** | Excelente | Excelente | Bom | Bom |
+| **Melhor para** | Plataformas multi-cloud | Times Azure-native | Automação rápida | Times developer-first |
 
 ### Terraform
 
-Terraform is the industry standard for multi-cloud infrastructure. Its provider ecosystem covers Azure, AWS, GCP, Kubernetes, Helm, and hundreds of SaaS services. State management (who owns what) is explicit, which is both a strength and a responsibility. For organizations running AI workloads across multiple clouds — training on Azure GPUs, serving on AWS endpoints — Terraform is the natural choice.
+Terraform é o padrão da indústria para infraestrutura multi-cloud. Seu ecossistema de providers abrange Azure, AWS, GCP, Kubernetes, Helm e centenas de serviços SaaS. O gerenciamento de estado (quem é dono do quê) é explícito, o que é tanto um ponto forte quanto uma responsabilidade. Para organizações que executam workloads de IA em múltiplas nuvens — treinamento em GPUs Azure, serving em endpoints AWS — Terraform é a escolha natural.
 
 ### Bicep
 
-Bicep is Azure's first-party IaC language. It compiles to ARM templates, requires no state file (Azure Resource Manager tracks state natively), and has first-class support for every Azure resource type on day one of GA. If your AI infrastructure is 100% Azure, Bicep gives you the cleanest syntax and the tightest integration. No state file means no state locking headaches, no storage account to manage, and no risk of state corruption.
+Bicep é a linguagem de IaC nativa do Azure. Ela compila para ARM templates, não requer arquivo de state (o Azure Resource Manager rastreia o estado nativamente) e tem suporte de primeira classe para todo tipo de recurso Azure desde o primeiro dia de GA. Se sua infraestrutura de IA é 100% Azure, Bicep oferece a sintaxe mais limpa e a integração mais estreita. Sem arquivo de state significa sem dores de cabeça com state locking, sem storage account para gerenciar e sem risco de corrupção de estado.
 
 ### Azure CLI
 
-The Azure CLI is imperative — you tell it exactly what to do, step by step. It's excellent for quick automation, ad-hoc scripting, and glue code between declarative tools. It's not the right choice for managing complex, stateful infrastructure, but it's invaluable for tasks like checking GPU quota, registering preview features, or running one-off deployments during development.
+O Azure CLI é imperativo — você diz exatamente o que fazer, passo a passo. É excelente para automação rápida, scripts ad-hoc e código de integração entre ferramentas declarativas. Não é a escolha certa para gerenciar infraestrutura complexa e com estado, mas é indispensável para tarefas como verificar cota de GPU, registrar features em preview ou executar deploys pontuais durante o desenvolvimento.
 
-### When to Use Each
+### Quando Usar Cada Uma
 
-Use **Terraform** when you need multi-cloud support, have a platform engineering team, or are managing infrastructure at scale across multiple environments. Use **Bicep** when you're Azure-native and want the simplest path to production-grade infrastructure with the least operational overhead. Use **Azure CLI** for automation glue, prototyping, and operations tasks. Use **Pulumi** when your team prefers to write infrastructure in the same language as their application code.
+Use **Terraform** quando precisar de suporte multi-cloud, tiver um time de platform engineering ou estiver gerenciando infraestrutura em escala com múltiplos ambientes. Use **Bicep** quando for Azure-native e quiser o caminho mais simples para infraestrutura production-grade com o menor overhead operacional. Use **Azure CLI** como cola de automação, prototipagem e tarefas operacionais. Use **Pulumi** quando seu time preferir escrever infraestrutura na mesma linguagem do código da aplicação.
 
-💡 **Pro Tip**: Many production teams use more than one tool. A common pattern is Terraform or Bicep for infrastructure provisioning, Azure CLI scripts for operational tasks (quota checks, feature registration), and GitHub Actions to orchestrate all of it.
+💡 **Dica**: Muitos times de produção usam mais de uma ferramenta. Um padrão comum é Terraform ou Bicep para provisionamento de infraestrutura, scripts Azure CLI para tarefas operacionais (verificação de cotas, registro de features) e GitHub Actions para orquestrar tudo.
 
 ---
 
-## Terraform for AI Infrastructure
+## Terraform para Infraestrutura de IA
 
-Terraform's strength is its explicitness. Every resource, every dependency, every configuration value is visible in the code. For AI infrastructure — where a single wrong SKU can cost thousands — that explicitness is a feature, not a burden.
+A força do Terraform é sua explicitude. Cada recurso, cada dependência, cada valor de configuração é visível no código. Para infraestrutura de IA — onde um único SKU errado pode custar milhares — essa explicitude é uma vantagem, não um peso.
 
-### Provider Configuration
+### Configuração do Provider
 
-Start with the provider block. The `azurerm` provider version `~> 4.0` is the current major release. Pin it to avoid surprises.
+Comece pelo bloco do provider. A versão `~> 4.0` do provider `azurerm` é a release major atual. Fixe-a para evitar surpresas.
 
 ```hcl
 terraform {
@@ -103,9 +103,9 @@ provider "azurerm" {
 }
 ```
 
-### Variables
+### Variáveis
 
-Parameterize everything that changes between environments. GPU SKUs, regions, node counts — none of these should be hardcoded.
+Parametrize tudo que muda entre ambientes. SKUs de GPU, regiões, contagem de nós — nada disso deve ser hardcoded.
 
 ```hcl
 variable "subscription_id" {
@@ -143,11 +143,11 @@ variable "environment" {
 }
 ```
 
-💡 **Pro Tip**: That `validation` block on `gpu_vm_size` is not decorative. It prevents the exact mistake from the opening story — someone accidentally specifying a D-series or E-series VM for a GPU workload. Catch it at `terraform plan`, not on your cloud bill.
+💡 **Dica**: Aquele bloco `validation` em `gpu_vm_size` não é decorativo. Ele previne exatamente o erro da história de abertura — alguém especificando acidentalmente uma VM da série D ou E para um workload GPU. Pegue o erro no `terraform plan`, não na sua fatura da nuvem.
 
-### AKS Cluster with GPU Node Pool
+### Cluster AKS com Node Pool GPU
 
-This is a production-ready AKS configuration for AI workloads. It includes a system node pool for cluster services, a GPU node pool with autoscaling, proper taints to prevent non-GPU workloads from landing on expensive nodes, and labels for workload targeting.
+Esta é uma configuração AKS pronta para produção para workloads de IA. Inclui um node pool de sistema para serviços do cluster, um node pool GPU com autoscaling, taints adequados para evitar que workloads não-GPU caiam em nós caros, e labels para direcionamento de workloads.
 
 ```hcl
 resource "azurerm_resource_group" "ai" {
@@ -217,11 +217,11 @@ resource "azurerm_kubernetes_cluster_node_pool" "gpu" {
 }
 ```
 
-⚠️ **Production Gotcha**: The `sku=gpu:NoSchedule` taint is critical. Without it, Kubernetes will happily schedule your monitoring DaemonSets, log collectors, and other non-GPU workloads onto your $3.80/hr GPU nodes. The taint ensures only pods with a matching toleration land on GPU hardware. Every GPU pod in your cluster must include `tolerations: [{key: "sku", operator: "Equal", value: "gpu", effect: "NoSchedule"}]` in its spec.
+⚠️ **Atenção em Produção**: O taint `sku=gpu:NoSchedule` é crítico. Sem ele, o Kubernetes vai alocar tranquilamente seus DaemonSets de monitoramento, coletores de logs e outros workloads não-GPU nos seus nós GPU de US$ 3,80/h. O taint garante que apenas pods com uma toleration correspondente caiam no hardware GPU. Todo pod GPU no seu cluster deve incluir `tolerations: [{key: "sku", operator: "Equal", value: "gpu", effect: "NoSchedule"}]` na sua spec.
 
 ### Outputs
 
-Expose the values that downstream consumers need — kubectl configuration, cluster identity, and resource group name.
+Exponha os valores que consumidores downstream precisam — configuração do kubectl, identidade do cluster e nome do resource group.
 
 ```hcl
 output "kube_config" {
@@ -242,9 +242,9 @@ output "resource_group_name" {
 }
 ```
 
-### Remote State in Azure Storage
+### State Remoto no Azure Storage
 
-Never store Terraform state locally for AI infrastructure. A corrupted or lost state file for a GPU cluster means Terraform can't track — or destroy — resources that cost real money every hour they run. Use Azure Storage with locking enabled.
+Nunca armazene o state do Terraform localmente para infraestrutura de IA. Um arquivo de state corrompido ou perdido para um cluster GPU significa que o Terraform não consegue rastrear — nem destruir — recursos que custam dinheiro real a cada hora que ficam rodando. Use Azure Storage com locking habilitado.
 
 ```hcl
 terraform {
@@ -258,7 +258,7 @@ terraform {
 ```
 
 ```bash
-# Create the state storage (one-time setup)
+# Criar o storage para state (configuração única)
 az group create --name rg-terraform-state --location eastus2
 
 az storage account create \
@@ -272,17 +272,17 @@ az storage container create \
   --account-name stterraformstate
 ```
 
-⚠️ **Production Gotcha**: Terraform state for GPU resources is a blast radius concern. If two engineers run `terraform apply` simultaneously against the same state, you can end up with orphaned GPU nodes that nobody's state file knows about. Azure Storage provides native blob leasing for state locking, but you should also enforce single-writer discipline through CI/CD — only your pipeline should run `apply`, never a human directly.
+⚠️ **Atenção em Produção**: O state do Terraform para recursos GPU é uma preocupação de raio de explosão. Se dois engenheiros executam `terraform apply` simultaneamente contra o mesmo state, você pode acabar com nós GPU órfãos que nenhum arquivo de state conhece. O Azure Storage oferece leasing nativo de blob para state locking, mas você também deve impor disciplina de escritor único via CI/CD — apenas seu pipeline deve executar `apply`, nunca um humano diretamente.
 
 ---
 
-## Bicep for AI Infrastructure
+## Bicep para Infraestrutura de IA
 
-Bicep's advantage is simplicity. No state file to manage, no backend to configure, no locking to worry about. Azure Resource Manager handles all of it. For teams that are 100% Azure, Bicep removes an entire category of operational complexity.
+A vantagem do Bicep é a simplicidade. Sem arquivo de state para gerenciar, sem backend para configurar, sem locking para se preocupar. O Azure Resource Manager cuida de tudo. Para times que são 100% Azure, Bicep elimina uma categoria inteira de complexidade operacional.
 
-### GPU VM with NVIDIA Driver Extension
+### VM GPU com Extensão de Driver NVIDIA
 
-This Bicep template provisions a GPU VM and automatically installs NVIDIA drivers via the VM extension. No SSH required for driver setup.
+Este template Bicep provisiona uma VM GPU e instala automaticamente os drivers NVIDIA via extensão de VM. Sem necessidade de SSH para configuração de drivers.
 
 ```bicep
 @description('Name of the GPU virtual machine')
@@ -445,9 +445,9 @@ output vmId string = vm.id
 output privateIp string = nic.properties.ipConfigurations[0].properties.privateIPAddress
 ```
 
-💡 **Pro Tip**: The `@allowed` decorator on `vmSize` serves the same purpose as Terraform's `validation` block — it prevents non-GPU SKUs from being deployed. The NVIDIA driver extension (`Microsoft.HpcCompute/NvidiaGpuDriverLinux`) eliminates the need to SSH in and manually install drivers, which was one of the most error-prone steps in the old manual process.
+💡 **Dica**: O decorator `@allowed` em `vmSize` tem o mesmo propósito que o bloco `validation` do Terraform — ele impede que SKUs não-GPU sejam implantados. A extensão de driver NVIDIA (`Microsoft.HpcCompute/NvidiaGpuDriverLinux`) elimina a necessidade de acessar via SSH e instalar drivers manualmente, que era uma das etapas mais propensas a erros no antigo processo manual.
 
-### AKS Cluster with GPU Node Pool (Bicep)
+### Cluster AKS com Node Pool GPU (Bicep)
 
 ```bicep
 @description('Name of the AKS cluster')
@@ -514,26 +514,26 @@ output clusterName string = aksCluster.name
 output clusterFqdn string = aksCluster.properties.fqdn
 ```
 
-### Modules Pattern for Reusable AI Infrastructure
+### Padrão de Módulos para Infraestrutura de IA Reutilizável
 
-Production teams don't write monolithic Bicep files. They use modules — self-contained, parameterized building blocks that enforce standards across the organization.
+Times de produção não escrevem arquivos Bicep monolíticos. Eles usam módulos — blocos de construção autocontidos e parametrizados que impõem padrões em toda a organização.
 
 ```
 infra/
-├── main.bicep              # Orchestrator
+├── main.bicep              # Orquestrador
 ├── modules/
 │   ├── network.bicep       # VNet, subnets, NSGs, private endpoints
-│   ├── aks.bicep            # AKS cluster with GPU node pool
-│   ├── storage.bicep        # Storage account for models and data
-│   ├── monitoring.bicep     # Log Analytics, alerts, dashboards
-│   └── keyvault.bicep       # Key Vault for secrets and certificates
+│   ├── aks.bicep            # Cluster AKS com node pool GPU
+│   ├── storage.bicep        # Storage account para modelos e dados
+│   ├── monitoring.bicep     # Log Analytics, alertas, dashboards
+│   └── keyvault.bicep       # Key Vault para secrets e certificados
 └── parameters/
     ├── dev.bicepparam
     ├── staging.bicepparam
     └── prod.bicepparam
 ```
 
-The orchestrator file (`main.bicep`) wires the modules together:
+O arquivo orquestrador (`main.bicep`) conecta os módulos:
 
 ```bicep
 targetScope = 'resourceGroup'
@@ -567,17 +567,17 @@ module storage 'modules/storage.bicep' = {
 }
 ```
 
-This pattern means a new team can spin up a complete, compliant AI environment by creating a single parameter file. No reinventing the wheel. No forgetting the GPU taint. No skipping the monitoring setup.
+Esse padrão faz com que um novo time consiga criar um ambiente de IA completo e em conformidade apenas criando um único arquivo de parâmetros. Sem reinventar a roda. Sem esquecer o taint de GPU. Sem pular a configuração de monitoramento.
 
 ---
 
-## CI/CD Pipelines for AI Infrastructure
+## Pipelines CI/CD para Infraestrutura de IA
 
-Infrastructure changes to AI environments should never be applied from a laptop. The stakes are too high. A CI/CD pipeline gives you review gates, automated validation, and an audit trail for every change.
+Mudanças de infraestrutura em ambientes de IA nunca devem ser aplicadas a partir de um laptop. O risco é alto demais. Um pipeline CI/CD oferece portões de revisão, validação automatizada e uma trilha de auditoria para cada mudança.
 
-### GitHub Actions with OIDC Authentication
+### GitHub Actions com Autenticação OIDC
 
-Modern CI/CD for Azure uses OpenID Connect (OIDC) — no client secrets stored in GitHub. The workflow exchanges a short-lived token with Microsoft Entra ID at runtime. This is the current best practice.
+CI/CD moderno para Azure usa OpenID Connect (OIDC) — sem client secrets armazenados no GitHub. O workflow troca um token de curta duração com o Microsoft Entra ID em tempo de execução. Esta é a melhor prática atual.
 
 ```yaml
 name: "AI Infrastructure — Plan & Apply"
@@ -674,35 +674,35 @@ jobs:
         run: terraform apply -auto-approve tfplan
 ```
 
-### The Plan → Approve → Apply Pattern
+### O Padrão Plan → Approve → Apply
 
-This workflow implements a critical safety pattern for AI infrastructure:
+Este workflow implementa um padrão de segurança crítico para infraestrutura de IA:
 
-1. **On pull request**: Terraform runs `plan` only. The plan output shows exactly what will change — new GPU nodes, modified network rules, destroyed resources. Reviewers can see the cost implications before anything happens.
-2. **On merge to main**: The `apply` job runs, but only after passing through an **environment protection rule**. This is a GitHub-native approval gate where designated reviewers must explicitly approve the deployment.
-3. **Artifact handoff**: The plan is saved as an artifact and consumed by the apply job. This ensures the exact plan that was reviewed is the plan that gets applied — no drift between review and execution.
+1. **No pull request**: O Terraform executa apenas o `plan`. A saída do plan mostra exatamente o que vai mudar — novos nós GPU, regras de rede modificadas, recursos destruídos. Os revisores podem ver as implicações de custo antes que qualquer coisa aconteça.
+2. **No merge para main**: O job de `apply` é executado, mas somente após passar por uma **regra de proteção de ambiente**. Este é um portão de aprovação nativo do GitHub onde revisores designados precisam aprovar explicitamente o deploy.
+3. **Transferência de artefato**: O plan é salvo como artefato e consumido pelo job de apply. Isso garante que o plano exato que foi revisado é o plano que será aplicado — sem drift entre revisão e execução.
 
-⚠️ **Production Gotcha**: Always pin your action versions. Use `actions/checkout@v4`, `hashicorp/setup-terraform@v3`, `azure/login@v2`, and `actions/upload-artifact@v4`. Using `@latest` or `@main` in production pipelines means a breaking upstream change can take down your infrastructure deployment at the worst possible time — like when you need to scale GPU nodes for a deadline.
+⚠️ **Atenção em Produção**: Sempre fixe as versões das suas actions. Use `actions/checkout@v4`, `hashicorp/setup-terraform@v3`, `azure/login@v2` e `actions/upload-artifact@v4`. Usar `@latest` ou `@main` em pipelines de produção significa que uma mudança upstream com breaking change pode derrubar seu deploy de infraestrutura no pior momento possível — como quando você precisa escalar nós GPU para um prazo apertado.
 
-### Environment Protection Rules
+### Regras de Proteção de Ambiente
 
-In GitHub, navigate to **Settings → Environments** and create an environment called `ai-infrastructure-prod`. Configure it with:
+No GitHub, navegue até **Settings → Environments** e crie um ambiente chamado `ai-infrastructure-prod`. Configure-o com:
 
-- **Required reviewers**: At least one infrastructure engineer must approve
-- **Wait timer**: Optional delay (e.g., 5 minutes) for last-chance review
-- **Deployment branches**: Restrict to `main` only — no feature branch deployments to production
+- **Revisores obrigatórios**: Pelo menos um engenheiro de infraestrutura deve aprovar
+- **Timer de espera**: Atraso opcional (ex: 5 minutos) para revisão de última hora
+- **Branches de deploy**: Restrinja apenas à `main` — sem deploys de feature branches para produção
 
-This turns your CI/CD pipeline into a controlled deployment process rather than a fire-and-forget script.
+Isso transforma seu pipeline CI/CD em um processo de deploy controlado, em vez de um script que dispara e esquece.
 
 ---
 
-## Governance and Guardrails
+## Governança e Guardrails
 
-AI infrastructure without guardrails is a cost center waiting to explode. Governance ensures that every deployment meets organizational standards for naming, tagging, security, and cost control.
+Infraestrutura de IA sem guardrails é um centro de custos esperando para explodir. Governança garante que cada deploy atenda aos padrões organizacionais de nomenclatura, tagging, segurança e controle de custos.
 
-### Azure Policy for GPU Governance
+### Azure Policy para Governança de GPU
 
-Azure Policy can enforce rules at the subscription or management group level. For AI infrastructure, the most impactful policies prevent cost overruns and ensure compliance.
+O Azure Policy pode impor regras no nível de subscription ou management group. Para infraestrutura de IA, as políticas mais impactantes previnem estouros de custo e garantem conformidade.
 
 ```json
 {
@@ -738,24 +738,24 @@ Azure Policy can enforce rules at the subscription or management group level. Fo
 }
 ```
 
-This policy denies the creation of high-end GPU VMs (A100, ND-series) unless they carry a `cost-center` tag. No tag, no GPU. It's a simple rule that prevents shadow GPU clusters from appearing on your bill.
+Esta política nega a criação de VMs GPU de alto desempenho (A100, série ND) a menos que elas carreguem a tag `cost-center`. Sem tag, sem GPU. É uma regra simples que impede que clusters GPU "sombra" apareçam na sua fatura.
 
-### Naming Conventions for AI Resources
+### Convenções de Nomenclatura para Recursos de IA
 
-Consistent naming makes resources discoverable, filterable, and manageable at scale. Adopt a pattern that encodes purpose, environment, and region.
+Nomenclatura consistente torna os recursos descobríveis, filtráveis e gerenciáveis em escala. Adote um padrão que codifique propósito, ambiente e região.
 
-| Resource Type | Pattern | Example |
-|---------------|---------|---------|
-| Resource Group | `rg-{project}-{env}` | `rg-ai-platform-prod` |
-| AKS Cluster | `aks-{project}-{env}` | `aks-ai-platform-prod` |
-| GPU Node Pool | `gpu{workload}` | `gputraining` |
-| Storage Account | `st{project}{env}{region}` | `staiprodeus2` |
-| Key Vault | `kv-{project}-{env}` | `kv-ai-platform-prod` |
-| Log Analytics | `log-{project}-{env}` | `log-ai-platform-prod` |
+| Tipo de Recurso | Padrão | Exemplo |
+|-----------------|--------|---------|
+| Resource Group | `rg-{projeto}-{env}` | `rg-ai-platform-prod` |
+| Cluster AKS | `aks-{projeto}-{env}` | `aks-ai-platform-prod` |
+| Node Pool GPU | `gpu{workload}` | `gputraining` |
+| Storage Account | `st{projeto}{env}{regiao}` | `staiprodeus2` |
+| Key Vault | `kv-{projeto}-{env}` | `kv-ai-platform-prod` |
+| Log Analytics | `log-{projeto}-{env}` | `log-ai-platform-prod` |
 
-### Tagging Strategy
+### Estratégia de Tagging
 
-Every AI resource should carry a minimum set of tags. These tags drive cost reporting, access control, and lifecycle management.
+Todo recurso de IA deve carregar um conjunto mínimo de tags. Essas tags direcionam relatórios de custos, controle de acesso e gerenciamento de ciclo de vida.
 
 ```hcl
 locals {
@@ -763,29 +763,29 @@ locals {
     environment  = var.environment          # dev, staging, prod
     project      = var.project_name         # ai-platform, ml-training
     team         = var.team_name            # ml-engineering, data-science
-    cost-center  = var.cost_center          # finance tracking
-    experiment   = var.experiment_id        # links infra to ML experiment
-    managed-by   = "terraform"             # how this resource was created
+    cost-center  = var.cost_center          # rastreamento financeiro
+    experiment   = var.experiment_id        # vincula infra ao experimento de ML
+    managed-by   = "terraform"             # como este recurso foi criado
     created-date = formatdate("YYYY-MM-DD", timestamp())
   }
 }
 ```
 
-**Infra ↔ AI Translation**: The `experiment` tag bridges the gap between infrastructure and ML workflows. When a data scientist asks "how much did experiment X cost?", you can answer with a single Azure Cost Management query filtered by that tag. Without it, you're manually correlating timestamps and resource groups.
+**Infra ↔ IA — Tradução**: A tag `experiment` faz a ponte entre infraestrutura e workflows de ML. Quando um cientista de dados pergunta "quanto custou o experimento X?", você consegue responder com uma única consulta no Azure Cost Management filtrada por essa tag. Sem ela, você fica correlacionando timestamps e resource groups manualmente.
 
-### Module Registries
+### Registries de Módulos
 
-For organizations with multiple teams deploying AI infrastructure, a module registry prevents configuration sprawl. Terraform supports private registries (Terraform Cloud, Azure-hosted), and Bicep modules can be published to Azure Container Registry.
+Para organizações com múltiplos times fazendo deploy de infraestrutura de IA, um registry de módulos previne a proliferação de configurações. O Terraform suporta registries privados (Terraform Cloud, hospedado no Azure), e módulos Bicep podem ser publicados no Azure Container Registry.
 
 ```bash
-# Publish a Bicep module to Azure Container Registry
+# Publicar um módulo Bicep no Azure Container Registry
 az bicep publish \
   --file modules/aks-gpu.bicep \
   --target br:myregistry.azurecr.io/bicep/modules/aks-gpu:v1.2.0
 ```
 
 ```bicep
-// Consume a published module
+// Consumir um módulo publicado
 module aksGpu 'br:myregistry.azurecr.io/bicep/modules/aks-gpu:v1.2.0' = {
   name: 'aks-gpu-deployment'
   params: {
@@ -796,24 +796,24 @@ module aksGpu 'br:myregistry.azurecr.io/bicep/modules/aks-gpu:v1.2.0' = {
 }
 ```
 
-Teams consume approved, tested, version-pinned modules instead of writing their own. This ensures every GPU cluster in the organization gets the right taints, the right tags, the right monitoring, and the right security configuration.
+Os times consomem módulos aprovados, testados e com versão fixada em vez de escrever os próprios. Isso garante que cada cluster GPU na organização tenha os taints corretos, as tags corretas, o monitoramento correto e a configuração de segurança correta.
 
 ---
 
-## Hands-On: Deploy an AKS GPU Cluster with Terraform
+## Mão na Massa: Deploy de um Cluster AKS GPU com Terraform
 
-This section walks through a complete, end-to-end deployment. Every command is production-valid. Every file is self-contained.
+Esta seção percorre um deploy completo, de ponta a ponta. Cada comando é válido para produção. Cada arquivo é autocontido.
 
-### Prerequisites
+### Pré-requisitos
 
-- Azure CLI installed and authenticated (`az login`)
-- Terraform >= 1.5 installed
-- An Azure subscription with GPU quota in your target region
-- A resource group for Terraform state (see the Remote State section above)
+- Azure CLI instalado e autenticado (`az login`)
+- Terraform >= 1.5 instalado
+- Uma subscription Azure com cota de GPU na região desejada
+- Um resource group para o state do Terraform (veja a seção State Remoto acima)
 
-### Step 1 — Check GPU Quota
+### Passo 1 — Verificar Cota de GPU
 
-Before writing a single line of Terraform, verify you have GPU quota. Nothing is more frustrating than a perfect plan that fails at apply.
+Antes de escrever uma única linha de Terraform, verifique se você tem cota de GPU. Nada é mais frustrante do que um plan perfeito que falha no apply.
 
 ```bash
 az vm list-usage --location eastus2 \
@@ -821,100 +821,100 @@ az vm list-usage --location eastus2 \
   --output table
 ```
 
-If `CurrentValue` equals `Limit`, you need to request a quota increase before proceeding.
+Se `CurrentValue` for igual a `Limit`, você precisa solicitar um aumento de cota antes de prosseguir.
 
-### Step 2 — Initialize Terraform
+### Passo 2 — Inicializar o Terraform
 
 ```bash
 mkdir ai-gpu-cluster && cd ai-gpu-cluster
 ```
 
-Create `main.tf` with the provider, resource group, AKS cluster, and GPU node pool configurations from the Terraform section above. Then initialize:
+Crie o `main.tf` com as configurações de provider, resource group, cluster AKS e node pool GPU da seção Terraform acima. Em seguida, inicialize:
 
 ```bash
 terraform init
 ```
 
-You should see `Terraform has been successfully initialized!` along with the provider version being downloaded.
+Você deve ver `Terraform has been successfully initialized!` junto com a versão do provider sendo baixada.
 
-### Step 3 — Plan
+### Passo 3 — Plan
 
 ```bash
 terraform plan -out=tfplan
 ```
 
-Review the plan output carefully. You should see:
+Revise a saída do plan com atenção. Você deve ver:
 
 - 1 resource group
-- 1 AKS cluster with a system node pool
-- 1 GPU node pool with autoscaling (0–5 nodes), `sku=gpu:NoSchedule` taint
+- 1 cluster AKS com um node pool de sistema
+- 1 node pool GPU com autoscaling (0–5 nós), taint `sku=gpu:NoSchedule`
 
-Verify the VM SKU in the plan output. This is your last chance to catch a wrong SKU before real money starts flowing.
+Verifique o SKU da VM na saída do plan. Esta é sua última chance de pegar um SKU errado antes que dinheiro real comece a ser gasto.
 
-### Step 4 — Apply
+### Passo 4 — Apply
 
 ```bash
 terraform apply tfplan
 ```
 
-AKS provisioning typically takes 5–10 minutes. The GPU node pool may take an additional 2–3 minutes if it scales up from zero.
+O provisionamento do AKS normalmente leva de 5 a 10 minutos. O node pool GPU pode levar de 2 a 3 minutos adicionais se estiver escalando a partir do zero.
 
-### Step 5 — Verify
+### Passo 5 — Verificar
 
 ```bash
-# Get cluster credentials
+# Obter credenciais do cluster
 az aks get-credentials \
   --resource-group rg-ai-dev \
   --name aks-ai-dev
 
-# Verify node pools
+# Verificar node pools
 kubectl get nodes -L hardware
 
-# Verify GPU taint
+# Verificar taint de GPU
 kubectl describe node <gpu-node-name> | grep Taints
 
-# Verify GPU availability
+# Verificar disponibilidade de GPU
 kubectl get nodes -l hardware=gpu \
   -o jsonpath='{.items[*].status.allocatable.nvidia\.com/gpu}'
 ```
 
-You should see the GPU taint `sku=gpu:NoSchedule` on GPU nodes, and the `nvidia.com/gpu` resource available in the node's allocatable resources.
+Você deve ver o taint `sku=gpu:NoSchedule` nos nós GPU, e o recurso `nvidia.com/gpu` disponível nos recursos alocáveis do nó.
 
-### Step 6 — Clean Up
+### Passo 6 — Limpeza
 
-When the experiment is done, tear it all down. This is one of IaC's superpowers — destruction is as controlled and repeatable as creation.
+Quando o experimento terminar, destrua tudo. Este é um dos superpoderes do IaC — a destruição é tão controlada e repetível quanto a criação.
 
 ```bash
 terraform destroy
 ```
 
-Type `yes` when prompted. Terraform will remove all resources in reverse dependency order. No orphaned NICs, no forgotten disks, no surprise bills next month.
+Digite `yes` quando solicitado. O Terraform removerá todos os recursos em ordem reversa de dependência. Sem NICs órfãs, sem discos esquecidos, sem faturas surpresa no mês seguinte.
 
-💡 **Pro Tip**: For ephemeral training environments, consider running `terraform destroy` on a schedule. A GitHub Actions workflow triggered by `schedule` (cron) can destroy dev GPU clusters every Friday at 6 PM and recreate them Monday at 8 AM. That alone can cut GPU costs by 65%.
-
----
-
-## Chapter Checklist
-
-Before moving on, verify you can answer "yes" to each of these:
-
-- All AI infrastructure is defined in code (Terraform or Bicep) — no portal-only resources
-- GPU VM SKUs are validated in variable definitions to prevent non-GPU deployments
-- AKS GPU node pools use the `sku=gpu:NoSchedule` taint
-- Terraform state is stored remotely in Azure Storage with locking enabled
-- CI/CD pipelines use OIDC authentication — no client secrets in GitHub
-- The plan → approve → apply pattern is enforced with environment protection rules
-- Azure Policy blocks GPU VMs without required tags
-- All resources follow a consistent naming convention
-- Every resource carries tags for environment, project, team, cost-center, and experiment
-- Reusable modules are published to a registry for cross-team consumption
-- GPU quota is verified before deployment
-- Destruction is automated and tested — you can `terraform destroy` with confidence
+💡 **Dica**: Para ambientes de treinamento efêmeros, considere executar `terraform destroy` de forma agendada. Um workflow do GitHub Actions disparado por `schedule` (cron) pode destruir clusters GPU de desenvolvimento toda sexta-feira às 18h e recriá-los na segunda-feira às 8h. Só isso já pode reduzir custos de GPU em 65%.
 
 ---
 
-## What's Next
+## Checklist do Capítulo
 
-Your infrastructure is now code — versioned, reproducible, and auditable. Every GPU cluster, every network rule, every RBAC binding lives in a Git repository with full history and review trails. You can spin up an identical environment in any region with a single command, and you can tear it down just as easily.
+Antes de seguir em frente, verifique se você pode responder "sim" a cada item:
 
-But infrastructure is only the foundation. What about the models that run on top of it? A perfectly provisioned AKS cluster means nothing if the model deployment process is manual, the container images are unscanned, and there's no rollback plan when a new model version degrades accuracy. **Chapter 6** covers the model lifecycle from an infrastructure lens: container registries, CI/CD for model deployments, A/B testing at the infrastructure layer, and supply chain security for the artifacts that run on your carefully codified platform.
+- Toda a infraestrutura de IA está definida em código (Terraform ou Bicep) — sem recursos criados apenas pelo portal
+- SKUs de VM GPU são validados nas definições de variáveis para evitar deploys sem GPU
+- Node pools GPU do AKS usam o taint `sku=gpu:NoSchedule`
+- O state do Terraform é armazenado remotamente no Azure Storage com locking habilitado
+- Pipelines CI/CD usam autenticação OIDC — sem client secrets no GitHub
+- O padrão plan → approve → apply é imposto com regras de proteção de ambiente
+- O Azure Policy bloqueia VMs GPU sem as tags obrigatórias
+- Todos os recursos seguem uma convenção de nomenclatura consistente
+- Cada recurso carrega tags de environment, project, team, cost-center e experiment
+- Módulos reutilizáveis são publicados em um registry para consumo entre times
+- A cota de GPU é verificada antes do deploy
+- A destruição é automatizada e testada — você consegue executar `terraform destroy` com confiança
+
+---
+
+## Próximos Passos
+
+Sua infraestrutura agora é código — versionada, reprodutível e auditável. Cada cluster GPU, cada regra de rede, cada atribuição de RBAC vive em um repositório Git com histórico completo e trilhas de revisão. Você pode criar um ambiente idêntico em qualquer região com um único comando, e destruí-lo com a mesma facilidade.
+
+Mas a infraestrutura é apenas a fundação. E os modelos que rodam em cima dela? Um cluster AKS perfeitamente provisionado não significa nada se o processo de deploy de modelos for manual, as imagens de container não forem escaneadas e não houver plano de rollback quando uma nova versão de modelo degradar a acurácia. O **Capítulo 6** cobre o ciclo de vida do modelo sob a perspectiva de infraestrutura: container registries, CI/CD para deploys de modelos, testes A/B na camada de infraestrutura e segurança da cadeia de suprimentos para os artefatos que rodam na sua plataforma cuidadosamente codificada.

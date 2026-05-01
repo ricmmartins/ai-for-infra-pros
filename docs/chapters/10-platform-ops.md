@@ -1,70 +1,70 @@
-# Chapter 10 — AI Platform Operations at Scale
+# Capítulo 10 — Operações de Plataforma de IA em Escala
 
-*You built an AI environment. Now you need to run an AI platform.*
-
----
-
-## The Slack Channel That Ate Your Calendar
-
-Six months ago, you provisioned a single GPU VM for the ML team. You set up the drivers, mounted the storage, and moved on. It felt like any other infrastructure request — a ticket in, a resource out, close the loop.
-
-Today, you have four teams, three AKS clusters, dozens of GPU node pools, and a growing collection of Azure OpenAI endpoints. Each team wants their own resources, their own quotas, and their own SLAs. Your Slack DMs have become a help desk. "Can you give us more GPUs?" "Why is my training job stuck in Pending?" "Who's using all the A100s?" You're spending more time answering questions than actually engineering anything.
-
-This is the inflection point every infrastructure organization hits. You've gone from supporting AI projects to being the bottleneck for an AI platform. The solution isn't working harder — it's building the systems, policies, and automation that let teams serve themselves while you maintain control. This chapter shows you how.
+*Você construiu um ambiente de IA. Agora precisa operar uma plataforma de IA.*
 
 ---
 
-## From AI Project to AI Platform
+## O Canal do Slack Que Engoliu Sua Agenda
 
-### The Platform Engineering Mindset
+Seis meses atrás, você provisionou uma única VM com GPU para o time de ML. Configurou os drivers, montou o storage e seguiu em frente. Parecia qualquer outra solicitação de infraestrutura — um ticket entra, um recurso sai, fecha o ciclo.
 
-Platform engineering isn't new. You've been doing it for years with web apps, databases, and CI/CD pipelines. The core idea is simple: build reusable, self-service infrastructure that product teams consume without filing tickets. An internal developer platform (IDP) provides golden paths — opinionated, well-tested workflows that teams follow to get from code to production.
+Hoje, você tem quatro times, três clusters AKS, dezenas de node pools com GPU e uma coleção crescente de endpoints do Azure OpenAI. Cada time quer seus próprios recursos, suas próprias cotas e seus próprios SLAs. Suas DMs no Slack viraram um help desk. "Pode liberar mais GPUs pra gente?" "Por que meu job de treinamento tá preso em Pending?" "Quem tá usando todas as A100s?" Você gasta mais tempo respondendo perguntas do que realmente fazendo engenharia.
 
-AI infrastructure follows the same principle. Instead of provisioning GPU VMs ad hoc, you build templates. Instead of manually creating Kubernetes namespaces, you offer a self-service portal. Instead of answering "how do I deploy a model?", you provide a pipeline that does it.
+Esse é o ponto de inflexão que toda organização de infraestrutura enfrenta. Você deixou de dar suporte a projetos de IA para se tornar o gargalo de uma plataforma de IA. A solução não é trabalhar mais — é construir os sistemas, políticas e automações que permitem que os times se sirvam sozinhos enquanto você mantém o controle. Este capítulo mostra como.
 
-**Infra ↔ AI Translation:** Platform engineering is the same discipline you already know — now applied to GPU compute, model registries, and inference endpoints instead of web apps and SQL databases. The abstraction layers change; the thinking doesn't.
+---
 
-### What to Automate vs. What to Manage
+## De Projeto de IA a Plataforma de IA
 
-Not everything should be self-service. The decision depends on blast radius and cost.
+### A Mentalidade de Platform Engineering
 
-| Category | Self-Service | Managed (Requires Approval) |
+Platform engineering não é novidade. Você já faz isso há anos com aplicações web, bancos de dados e pipelines de CI/CD. A ideia central é simples: construir infraestrutura reutilizável e self-service que os times de produto consomem sem abrir tickets. Uma plataforma interna de desenvolvimento (IDP) oferece golden paths — workflows opinados e bem testados que os times seguem para ir do código à produção.
+
+Infraestrutura de IA segue o mesmo princípio. Em vez de provisionar VMs com GPU de forma ad hoc, você cria templates. Em vez de criar namespaces Kubernetes manualmente, você oferece um portal self-service. Em vez de responder "como faço deploy de um modelo?", você disponibiliza um pipeline que faz isso.
+
+**Infra ↔ IA — Tradução:** Platform engineering é a mesma disciplina que você já conhece — agora aplicada a GPU compute, registries de modelos e endpoints de inferência, em vez de aplicações web e bancos SQL. As camadas de abstração mudam; o raciocínio é o mesmo.
+
+### O Que Automatizar vs. O Que Gerenciar
+
+Nem tudo deve ser self-service. A decisão depende do raio de impacto e do custo.
+
+| Categoria | Self-Service | Gerenciado (Requer Aprovação) |
 |---|---|---|
-| Dev/test namespaces | ✅ | |
-| Small GPU allocations (1–2 GPUs) | ✅ | |
-| Production inference endpoints | | ✅ |
-| Large training jobs (8+ GPUs) | | ✅ |
-| New cluster provisioning | | ✅ |
-| Jupyter notebook environments | ✅ | |
-| Azure OpenAI endpoint creation | | ✅ |
-| Storage volumes for datasets | ✅ | |
+| Namespaces de dev/test | ✅ | |
+| Alocações pequenas de GPU (1–2 GPUs) | ✅ | |
+| Endpoints de inferência em produção | | ✅ |
+| Jobs de treinamento grandes (8+ GPUs) | | ✅ |
+| Provisionamento de novos clusters | | ✅ |
+| Ambientes Jupyter notebook | ✅ | |
+| Criação de endpoints Azure OpenAI | | ✅ |
+| Volumes de storage para datasets | ✅ | |
 
-The rule of thumb: if a mistake costs less than a few hundred dollars and can be reversed in minutes, make it self-service. If it involves expensive resources, production traffic, or cross-team impact, put a gate on it.
+A regra geral: se um erro custa menos do que algumas centenas de dólares e pode ser revertido em minutos, torne self-service. Se envolve recursos caros, tráfego de produção ou impacto entre times, coloque um gate de aprovação.
 
 ---
 
-## Multi-Tenancy for AI Infrastructure
+## Multi-Tenancy para Infraestrutura de IA
 
-### Isolation Patterns
+### Padrões de Isolamento
 
-Multi-tenancy in AI infrastructure is about balancing isolation against efficiency. Too little isolation and one team's runaway training job starves everyone. Too much isolation and you're managing dozens of clusters with terrible GPU utilization.
+Multi-tenancy em infraestrutura de IA é sobre equilibrar isolamento e eficiência. Isolamento de menos e o job de treinamento descontrolado de um time vai matar de fome todos os outros. Isolamento demais e você vai gerenciar dezenas de clusters com utilização de GPU péssima.
 
-There are four levels of isolation, each with different tradeoffs:
+Existem quatro níveis de isolamento, cada um com tradeoffs diferentes:
 
-### 📊 Decision Matrix: Team Isolation Levels
+### 📊 Matriz de Decisão: Níveis de Isolamento de Times
 
-| Isolation Level | Cost Efficiency | Security Boundary | Operational Overhead | Best For |
+| Nível de Isolamento | Eficiência de Custo | Fronteira de Segurança | Overhead Operacional | Melhor Para |
 |---|---|---|---|---|
-| **Namespace** | ⭐⭐⭐⭐⭐ | Low | Low | Trusted teams sharing a cluster |
-| **Node pool** | ⭐⭐⭐⭐ | Medium | Medium | Teams needing dedicated GPU types |
-| **Cluster** | ⭐⭐⭐ | High | High | Teams with different compliance needs |
-| **Subscription** | ⭐⭐ | Very High | Very High | Regulated workloads, separate billing |
+| **Namespace** | ⭐⭐⭐⭐⭐ | Baixa | Baixo | Times confiáveis compartilhando um cluster |
+| **Node pool** | ⭐⭐⭐⭐ | Média | Médio | Times que precisam de tipos de GPU dedicados |
+| **Cluster** | ⭐⭐⭐ | Alta | Alto | Times com necessidades de compliance diferentes |
+| **Subscription** | ⭐⭐ | Muito Alta | Muito Alto | Workloads regulados, billing separado |
 
-Most organizations land on a hybrid: one or two shared clusters with per-team namespaces and dedicated GPU node pools, plus separate clusters for production inference and regulated workloads.
+A maioria das organizações adota um modelo híbrido: um ou dois clusters compartilhados com namespaces por time e node pools de GPU dedicados, além de clusters separados para inferência em produção e workloads regulados.
 
-### RBAC Scoping for Multi-Team GPU Access
+### RBAC com Escopo para Acesso Multi-Time a GPUs
 
-In AKS, RBAC should scope each team to their own namespace. Use Microsoft Entra ID groups mapped to Kubernetes ClusterRoles for consistent access control.
+No AKS, o RBAC deve limitar cada time ao seu próprio namespace. Use grupos do Microsoft Entra ID mapeados para ClusterRoles do Kubernetes para controle de acesso consistente.
 
 ```yaml
 # team-data-science-role.yaml
@@ -85,11 +85,11 @@ rules:
     verbs: ["get", "list", "create", "update", "delete"]
 ```
 
-Bind this role to the team's Microsoft Entra ID group. They can deploy workloads in their namespace but can't touch other teams' resources or cluster-level objects.
+Vincule essa role ao grupo do Microsoft Entra ID do time. Eles podem fazer deploy de workloads no namespace deles, mas não conseguem tocar nos recursos de outros times nem em objetos no nível do cluster.
 
-### Resource Quota Enforcement
+### Enforcement de Resource Quotas
 
-Without quotas, one team will inevitably consume all available GPUs. Kubernetes ResourceQuotas enforce hard limits per namespace.
+Sem cotas, um time inevitavelmente vai consumir todas as GPUs disponíveis. ResourceQuotas do Kubernetes impõem limites rígidos por namespace.
 
 ```yaml
 # team-data-science-quota.yaml
@@ -109,13 +109,13 @@ spec:
     pods: "50"
 ```
 
-This caps the data science team at 8 GPUs, 64 CPU cores, and 256 GiB of memory. They can distribute that budget across any number of pods — one job with 8 GPUs or eight jobs with 1 GPU each — but they can't exceed the total.
+Isso limita o time de data science a 8 GPUs, 64 cores de CPU e 256 GiB de memória. Eles podem distribuir esse orçamento entre qualquer número de pods — um job com 8 GPUs ou oito jobs com 1 GPU cada — mas não podem exceder o total.
 
-⚠️ **Production Gotcha:** ResourceQuotas only enforce at scheduling time. If you lower a quota below current usage, existing pods won't be evicted — but new pods will be rejected. Plan quota changes during maintenance windows when teams can reschedule their workloads.
+⚠️ **Cuidado em Produção:** ResourceQuotas só são aplicadas no momento do scheduling. Se você reduzir uma cota abaixo do uso atual, os pods existentes não serão despejados — mas novos pods serão rejeitados. Planeje mudanças de cota durante janelas de manutenção, quando os times podem reagendar seus workloads.
 
-### Network Isolation
+### Isolamento de Rede
 
-Network policies prevent lateral traffic between team namespaces. This is especially important when teams handle different data classifications.
+Network policies impedem tráfego lateral entre namespaces de times diferentes. Isso é especialmente importante quando os times lidam com classificações de dados distintas.
 
 ```yaml
 # deny-cross-namespace.yaml
@@ -133,21 +133,21 @@ spec:
         - podSelector: {}
 ```
 
-This policy allows pods within the `team-data-science` namespace to communicate with each other but blocks all inbound traffic from other namespaces. You'll need to add explicit rules for shared services like model registries or monitoring endpoints.
+Essa policy permite que pods dentro do namespace `team-data-science` se comuniquem entre si, mas bloqueia todo tráfego de entrada de outros namespaces. Você precisará adicionar regras explícitas para serviços compartilhados, como registries de modelos ou endpoints de monitoramento.
 
 ---
 
-## GPU Scheduling and Queue Management
+## GPU Scheduling e Gerenciamento de Filas
 
-### The Fundamental Problem
+### O Problema Fundamental
 
-GPU resources are finite and expensive. A single A100 node costs roughly $3 per hour on Azure. When you have 20 nodes and 4 teams, simple Kubernetes scheduling — first-come, first-served — creates constant friction. Training jobs hog GPUs for hours. Inference workloads get starved. Data scientists submit 10 jobs at once and wonder why only 2 are running.
+Recursos de GPU são finitos e caros. Um único nó A100 custa aproximadamente US$ 3 por hora no Azure. Quando você tem 20 nós e 4 times, o scheduling padrão do Kubernetes — primeiro a chegar, primeiro a ser servido — gera atrito constante. Jobs de treinamento monopolizam GPUs por horas. Workloads de inferência ficam sem recursos. Data scientists submetem 10 jobs de uma vez e ficam se perguntando por que só 2 estão rodando.
 
-You need scheduling that understands priorities, fairness, and the unique characteristics of AI workloads.
+Você precisa de scheduling que entenda prioridades, fairness e as características únicas de workloads de IA.
 
-### Kubernetes Native Scheduling
+### Scheduling Nativo do Kubernetes
 
-Start with the basics. Every GPU workload must specify resource requests and limits. Without them, Kubernetes can't make intelligent scheduling decisions.
+Comece pelo básico. Todo workload de GPU deve especificar requests e limits de recursos. Sem eles, o Kubernetes não consegue tomar decisões de scheduling inteligentes.
 
 ```yaml
 # training-job.yaml
@@ -181,11 +181,11 @@ spec:
         accelerator: nvidia-a100
 ```
 
-💡 **Pro Tip:** Always set GPU requests equal to GPU limits. Unlike CPU and memory, GPUs can't be overcommitted. A pod requesting 1 GPU will exclusively own that GPU regardless of its limit value, so mismatched values only create confusion.
+💡 **Dica:** Sempre defina GPU requests iguais aos GPU limits. Diferentemente de CPU e memória, GPUs não podem ser overcommitted. Um pod que solicita 1 GPU vai ser dono exclusivo daquela GPU independentemente do valor do limit, então valores diferentes só geram confusão.
 
 ### Priority Classes
 
-Priority classes tell the scheduler which workloads matter most. Define a clear hierarchy that reflects your business needs.
+Priority classes dizem ao scheduler quais workloads são mais importantes. Defina uma hierarquia clara que reflita as necessidades do negócio.
 
 ```yaml
 # priority-classes.yaml
@@ -217,13 +217,13 @@ preemptionPolicy: Never
 description: "Interactive notebooks, experiments — can be preempted."
 ```
 
-With this hierarchy, a production inference pod will preempt a training job if GPUs are scarce, and training jobs will preempt exploratory notebooks. But exploratory workloads will never preempt anything — they wait.
+Com essa hierarquia, um pod de inferência em produção vai fazer preemption de um job de treinamento se GPUs estiverem escassas, e jobs de treinamento vão fazer preemption de notebooks exploratórios. Mas workloads exploratórios nunca fazem preemption de nada — eles esperam.
 
-💡 **Pro Tip:** Use `preemptionPolicy: Never` for exploratory workloads. This prevents a stampede where 50 notebook pods all try to preempt each other in a tight GPU environment.
+💡 **Dica:** Use `preemptionPolicy: Never` para workloads exploratórios. Isso evita uma debandada onde 50 pods de notebook tentam fazer preemption uns dos outros em um ambiente de GPU limitado.
 
-### Kueue: Fair Scheduling for Batch AI Workloads
+### Kueue: Fair Scheduling para Workloads Batch de IA
 
-Kubernetes doesn't natively understand job queuing. If you submit 100 training jobs and you have capacity for 10, Kubernetes will create 100 pending pods. Kueue solves this by adding a queuing layer that admits jobs based on available capacity and fair-share policies.
+O Kubernetes não entende nativamente enfileiramento de jobs. Se você submeter 100 jobs de treinamento e tiver capacidade para 10, o Kubernetes vai criar 100 pods pendentes. O Kueue resolve isso adicionando uma camada de filas que admite jobs com base na capacidade disponível e em políticas de fair-share.
 
 ```yaml
 # cluster-queue.yaml
@@ -265,13 +265,13 @@ spec:
   clusterQueue: gpu-cluster-queue
 ```
 
-Kueue holds jobs in a queue until resources are available, then admits them in priority order. Teams submit jobs to their LocalQueue; the ClusterQueue enforces global capacity. This eliminates the "100 pending pods" problem — jobs stay queued, not scheduled, until there's room.
+O Kueue mantém jobs na fila até que recursos estejam disponíveis e então os admite em ordem de prioridade. Os times submetem jobs para sua LocalQueue; a ClusterQueue controla a capacidade global. Isso elimina o problema dos "100 pods pendentes" — os jobs ficam enfileirados, não agendados, até que haja espaço.
 
-### Volcano: Gang Scheduling for Distributed Training
+### Volcano: Gang Scheduling para Treinamento Distribuído
 
-Distributed training jobs need multiple GPUs across multiple nodes to start simultaneously. Standard Kubernetes scheduling doesn't guarantee this — it might schedule 3 of 4 required pods, leaving all three sitting idle while waiting for the fourth.
+Jobs de treinamento distribuído precisam de múltiplas GPUs em múltiplos nós iniciando simultaneamente. O scheduling padrão do Kubernetes não garante isso — ele pode agendar 3 de 4 pods necessários, deixando os três ociosos enquanto esperam pelo quarto.
 
-Volcano provides gang scheduling: all pods in a job start together, or none of them start. This prevents deadlocks and wasted resources.
+O Volcano oferece gang scheduling: todos os pods de um job iniciam juntos, ou nenhum inicia. Isso previne deadlocks e desperdício de recursos.
 
 ```yaml
 # distributed-training-volcano.yaml
@@ -304,27 +304,27 @@ spec:
           restartPolicy: OnFailure
 ```
 
-The `minAvailable: 4` field tells Volcano: don't schedule any workers unless you can schedule all four. This prevents partial allocation — the most common source of wasted GPU hours in distributed training.
+O campo `minAvailable: 4` diz ao Volcano: não agende nenhum worker a menos que consiga agendar todos os quatro. Isso previne alocação parcial — a fonte mais comum de horas de GPU desperdiçadas em treinamento distribuído.
 
 ---
 
-## Quota and Capacity Management
+## Gerenciamento de Cotas e Capacidade
 
-### The Quota Stack
+### A Pilha de Cotas
 
-GPU capacity is managed at multiple layers. Miss any layer and you'll hit a wall.
+A capacidade de GPU é gerenciada em múltiplas camadas. Pule qualquer uma delas e você vai bater em um muro.
 
-| Layer | Mechanism | Who Manages It |
+| Camada | Mecanismo | Quem Gerencia |
 |---|---|---|
-| **Azure subscription** | Regional vCPU quotas | Cloud admin (portal or support request) |
-| **AKS cluster** | Node pool scaling limits | Platform team |
-| **Kubernetes namespace** | ResourceQuota objects | Platform team |
-| **Kueue** | ClusterQueue nominal quotas | Platform team |
-| **Team-level** | LocalQueue admission | Self-service within limits |
+| **Azure subscription** | Cotas regionais de vCPU | Admin de cloud (portal ou solicitação de suporte) |
+| **Cluster AKS** | Limites de scaling de node pools | Time de plataforma |
+| **Namespace Kubernetes** | Objetos ResourceQuota | Time de plataforma |
+| **Kueue** | Cotas nominais de ClusterQueue | Time de plataforma |
+| **Nível do time** | Admissão via LocalQueue | Self-service dentro dos limites |
 
-### Capacity Reservation
+### Reserva de Capacidade
 
-For production inference workloads that can't tolerate scheduling delays, use Azure Capacity Reservations. This guarantees that specific VM sizes are available in your region when you need them.
+Para workloads de inferência em produção que não toleram atrasos de scheduling, use Azure Capacity Reservations. Isso garante que tamanhos específicos de VM estejam disponíveis na sua região quando você precisar.
 
 ```bash
 # Reserve 4x Standard_NC24ads_A100_v4 in East US
@@ -341,19 +341,19 @@ az capacity reservation create \
   --capacity 4
 ```
 
-You pay for reserved capacity whether you use it or not — but you're guaranteed the VMs are there. For production inference serving real-time traffic, this tradeoff is almost always worth it.
+Você paga pela capacidade reservada usando ou não — mas tem a garantia de que as VMs estarão lá. Para inferência em produção atendendo tráfego em tempo real, esse tradeoff quase sempre vale a pena.
 
-### Request-and-Approval Workflows
+### Workflows de Solicitação e Aprovação
 
-For GPU allocations above the self-service threshold, build a lightweight approval workflow. This doesn't need to be complex — a GitHub issue template or a Teams form that triggers an Azure Logic App works well.
+Para alocações de GPU acima do limite self-service, construa um workflow leve de aprovação. Não precisa ser complexo — um template de issue no GitHub ou um formulário no Teams que aciona um Azure Logic App funciona bem.
 
-The workflow should capture: which team is requesting, how many GPUs, for how long, what workload type (training vs. inference), and a business justification. Route approvals to the platform team lead for standard requests and to engineering leadership for large allocations. Auto-approve requests that fall within pre-approved budgets and escalate everything else.
+O workflow deve capturar: qual time está solicitando, quantas GPUs, por quanto tempo, qual tipo de workload (treinamento vs. inferência) e uma justificativa de negócio. Direcione aprovações para o líder do time de plataforma em solicitações padrão e para a liderança de engenharia em alocações grandes. Aprove automaticamente solicitações dentro de orçamentos pré-aprovados e escale todo o resto.
 
-The goal isn't bureaucracy — it's visibility. You want to know about large GPU allocations before they happen, not after your quota is exhausted.
+O objetivo não é burocracia — é visibilidade. Você quer saber sobre alocações grandes de GPU antes que aconteçam, não depois que sua cota estiver esgotada.
 
-### Monitoring Quota Usage
+### Monitoramento de Uso de Cotas
 
-Build a dashboard that shows quota consumption across every layer. The Azure CLI gives you subscription-level visibility:
+Construa um dashboard que mostre o consumo de cotas em todas as camadas. A Azure CLI dá visibilidade no nível da subscription:
 
 ```bash
 # Check GPU quota usage in East US
@@ -362,37 +362,37 @@ az vm list-usage --location eastus \
   --output table
 ```
 
-Set alerts when any quota crosses 80% utilization. At 80%, you still have time to request an increase. At 95%, you're one training job away from a hard stop.
+Configure alertas quando qualquer cota ultrapassar 80% de utilização. Com 80%, você ainda tem tempo de solicitar um aumento. Com 95%, você está a um job de treinamento de uma parada total.
 
-💡 **Pro Tip:** Azure quota increases can take days for GPU SKUs in popular regions. File your increase request well before you need it — ideally when you hit 60% utilization, not 90%.
+💡 **Dica:** Aumentos de cota no Azure podem levar dias para SKUs de GPU em regiões populares. Solicite o aumento bem antes de precisar — idealmente quando atingir 60% de utilização, não 90%.
 
 ---
 
-## SLA/SLO Design for Inference Endpoints
+## Design de SLA/SLO para Endpoints de Inferência
 
-### Defining What "Good" Looks Like
+### Definindo o Que "Bom" Significa
 
-Every inference endpoint needs clear service-level objectives. Without them, every latency spike is a fire drill and every team's workload is equally "critical."
+Todo endpoint de inferência precisa de service-level objectives claros. Sem eles, cada pico de latência vira um incêndio e o workload de cada time é igualmente "crítico."
 
-### Decision Matrix: SLO Tiers for AI Services
+### Matriz de Decisão: Tiers de SLO para Serviços de IA
 
-| Tier | Latency (P99) | Availability | Throughput | Example Use Cases |
+| Tier | Latência (P99) | Disponibilidade | Throughput | Exemplos de Uso |
 |---|---|---|---|---|
-| **Real-time** | < 200ms | 99.95% | > 1000 req/s | Customer-facing chat, search ranking |
-| **Near-real-time** | < 2s | 99.9% | > 100 req/s | Content moderation, recommendations |
-| **Batch** | < 1 hour | 99.5% | N/A (job-based) | Document processing, embedding generation |
+| **Real-time** | < 200ms | 99,95% | > 1000 req/s | Chat voltado ao cliente, ranking de busca |
+| **Near-real-time** | < 2s | 99,9% | > 100 req/s | Moderação de conteúdo, recomendações |
+| **Batch** | < 1 hora | 99,5% | N/A (baseado em jobs) | Processamento de documentos, geração de embeddings |
 
-Define these tiers early and assign every workload to one. This drives architecture decisions — real-time endpoints need autoscaling and capacity reservations; batch workloads can use spot instances and preemptible scheduling.
+Defina esses tiers cedo e atribua cada workload a um deles. Isso direciona decisões de arquitetura — endpoints real-time precisam de autoscaling e reservas de capacidade; workloads batch podem usar instâncias spot e scheduling preemptível.
 
-### Error Budgets for AI Services
+### Error Budgets para Serviços de IA
 
-Error budgets quantify how much unreliability you can tolerate. A 99.9% availability SLO gives you 43 minutes of downtime per month. Spend that budget wisely.
+Error budgets quantificam quanta instabilidade você pode tolerar. Um SLO de disponibilidade de 99,9% dá a você 43 minutos de downtime por mês. Gaste esse orçamento com sabedoria.
 
-Track error budget consumption in real time. When the budget is burning fast — say you've consumed 50% in the first week — freeze changes and focus on reliability. When the budget is healthy, you have room for deployments and experiments.
+Acompanhe o consumo do error budget em tempo real. Quando o orçamento está queimando rápido — digamos que você consumiu 50% na primeira semana — congele mudanças e foque em confiabilidade. Quando o orçamento está saudável, você tem espaço para deploys e experimentos.
 
-### Health Probes for Model Serving
+### Health Probes para Model Serving
 
-Model containers fail in ways that traditional health checks miss. A container can be running but the model hasn't loaded yet, or the GPU is in a bad state, or inference is returning garbage. Design health probes that verify actual model functionality.
+Containers de modelo falham de maneiras que health checks tradicionais não detectam. Um container pode estar rodando, mas o modelo ainda não carregou, ou a GPU está em estado ruim, ou a inferência está retornando lixo. Projete health probes que verifiquem a funcionalidade real do modelo.
 
 ```yaml
 # inference-deployment.yaml (partial)
@@ -419,39 +419,39 @@ startupProbe:
   failureThreshold: 30
 ```
 
-⚠️ **Production Gotcha:** Large models can take 5–10 minutes to load into GPU memory. Set `startupProbe.failureThreshold` high enough to cover your largest model's load time, or Kubernetes will kill the container in a restart loop before the model is ready.
+⚠️ **Cuidado em Produção:** Modelos grandes podem levar de 5 a 10 minutos para carregar na memória da GPU. Defina `startupProbe.failureThreshold` alto o suficiente para cobrir o tempo de carregamento do seu maior modelo, ou o Kubernetes vai matar o container em um loop de restart antes que o modelo esteja pronto.
 
-### Graceful Degradation
+### Degradação Graciosa
 
-When your primary model is overloaded or down, don't return errors — degrade gracefully. Common patterns:
+Quando seu modelo principal está sobrecarregado ou fora do ar, não retorne erros — degrade graciosamente. Padrões comuns:
 
-- **Fallback models:** Route to a smaller, faster model when the primary model's latency exceeds SLO thresholds.
-- **Cached responses:** Return cached results for common queries while the model recovers.
-- **Queue-based buffering:** Accept requests into a queue and process them when capacity returns, returning a "processing" status to the client.
-- **Circuit breakers:** Stop sending traffic to a failing endpoint after a threshold of errors, giving it time to recover.
+- **Modelos de fallback:** Redirecione para um modelo menor e mais rápido quando a latência do modelo principal excede os thresholds do SLO.
+- **Respostas em cache:** Retorne resultados em cache para consultas comuns enquanto o modelo se recupera.
+- **Buffering baseado em fila:** Aceite requisições em uma fila e processe-as quando a capacidade retornar, devolvendo um status "processando" ao cliente.
+- **Circuit breakers:** Pare de enviar tráfego para um endpoint que está falhando após um limite de erros, dando tempo para ele se recuperar.
 
 ---
 
 ## Fleet Management
 
-### The Multi-Cluster Reality
+### A Realidade Multi-Cluster
 
-At scale, you won't have one cluster — you'll have several. Production inference in East US and West Europe. Training clusters with spot node pools. A dev/test cluster with cheaper GPU SKUs. Managing these consistently is the difference between a platform and a collection of snowflakes.
+Em escala, você não vai ter um cluster — vai ter vários. Inferência em produção no East US e West Europe. Clusters de treinamento com node pools spot. Um cluster de dev/test com SKUs de GPU mais baratos. Gerenciar tudo isso de forma consistente é a diferença entre uma plataforma e uma coleção de snowflakes.
 
-A typical fleet layout for a mid-size AI organization looks like this:
+Um layout típico de fleet para uma organização de IA de médio porte é assim:
 
-| Cluster | Region | Purpose | GPU SKUs | Node Scaling |
+| Cluster | Região | Finalidade | SKUs de GPU | Scaling de Nós |
 |---|---|---|---|---|
-| prod-inference-eastus | East US | Real-time serving | A100, A10G | Capacity reserved |
-| prod-inference-westeu | West Europe | Real-time serving (DR) | A100, A10G | Capacity reserved |
-| training-eastus | East US | Training, fine-tuning | A100, H100 | Spot + on-demand |
-| dev-eastus | East US | Dev/test, notebooks | T4, A10G | Spot only |
+| prod-inference-eastus | East US | Serving em tempo real | A100, A10G | Capacidade reservada |
+| prod-inference-westeu | West Europe | Serving em tempo real (DR) | A100, A10G | Capacidade reservada |
+| training-eastus | East US | Treinamento, fine-tuning | A100, H100 | Spot + on-demand |
+| dev-eastus | East US | Dev/test, notebooks | T4, A10G | Somente spot |
 
-Each cluster has a distinct purpose, and that purpose drives its configuration — spot tolerance, GPU SKU selection, scaling behavior, and upgrade cadence. Don't try to make one cluster do everything. The operational overhead of managing four focused clusters is lower than managing one cluster that tries to serve every workload pattern.
+Cada cluster tem uma finalidade distinta, e essa finalidade direciona sua configuração — tolerância a spot, seleção de SKU de GPU, comportamento de scaling e cadência de upgrades. Não tente fazer um cluster servir para tudo. O overhead operacional de gerenciar quatro clusters focados é menor do que gerenciar um cluster que tenta atender todos os padrões de workload.
 
-### GitOps for GPU Infrastructure
+### GitOps para Infraestrutura de GPU
 
-Use Flux or ArgoCD to manage cluster configuration declaratively. Every cluster pulls its configuration from a Git repository. Changes go through pull requests, get reviewed, and roll out automatically.
+Use Flux ou ArgoCD para gerenciar a configuração dos clusters de forma declarativa. Cada cluster puxa sua configuração de um repositório Git. Mudanças passam por pull requests, são revisadas e são implantadas automaticamente.
 
 ```text
 fleet-config/
@@ -474,13 +474,13 @@ fleet-config/
 │       └── patches/
 ```
 
-The `base/` directory contains shared configuration — namespaces, RBAC, quotas, priority classes. Each cluster directory layers on environment-specific patches. Add a new team? Create the namespace and quota in `base/`, and every cluster picks it up on the next sync.
+O diretório `base/` contém a configuração compartilhada — namespaces, RBAC, cotas, priority classes. Cada diretório de cluster aplica patches específicos do ambiente por cima. Precisa adicionar um novo time? Crie o namespace e a cota em `base/`, e todos os clusters pegam na próxima sincronização.
 
-### Rolling Upgrades Across the Fleet
+### Rolling Upgrades na Fleet
 
-Beyond GPU drivers, you'll need to coordinate CUDA toolkit versions, container runtime updates, and Kubernetes version upgrades across your fleet. Version mismatches between clusters are a constant source of "it works in dev but not in prod" bugs.
+Além dos drivers de GPU, você vai precisar coordenar versões do CUDA toolkit, atualizações do container runtime e upgrades de versão do Kubernetes em toda a sua fleet. Divergências de versão entre clusters são uma fonte constante de bugs do tipo "funciona no dev mas não na prod."
 
-Maintain a fleet compatibility matrix that tracks the exact versions of every component across every cluster. Update it with every change. When a data scientist reports that their training job fails on the production cluster but works on dev, the first thing you check is this matrix.
+Mantenha uma matriz de compatibilidade da fleet que rastreie as versões exatas de cada componente em cada cluster. Atualize-a a cada mudança. Quando um data scientist reportar que o job de treinamento dele falha no cluster de produção mas funciona no dev, a primeira coisa que você verifica é essa matriz.
 
 ```text
 Fleet Compatibility Matrix (2024-Q4)
@@ -495,51 +495,51 @@ Container Runtime  containerd 1.7 containerd 1.7 containerd 1.7 containerd 1.7
 ─────────────────────────────────────────────────────────────
 ```
 
-💡 **Pro Tip:** Keep production clusters on identical versions. Let the dev cluster run one version ahead as your early-warning system. When a new CUDA version breaks a popular training framework, you want to discover that in dev — not in the middle of a two-week production training run.
+💡 **Dica:** Mantenha os clusters de produção em versões idênticas. Deixe o cluster de dev rodar uma versão à frente como seu sistema de alerta antecipado. Quando uma nova versão do CUDA quebrar um framework de treinamento popular, você quer descobrir isso no dev — não no meio de um treinamento de duas semanas em produção.
 
-### GPU Driver Upgrades
+### Upgrades de Driver de GPU
 
-GPU driver upgrades are the most dangerous operation in your fleet. A bad driver can cause silent data corruption in model training, kernel panics, or total GPU failure. Treat driver upgrades with the same care as a kernel upgrade.
+Upgrades de driver de GPU são a operação mais perigosa na sua fleet. Um driver ruim pode causar corrupção silenciosa de dados no treinamento de modelos, kernel panics ou falha total da GPU. Trate upgrades de driver com o mesmo cuidado que um upgrade de kernel.
 
-⚠️ **Production Gotcha:** Never upgrade GPU drivers on all clusters simultaneously. Use a canary deployment strategy: upgrade the dev cluster first, run validation workloads for 48 hours, then move to one production cluster. Wait another 48 hours before rolling to the rest of the fleet. Silent GPU errors can take days to surface in training loss curves.
+⚠️ **Cuidado em Produção:** Nunca faça upgrade de drivers de GPU em todos os clusters simultaneamente. Use uma estratégia de deploy canário: faça upgrade no cluster de dev primeiro, rode workloads de validação por 48 horas, depois avance para um cluster de produção. Espere mais 48 horas antes de avançar para o restante da fleet. Erros silenciosos de GPU podem levar dias para aparecer nas curvas de loss de treinamento.
 
-Build standardized VM images with pre-baked GPU drivers using Azure Image Builder or Packer. This ensures every node in every cluster runs identical driver versions. Never rely on driver installation at boot time — it's slow, fragile, and adds unpredictable startup latency to your node pools.
+Construa imagens de VM padronizadas com drivers de GPU pré-instalados usando Azure Image Builder ou Packer. Isso garante que cada nó em cada cluster rode versões idênticas de driver. Nunca dependa da instalação de driver no boot — é lento, frágil e adiciona latência imprevisível de inicialização aos seus node pools.
 
 ---
 
-## Observability at Scale
+## Observabilidade em Escala
 
-### Centralized Monitoring
+### Monitoramento Centralizado
 
-When you have multiple clusters, you need a single pane of glass. Azure Monitor with Container Insights can aggregate metrics across clusters, but for GPU-specific observability, DCGM Exporter feeding into a centralized Prometheus instance (or Azure Monitor Managed Prometheus) gives you the granularity you need.
+Quando você tem múltiplos clusters, precisa de uma visão unificada. O Azure Monitor com Container Insights pode agregar métricas entre clusters, mas para observabilidade específica de GPU, o DCGM Exporter alimentando uma instância centralizada de Prometheus (ou Azure Monitor Managed Prometheus) dá a granularidade que você precisa.
 
-Key metrics to centralize:
+Métricas-chave para centralizar:
 
-| Metric | Source | Alert Threshold |
+| Métrica | Fonte | Threshold de Alerta |
 |---|---|---|
-| GPU utilization | DCGM Exporter | < 20% for 1h (waste) |
-| GPU memory used | DCGM Exporter | > 95% (OOM risk) |
-| GPU temperature | DCGM Exporter | > 83°C |
-| Inference latency P99 | Application metrics | > SLO threshold |
-| Queue depth | Kueue metrics | > 50 pending jobs |
-| Node pool utilization | AKS metrics | > 85% |
-| Quota consumption | Azure Monitor | > 80% |
+| Utilização de GPU | DCGM Exporter | < 20% por 1h (desperdício) |
+| Memória de GPU usada | DCGM Exporter | > 95% (risco de OOM) |
+| Temperatura da GPU | DCGM Exporter | > 83°C |
+| Latência de inferência P99 | Métricas da aplicação | > threshold do SLO |
+| Profundidade da fila | Métricas do Kueue | > 50 jobs pendentes |
+| Utilização do node pool | Métricas do AKS | > 85% |
+| Consumo de cota | Azure Monitor | > 80% |
 
-### Cross-Cluster Dashboards
+### Dashboards Cross-Cluster
 
-Build Grafana dashboards that show fleet-wide health at a glance. The top-level dashboard should answer three questions in under 10 seconds:
+Construa dashboards no Grafana que mostrem a saúde da fleet inteira em uma olhada. O dashboard de nível superior deve responder três perguntas em menos de 10 segundos:
 
-1. **Is anything broken?** Red/green status for every inference endpoint across all clusters.
-2. **Is anything wasted?** GPU utilization heat map showing underused capacity.
-3. **Is anything at risk?** Quota consumption and capacity trends that predict when you'll run out.
+1. **Algo está quebrado?** Status vermelho/verde para cada endpoint de inferência em todos os clusters.
+2. **Algo está sendo desperdiçado?** Mapa de calor de utilização de GPU mostrando capacidade subutilizada.
+3. **Algo está em risco?** Consumo de cotas e tendências de capacidade que preveem quando você vai ficar sem recursos.
 
-Drill-down dashboards should let you go from "GPU utilization is low on cluster prod-eastus" to "team-nlp's namespace has 4 idle GPUs allocated to a completed job that was never cleaned up."
+Dashboards de drill-down devem permitir ir de "utilização de GPU está baixa no cluster prod-eastus" até "o namespace do team-nlp tem 4 GPUs ociosas alocadas a um job concluído que nunca foi limpo."
 
-### Cost Attribution
+### Atribuição de Custos
 
-When four teams share a GPU cluster, someone will ask "how much is each team spending?" Build cost attribution from day one — it's much harder to retrofit.
+Quando quatro times compartilham um cluster de GPU, alguém vai perguntar "quanto cada time está gastando?" Construa a atribuição de custos desde o primeiro dia — é muito mais difícil implementar depois.
 
-Tag every resource with team ownership. Use Kubernetes labels consistently:
+Tagueie cada recurso com o time proprietário. Use labels do Kubernetes de forma consistente:
 
 ```yaml
 metadata:
@@ -550,31 +550,31 @@ metadata:
     environment: production
 ```
 
-Feed these labels into your cost monitoring tool — whether that's Azure Cost Management, Kubecost, or OpenCost. Report costs by team and project monthly. Teams that see their GPU spend are teams that clean up idle resources.
+Alimente essas labels na sua ferramenta de monitoramento de custos — seja Azure Cost Management, Kubecost ou OpenCost. Reporte custos por time e projeto mensalmente. Times que enxergam seu gasto com GPU são times que limpam recursos ociosos.
 
-### Capacity Planning
+### Planejamento de Capacidade
 
-Collect historical utilization data and use it to forecast demand. Simple linear regression on weekly GPU utilization trends will tell you when you'll exhaust current capacity. Factor in known upcoming projects — if the NLP team is starting a large language model training run next quarter, account for that spike now.
+Colete dados históricos de utilização e use-os para prever demanda. Uma regressão linear simples sobre tendências semanais de utilização de GPU vai dizer quando você vai esgotar a capacidade atual. Considere projetos futuros conhecidos — se o time de NLP vai começar um treinamento de large language model no próximo trimestre, contabilize esse pico agora.
 
-Plan GPU capacity 8–12 weeks ahead. This accounts for Azure quota increase lead times, procurement cycles for reserved instances, and the time needed to provision and configure new node pools.
+Planeje capacidade de GPU com 8 a 12 semanas de antecedência. Isso contempla os tempos de espera para aumento de cotas no Azure, ciclos de aquisição de instâncias reservadas e o tempo necessário para provisionar e configurar novos node pools.
 
 ---
 
-## Self-Service Patterns
+## Padrões de Self-Service
 
-### Team Onboarding
+### Onboarding de Times
 
-New team onboarding should be a pull request, not a ticket. Build Terraform modules or Backstage templates that create everything a team needs in one shot.
+O onboarding de novos times deve ser um pull request, não um ticket. Construa módulos Terraform ou templates Backstage que criam tudo o que um time precisa de uma só vez.
 
-A team onboarding module should provision:
+Um módulo de onboarding de time deve provisionar:
 
-- Kubernetes namespace with resource quotas
-- RBAC bindings for the team's Microsoft Entra ID group
+- Namespace Kubernetes com resource quotas
+- Bindings de RBAC para o grupo do Microsoft Entra ID do time
 - Network policies
-- Kueue LocalQueue linked to the cluster queue
-- Azure Container Registry access
-- Default storage class and persistent volume claims
-- Monitoring dashboards pre-filtered to the team's namespace
+- LocalQueue do Kueue vinculada à cluster queue
+- Acesso ao Azure Container Registry
+- Storage class padrão e persistent volume claims
+- Dashboards de monitoramento pré-filtrados para o namespace do time
 
 ```bash
 # Team onboarding via Terraform
@@ -586,44 +586,44 @@ terraform apply -var="team_name=robotics" \
   -target=module.team_onboarding
 ```
 
-One command. Five minutes. The team has everything they need to start deploying workloads. No tickets, no waiting, no Slack messages.
+Um comando. Cinco minutos. O time tem tudo o que precisa para começar a fazer deploy de workloads. Sem tickets, sem espera, sem mensagens no Slack.
 
-### Pre-Configured Environments
+### Ambientes Pré-Configurados
 
-Data scientists don't want to build Docker images or write Kubernetes manifests. They want a notebook with GPUs. Meet them where they are.
+Data scientists não querem construir imagens Docker nem escrever manifestos Kubernetes. Eles querem um notebook com GPUs. Encontre-os onde eles estão.
 
-- **JupyterHub on AKS:** Deploy JupyterHub with GPU-enabled server profiles. Scientists pick a profile ("2x A100, PyTorch 2.1, CUDA 12.1"), click launch, and get a notebook with GPUs attached. The platform team maintains the profiles.
-- **VS Code Dev Containers:** Provide `.devcontainer` configurations with GPU passthrough. Data scientists clone a repo and get a fully configured development environment.
-- **Training job templates:** Offer a simple CLI or web form: "I want to fine-tune a model. Here's my script, here's my dataset, here's how many GPUs I need." The template generates the Kubernetes Job manifest, submits it through Kueue, and sends the scientist a link to the logs.
+- **JupyterHub no AKS:** Faça deploy do JupyterHub com perfis de servidor habilitados para GPU. Os cientistas escolhem um perfil ("2x A100, PyTorch 2.1, CUDA 12.1"), clicam em iniciar e recebem um notebook com GPUs conectadas. O time de plataforma mantém os perfis.
+- **VS Code Dev Containers:** Forneça configurações `.devcontainer` com passthrough de GPU. Data scientists clonam um repositório e recebem um ambiente de desenvolvimento totalmente configurado.
+- **Templates de jobs de treinamento:** Ofereça uma CLI simples ou formulário web: "Quero fazer fine-tuning de um modelo. Aqui está meu script, aqui está meu dataset, aqui está quantas GPUs eu preciso." O template gera o manifesto de Kubernetes Job, submete pelo Kueue e envia ao cientista um link para os logs.
 
-**Infra ↔ AI Translation:** This is the same abstraction pattern you've used for years. VMs became containers. Containers became serverless functions. Now, GPU access becomes a profile dropdown. Every generation of infrastructure goes through this arc from manual to self-service.
-
----
-
-## Chapter Checklist
-
-- Defined isolation boundaries for each team (namespace, node pool, cluster, or subscription)
-- Implemented ResourceQuotas to cap GPU, CPU, and memory per namespace
-- Set up RBAC scoping with Microsoft Entra ID groups mapped to Kubernetes roles
-- Applied network policies to prevent cross-namespace traffic
-- Created priority classes separating production inference, training, and exploratory workloads
-- Deployed Kueue for job queueing and fair-share scheduling
-- Evaluated Volcano for distributed training with gang scheduling
-- Set up Azure capacity reservations for production inference GPU VMs
-- Configured quota usage alerts at 80% thresholds
-- Defined SLO tiers (real-time, near-real-time, batch) for inference endpoints
-- Implemented health probes with startup probe timeouts that cover model load time
-- Built a GitOps repository structure for multi-cluster fleet management
-- Established a canary strategy for GPU driver upgrades
-- Centralized observability with cross-cluster GPU monitoring dashboards
-- Implemented cost attribution with consistent Kubernetes labels
-- Automated team onboarding via Terraform modules or platform templates
-- Provided self-service environments (JupyterHub, training templates) for data scientists
+**Infra ↔ IA — Tradução:** Esse é o mesmo padrão de abstração que você usa há anos. VMs viraram containers. Containers viraram funções serverless. Agora, acesso a GPU vira um dropdown de perfil. Toda geração de infraestrutura passa por esse arco do manual ao self-service.
 
 ---
 
-## What's Next
+## Checklist do Capítulo
 
-Your AI platform is running at scale — multi-tenant, well-scheduled, and observable. Teams can onboard themselves, submit training jobs through queues, and deploy inference endpoints with clear SLOs. You've moved from answering Slack messages to engineering systems.
+- Definiu fronteiras de isolamento para cada time (namespace, node pool, cluster ou subscription)
+- Implementou ResourceQuotas para limitar GPU, CPU e memória por namespace
+- Configurou RBAC com escopo usando grupos do Microsoft Entra ID mapeados para roles do Kubernetes
+- Aplicou network policies para impedir tráfego entre namespaces
+- Criou priority classes separando inferência em produção, treinamento e workloads exploratórios
+- Fez deploy do Kueue para enfileiramento de jobs e fair-share scheduling
+- Avaliou o Volcano para treinamento distribuído com gang scheduling
+- Configurou Azure capacity reservations para VMs de GPU de inferência em produção
+- Configurou alertas de uso de cota no threshold de 80%
+- Definiu tiers de SLO (real-time, near-real-time, batch) para endpoints de inferência
+- Implementou health probes com timeouts de startup probe que cobrem o tempo de carregamento do modelo
+- Construiu uma estrutura de repositório GitOps para fleet management multi-cluster
+- Estabeleceu uma estratégia canário para upgrades de driver de GPU
+- Centralizou observabilidade com dashboards de monitoramento de GPU cross-cluster
+- Implementou atribuição de custos com labels Kubernetes consistentes
+- Automatizou onboarding de times via módulos Terraform ou templates de plataforma
+- Forneceu ambientes self-service (JupyterHub, templates de treinamento) para data scientists
 
-Now let's dive deep into the service that's driving more AI conversations than any other: Azure OpenAI. Chapter 11 covers tokens, throughput, and provisioned capacity — the capacity planning chapter every Azure OpenAI deployment needs.
+---
+
+## Próximos Passos
+
+Sua plataforma de IA está operando em escala — multi-tenant, com scheduling bem definido e observável. Os times conseguem fazer onboarding sozinhos, submeter jobs de treinamento por filas e fazer deploy de endpoints de inferência com SLOs claros. Você saiu de responder mensagens no Slack para engenheirar sistemas.
+
+Agora vamos mergulhar no serviço que está gerando mais conversas sobre IA do que qualquer outro: Azure OpenAI. O Capítulo 11 cobre tokens, throughput e provisioned capacity — o capítulo de planejamento de capacidade que todo deploy de Azure OpenAI precisa.

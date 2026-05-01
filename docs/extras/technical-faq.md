@@ -1,40 +1,40 @@
-# Technical FAQ — AI Infrastructure Essentials
+# FAQ Técnico — Fundamentos de Infraestrutura para IA
 
-Practical answers for infrastructure engineers working with AI on Azure. Every answer cross-references the relevant chapter so you can dive deeper when needed.
-
----
-
-## 1. Can I run AI workloads without a GPU? *(Ch3)*
-
-**Yes, but know the boundaries.** Classical ML models — linear regression, decision trees, random forests, gradient-boosted trees — run efficiently on CPU. Many of these serve predictions in under 10 ms on a `Standard_D4s_v5`. Even some smaller neural networks (MobileNet, DistilBERT) can run acceptably on CPU if your latency budget is generous (200+ ms per request).
-
-However, anything involving large matrix multiplications at scale — LLM inference, diffusion models, video processing, large embedding generation — will be 10-100× slower on CPU. A GPT-class model that responds in 200 ms on a T4 GPU would take 5-15 seconds on CPU.
-
-**Rule of thumb**: If your model has more than 100M parameters, you almost certainly need a GPU. If it's under 10M parameters and uses tabular data, CPU is likely fine.
-
-**Pro Tip**: Before requesting GPU quota, benchmark your model on a `Standard_D8s_v5` (CPU) first. If latency meets your SLA, you just saved 5× on compute costs.
+Respostas práticas para engenheiros de infraestrutura que trabalham com IA no Azure. Cada resposta referencia o capítulo correspondente para que você possa se aprofundar quando necessário.
 
 ---
 
-## 2. What's the difference between training and inference from an infra perspective? *(Ch3)*
+## 1. Posso executar workloads de IA sem GPU? *(Ch3)*
 
-| Aspect | Training | Inference |
-|--------|----------|-----------|
-| **Compute pattern** | Batch, hours-to-weeks | Real-time, milliseconds per request |
-| **GPU memory** | Needs weights + gradients + optimizer (12× params) | Needs weights + KV cache only (2-4× params) |
-| **Scaling** | Scale up (bigger GPUs, more nodes) | Scale out (more replicas) |
-| **Availability** | Tolerates interruptions (checkpointing) | Requires high availability (SLA) |
-| **Network** | InfiniBand for multi-node (NCCL) | Standard Ethernet is fine |
-| **Cost model** | Spot VMs viable (60-90% savings) | On-demand or Reserved (needs uptime) |
-| **Storage** | High-throughput for datasets + checkpoints | Low-latency for model loading |
+**Sim, mas conheça os limites.** Modelos clássicos de ML — regressão linear, árvores de decisão, random forests, gradient-boosted trees — rodam eficientemente em CPU. Muitos deles servem predições em menos de 10 ms em uma `Standard_D4s_v5`. Até algumas redes neurais menores (MobileNet, DistilBERT) podem rodar de forma aceitável em CPU se seu orçamento de latência for generoso (200+ ms por requisição).
 
-**Infra analogy**: Training is a massive batch ETL job that processes terabytes. Inference is a latency-sensitive API behind a load balancer. You'd never architect them the same way — and the same applies to AI.
+Porém, tudo que envolve grandes multiplicações de matrizes em escala — inferência de LLM, modelos de difusão, processamento de vídeo, geração de embeddings em larga escala — será 10-100× mais lento em CPU. Um modelo da classe GPT que responde em 200 ms em uma GPU T4 levaria 5-15 segundos em CPU.
+
+**Regra prática**: Se seu modelo tem mais de 100M de parâmetros, você quase certamente precisa de uma GPU. Se tem menos de 10M de parâmetros e usa dados tabulares, CPU provavelmente é suficiente.
+
+**Dica Pro**: Antes de solicitar cota de GPU, faça benchmark do seu modelo em uma `Standard_D8s_v5` (CPU) primeiro. Se a latência atender ao seu SLA, você acabou de economizar 5× em custos de computação.
 
 ---
 
-## 3. How do I calculate whether my model fits in GPU memory? *(Ch4)*
+## 2. Qual a diferença entre treinamento e inferência do ponto de vista de infraestrutura? *(Ch3)*
 
-Start with the parameter count and target precision:
+| Aspecto | Treinamento | Inferência |
+|---------|-------------|------------|
+| **Padrão de computação** | Batch, horas a semanas | Tempo real, milissegundos por requisição |
+| **Memória de GPU** | Precisa de pesos + gradientes + otimizador (12× parâmetros) | Precisa de pesos + KV cache apenas (2-4× parâmetros) |
+| **Escalabilidade** | Scale up (GPUs maiores, mais nós) | Scale out (mais réplicas) |
+| **Disponibilidade** | Tolera interrupções (checkpointing) | Requer alta disponibilidade (SLA) |
+| **Rede** | InfiniBand para multi-node (NCCL) | Ethernet padrão é suficiente |
+| **Modelo de custo** | Spot VMs viáveis (60-90% de economia) | On-demand ou Reserved (precisa de uptime) |
+| **Armazenamento** | Alto throughput para datasets + checkpoints | Baixa latência para carregamento de modelo |
+
+**Analogia de infra**: Treinamento é um enorme job batch de ETL que processa terabytes. Inferência é uma API sensível à latência atrás de um load balancer. Você nunca arquitetaria ambos da mesma forma — e o mesmo se aplica à IA.
+
+---
+
+## 3. Como calcular se meu modelo cabe na memória da GPU? *(Ch4)*
+
+Comece com a contagem de parâmetros e a precisão desejada:
 
 ```
 FP16 memory = Parameters × 2 bytes
@@ -42,185 +42,185 @@ INT8 memory = Parameters × 1 byte
 INT4 memory = Parameters × 0.5 bytes
 ```
 
-**For inference**, add KV cache overhead:
+**Para inferência**, adicione o overhead de KV cache:
 
 ```
 KV cache ≈ 2 × layers × hidden_dim × max_seq_len × batch_size × 2 bytes
 ```
 
-**For training** (full fine-tuning with AdamW):
+**Para treinamento** (fine-tuning completo com AdamW):
 
 ```
 Total ≈ params × 12 bytes + activation memory
 ```
 
-**Practical example**: Llama 2 13B at FP16 = 26 GB for weights alone. On an A100 (80 GB), that leaves 54 GB for KV cache and activations — comfortable for inference with batch size up to ~32. But for full fine-tuning, you'd need 13B × 12 = 156 GB — requiring at least 2× A100 with ZeRO Stage 3 sharding.
+**Exemplo prático**: Llama 2 13B em FP16 = 26 GB apenas para os pesos. Em uma A100 (80 GB), isso deixa 54 GB para KV cache e activations — confortável para inferência com batch size de até ~32. Mas para fine-tuning completo, você precisaria de 13B × 12 = 156 GB — exigindo pelo menos 2× A100 com sharding ZeRO Stage 3.
 
-⚠️ **Production Gotcha**: PyTorch's CUDA memory allocator fragments memory over time. Even if your model fits in 15 GB on a 16 GB T4, it will OOM after a few hours under load. Leave 20% headroom minimum, or configure `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True`.
+⚠️ **Armadilha em Produção**: O alocador de memória CUDA do PyTorch fragmenta a memória ao longo do tempo. Mesmo que seu modelo caiba em 15 GB em uma T4 de 16 GB, ele vai dar OOM após algumas horas sob carga. Deixe no mínimo 20% de margem, ou configure `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True`.
 
 ---
 
-## 4. What causes GPU OOM errors and how do I fix them? *(Ch4, Ch12)*
+## 4. O que causa erros de OOM na GPU e como corrigi-los? *(Ch4, Ch12)*
 
-**Most common causes** (in order of frequency):
+**Causas mais comuns** (em ordem de frequência):
 
-1. **Batch size too large** — Each sample in a batch consumes GPU memory. Reduce batch size by 50% and test.
-2. **Sequence length too long** — KV cache grows linearly with sequence length. Set `max_tokens` or `max_seq_len` to the minimum your application needs.
-3. **Model too large for the GPU** — Calculate required memory (see Q3). Quantize to INT8/INT4, or use a larger GPU.
-4. **Memory leak in preprocessing** — Tensors created on GPU during preprocessing that aren't freed. Always preprocess on CPU.
-5. **Memory fragmentation** — Long-running inference servers fragment GPU memory. Restart the process periodically, or use `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True`.
+1. **Batch size muito grande** — Cada amostra em um batch consome memória de GPU. Reduza o batch size em 50% e teste.
+2. **Sequência muito longa** — O KV cache cresce linearmente com o tamanho da sequência. Defina `max_tokens` ou `max_seq_len` para o mínimo que sua aplicação precisa.
+3. **Modelo grande demais para a GPU** — Calcule a memória necessária (veja Q3). Quantize para INT8/INT4, ou use uma GPU maior.
+4. **Vazamento de memória no pré-processamento** — Tensores criados na GPU durante o pré-processamento que não são liberados. Sempre faça o pré-processamento na CPU.
+5. **Fragmentação de memória** — Servidores de inferência de longa duração fragmentam a memória da GPU. Reinicie o processo periodicamente, ou use `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True`.
 
-**Debugging commands:**
+**Comandos de depuração:**
 
 ```bash
-# Check current GPU memory usage
+# Verificar uso atual de memória da GPU
 nvidia-smi --query-gpu=memory.used,memory.total --format=csv
 
-# Inside Python, get detailed allocation breakdown
+# Dentro do Python, obter detalhamento de alocação
 python -c "import torch; print(torch.cuda.memory_summary())"
 ```
 
-**Quick fix checklist:**
-- [ ] Reduce batch size
-- [ ] Reduce max sequence length
-- [ ] Enable gradient checkpointing (training)
-- [ ] Quantize the model (INT8 with bitsandbytes, INT4 with GPTQ/AWQ)
-- [ ] Move to a GPU with more VRAM
-- [ ] Enable tensor parallelism across multiple GPUs
+**Checklist de correção rápida:**
+- [ ] Reduzir batch size
+- [ ] Reduzir tamanho máximo de sequência
+- [ ] Habilitar gradient checkpointing (treinamento)
+- [ ] Quantizar o modelo (INT8 com bitsandbytes, INT4 com GPTQ/AWQ)
+- [ ] Migrar para uma GPU com mais VRAM
+- [ ] Habilitar tensor parallelism em múltiplas GPUs
 
 ---
 
-## 5. How should I set up auto-scaling for GPU inference? *(Ch3, Ch7)*
+## 5. Como devo configurar auto-scaling para inferência com GPU? *(Ch3, Ch7)*
 
-**Recommended scaling signals** (in priority order):
+**Sinais de escalabilidade recomendados** (em ordem de prioridade):
 
-1. **P95 inference latency** — Scale out when latency approaches your SLA threshold. This is the most user-visible metric.
-2. **GPU utilization** — Scale out when sustained above 80%. Scale in when below 30% for 15+ minutes.
-3. **Request queue depth** — If your inference server queues requests, scale when queue depth exceeds 2× your batch size.
-4. **GPU memory utilization** — Scale out when above 85% (KV cache pressure).
+1. **Latência de inferência P95** — Scale out quando a latência se aproximar do limite do seu SLA. Esta é a métrica mais visível para o usuário.
+2. **Utilização de GPU** — Scale out quando sustentada acima de 80%. Scale in quando abaixo de 30% por mais de 15 minutos.
+3. **Profundidade da fila de requisições** — Se seu servidor de inferência enfileira requisições, escale quando a profundidade da fila exceder 2× o seu batch size.
+4. **Utilização de memória de GPU** — Scale out quando acima de 85% (pressão de KV cache).
 
-**Azure implementations:**
+**Implementações no Azure:**
 
-| Platform | Scaling Mechanism | GPU Metric Source |
-|----------|-------------------|-------------------|
+| Plataforma | Mecanismo de Escalabilidade | Fonte de Métricas de GPU |
+|------------|----------------------------|--------------------------|
 | AKS | HPA + Cluster Autoscaler | DCGM Exporter → Prometheus → HPA custom metrics |
-| Azure ML | `min_instances`/`max_instances` | Built-in autoscaler (request latency based) |
-| VMSS | Autoscale rules | Azure Monitor custom metrics via DCGM |
+| Azure ML | `min_instances`/`max_instances` | Autoscaler integrado (baseado em latência de requisição) |
+| VMSS | Regras de Autoscale | Métricas customizadas do Azure Monitor via DCGM |
 
-**Critical settings:**
-- **Scale-out cooldown**: 3-5 minutes (GPU nodes take time to initialize)
-- **Scale-in cooldown**: 15-20 minutes (avoid thrashing during traffic dips)
-- **Min replicas**: Never set to 0 in production (cold start for GPU workloads is 2-5 minutes for model loading)
+**Configurações críticas:**
+- **Cooldown de scale-out**: 3-5 minutos (nós com GPU levam tempo para inicializar)
+- **Cooldown de scale-in**: 15-20 minutos (evita oscilação durante quedas de tráfego)
+- **Réplicas mínimas**: Nunca defina como 0 em produção (cold start para workloads com GPU é de 2-5 minutos para carregamento do modelo)
 
-💡 **Pro Tip**: For AKS, set `min_count: 1` on your GPU node pool even during off-hours. The cost of one idle T4 (~$380/month) is far less than the user impact of a 5-minute cold start.
+💡 **Dica Pro**: Para AKS, defina `min_count: 1` no seu node pool de GPU mesmo fora do horário de pico. O custo de uma T4 ociosa (~$380/mês) é muito menor que o impacto para o usuário de um cold start de 5 minutos.
 
 ---
 
-## 6. What is a model registry and why should infra engineers care? *(Ch6)*
+## 6. O que é um model registry e por que engenheiros de infraestrutura devem se importar? *(Ch6)*
 
-A model registry is a versioned artifact store for ML models — think of it like a container registry (ACR) but for model files instead of Docker images. Azure ML's model registry stores model weights, metadata (accuracy metrics, training parameters), and lineage (which dataset and code produced this version).
+Um model registry é um armazém versionado de artefatos para modelos de ML — pense nele como um container registry (ACR), mas para arquivos de modelo em vez de imagens Docker. O model registry do Azure ML armazena pesos do modelo, metadados (métricas de acurácia, parâmetros de treinamento) e linhagem (qual dataset e código produziram esta versão).
 
-**Why it matters for infra:**
+**Por que é importante para infraestrutura:**
 
-- **Rollback capability** — When a new model degrades production inference, you need to redeploy version N-1 in minutes, not hours. The registry gives you `az ml model download --name fraud-detector --version 3`.
-- **Deployment automation** — CI/CD pipelines reference `model-name:version` to deploy deterministically. No more "which model file is currently in the blob container?"
-- **Storage management** — Model files are large (7B model = 14 GB at FP16). The registry handles deduplication and lifecycle.
-- **Audit trail** — Regulated industries require proof of which model version served which predictions. The registry provides this.
+- **Capacidade de rollback** — Quando um novo modelo degrada a inferência em produção, você precisa reimplantar a versão N-1 em minutos, não horas. O registry oferece `az ml model download --name fraud-detector --version 3`.
+- **Automação de deployment** — Pipelines de CI/CD referenciam `model-name:version` para deploy determinístico. Chega de "qual arquivo de modelo está atualmente no blob container?"
+- **Gerenciamento de armazenamento** — Arquivos de modelo são grandes (modelo 7B = 14 GB em FP16). O registry cuida de deduplicação e ciclo de vida.
+- **Trilha de auditoria** — Setores regulamentados exigem comprovação de qual versão do modelo serviu quais predições. O registry fornece isso.
 
-**Minimum viable MLOps for infra teams:**
+**MLOps mínimo viável para equipes de infraestrutura:**
 
 ```bash
-# Register model
+# Registrar modelo
 az ml model create --name fraud-detector --version 4 --path ./model/
 
-# Deploy specific version
+# Fazer deploy de versão específica
 az ml online-deployment create --endpoint-name prod-api \
   --model azureml:fraud-detector:4 --file deployment.yml
 
-# Rollback (swap traffic)
+# Rollback (trocar tráfego)
 az ml online-endpoint update --name prod-api --traffic "v3=100 v4=0"
 ```
 
-⚠️ **Production Gotcha**: Model files in Azure ML's default storage account can accumulate fast. Set up lifecycle policies to archive versions older than 90 days — a single team can generate 500+ GB of model artifacts per quarter.
+⚠️ **Armadilha em Produção**: Arquivos de modelo na conta de armazenamento padrão do Azure ML podem se acumular rapidamente. Configure políticas de ciclo de vida para arquivar versões com mais de 90 dias — um único time pode gerar mais de 500 GB de artefatos de modelo por trimestre.
 
 ---
 
-## 7. How do I monitor GPU workloads effectively? *(Ch7)*
+## 7. Como monitorar workloads de GPU de forma eficaz? *(Ch7)*
 
-**The four GPU golden signals** (analogous to Google's four golden signals for services):
+**Os quatro sinais de ouro para GPU** (análogos aos quatro sinais de ouro do Google para serviços):
 
-1. **GPU Utilization** (`DCGM_FI_DEV_GPU_UTIL`) — Are the CUDA cores busy? < 20% means waste; > 95% means saturation.
-2. **GPU Memory** (`DCGM_FI_DEV_FB_USED`) — How much VRAM is consumed? > 90% means OOM risk.
-3. **GPU Temperature** (`DCGM_FI_DEV_GPU_TEMP`) — Above 83°C, NVIDIA GPUs thermal-throttle, silently reducing performance.
-4. **GPU Errors** (`DCGM_FI_DEV_ECC_DBE_VOL_TOTAL`) — Double-bit ECC errors indicate hardware failure. Alert immediately.
+1. **Utilização de GPU** (`DCGM_FI_DEV_GPU_UTIL`) — Os núcleos CUDA estão ocupados? < 20% significa desperdício; > 95% significa saturação.
+2. **Memória de GPU** (`DCGM_FI_DEV_FB_USED`) — Quanta VRAM está consumida? > 90% significa risco de OOM.
+3. **Temperatura da GPU** (`DCGM_FI_DEV_GPU_TEMP`) — Acima de 83°C, GPUs NVIDIA entram em thermal-throttle, reduzindo silenciosamente o desempenho.
+4. **Erros de GPU** (`DCGM_FI_DEV_ECC_DBE_VOL_TOTAL`) — Erros ECC de bit duplo indicam falha de hardware. Alerte imediatamente.
 
-**Monitoring stack recommendation:**
+**Stack de monitoramento recomendado:**
 
 ```
 DCGM Exporter (DaemonSet) → Prometheus (scrape) → Grafana (dashboards)
-                                                 → Alertmanager (alerts)
+                                                 → Alertmanager (alertas)
 Application Insights SDK → Azure Monitor → Action Groups (PagerDuty/Teams)
 ```
 
-**Three alerts every GPU deployment needs:**
+**Três alertas que todo deployment com GPU precisa:**
 
-| Alert | Condition | Severity |
-|-------|-----------|----------|
-| GPU OOM imminent | Memory > 90% for 5 min | P1 (page) |
-| GPU waste | Utilization < 20% for 60 min | P3 (daily report) |
-| Thermal throttling | Temperature > 83°C for 10 min | P2 (Teams) |
+| Alerta | Condição | Severidade |
+|--------|----------|------------|
+| OOM de GPU iminente | Memória > 90% por 5 min | P1 (chamada urgente) |
+| Desperdício de GPU | Utilização < 20% por 60 min | P3 (relatório diário) |
+| Thermal throttling | Temperatura > 83°C por 10 min | P2 (Teams) |
 
-💡 **Pro Tip**: `nvidia-smi` is fine for a quick check, but it samples once per invocation. DCGM Exporter provides continuous 1-second resolution metrics — the difference matters when debugging intermittent latency spikes.
+💡 **Dica Pro**: `nvidia-smi` serve para uma verificação rápida, mas faz uma amostragem por invocação. O DCGM Exporter fornece métricas contínuas com resolução de 1 segundo — a diferença importa ao depurar picos intermitentes de latência.
 
 ---
 
-## 8. How do I secure AI inference endpoints? *(Ch8)*
+## 8. Como proteger endpoints de inferência de IA? *(Ch8)*
 
-Follow the same zero-trust principles you'd apply to any production API, plus AI-specific controls:
+Siga os mesmos princípios de zero-trust que você aplicaria a qualquer API de produção, além de controles específicos para IA:
 
-**Network layer:**
-- Deploy inference behind **Private Endpoints** — no public IP
-- Use **NSG rules** to restrict inbound to known clients only
-- For Azure OpenAI, enable **VNet integration** and disable public access
+**Camada de rede:**
+- Implante inferência atrás de **Private Endpoints** — sem IP público
+- Use **regras de NSG** para restringir entrada apenas a clientes conhecidos
+- Para Azure OpenAI, habilite **integração com VNet** e desabilite acesso público
 
-**Identity layer:**
-- **Managed Identity** for service-to-service auth (Azure ML, AKS pods, Functions)
-- **Microsoft Entra ID** for user-facing applications
-- API keys as last resort — rotate every 90 days, store in **Key Vault**
+**Camada de identidade:**
+- **Managed Identity** para autenticação serviço-a-serviço (Azure ML, pods AKS, Functions)
+- **Microsoft Entra ID** para aplicações voltadas ao usuário
+- API keys como último recurso — rotacione a cada 90 dias, armazene no **Key Vault**
 
-**AI-specific controls:**
-- Enable **content filtering** on Azure OpenAI deployments
-- Implement **input validation** — reject prompts exceeding max token limits
-- Log all prompts and completions to **Log Analytics** for audit (comply with privacy policies)
-- Rate-limit per client to prevent prompt injection brute-force attempts
+**Controles específicos para IA:**
+- Habilite **content filtering** nos deployments do Azure OpenAI
+- Implemente **validação de entrada** — rejeite prompts que excedam os limites máximos de tokens
+- Registre todos os prompts e completions no **Log Analytics** para auditoria (em conformidade com políticas de privacidade)
+- Aplique rate-limit por cliente para prevenir tentativas de brute-force de prompt injection
 
-**Quick validation:**
+**Validação rápida:**
 
 ```bash
-# Verify no public endpoints on Azure OpenAI
+# Verificar se não há endpoints públicos no Azure OpenAI
 az cognitiveservices account show --name aoai-prod --resource-group rg-ai \
   --query "properties.publicNetworkAccess"
-# Should return: "Disabled"
+# Deve retornar: "Disabled"
 ```
 
 ---
 
-## 9. What are Spot VMs and when should I use them for AI? *(Ch9)*
+## 9. O que são Spot VMs e quando devo usá-las para IA? *(Ch9)*
 
-**Spot VMs** offer unused Azure capacity at 60-90% discount but can be evicted with 30 seconds notice when Azure needs the capacity back.
+**Spot VMs** oferecem capacidade ociosa do Azure com 60-90% de desconto, mas podem ser despejadas com 30 segundos de aviso quando o Azure precisa da capacidade de volta.
 
-**Safe for:**
-- Model training (with checkpointing every 15-30 minutes)
-- Batch inference (process queued items, re-queue on eviction)
-- Hyperparameter sweeps (embarrassingly parallel — eviction loses one trial, not all)
-- Dev/test GPU workloads
+**Seguro para:**
+- Treinamento de modelo (com checkpointing a cada 15-30 minutos)
+- Inferência em batch (processa itens enfileirados, reenfileira em caso de despejo)
+- Sweeps de hiperparâmetros (embaraçosamente paralelo — despejo perde uma tentativa, não todas)
+- Workloads de GPU para dev/test
 
-**Not safe for:**
-- Production real-time inference (eviction = downtime)
-- Workloads that can't checkpoint (you lose all progress)
-- Anything with an SLA
+**Não é seguro para:**
+- Inferência em tempo real em produção (despejo = downtime)
+- Workloads que não suportam checkpoint (você perde todo o progresso)
+- Qualquer coisa com SLA
 
-**Implementation pattern for training:**
+**Padrão de implementação para treinamento:**
 
 ```bash
 az vm create --name train-gpu --size Standard_NC24ads_A100_v4 \
@@ -228,27 +228,27 @@ az vm create --name train-gpu --size Standard_NC24ads_A100_v4 \
   --resource-group rg-training --image Ubuntu2204 --generate-ssh-keys
 ```
 
-**Checkpoint strategy:**
+**Estratégia de checkpoint:**
 ```python
-# Save checkpoint every 30 minutes
+# Salvar checkpoint a cada 30 minutos
 if step % checkpoint_interval == 0:
     torch.save({
         'step': step,
         'model_state': model.state_dict(),
         'optimizer_state': optimizer.state_dict(),
-    }, f"azureml://checkpoint-{step}.pt")  # Save to Azure Blob
+    }, f"azureml://checkpoint-{step}.pt")  # Salvar no Azure Blob
 ```
 
-⚠️ **Production Gotcha**: Spot eviction rates vary by region and VM size. `Standard_NC24ads_A100_v4` in `eastus` might see 2% eviction rate, while `westus2` sees 15%. Check [Azure Spot VM eviction data](https://learn.microsoft.com/azure/virtual-machines/spot-vms) before committing.
+⚠️ **Armadilha em Produção**: Taxas de despejo de Spot variam por região e tamanho de VM. `Standard_NC24ads_A100_v4` em `eastus` pode ter taxa de despejo de 2%, enquanto `westus2` tem 15%. Verifique os [dados de despejo de Spot VMs do Azure](https://learn.microsoft.com/azure/virtual-machines/spot-vms) antes de se comprometer.
 
 ---
 
-## 10. How do I estimate and control Azure OpenAI costs? *(Ch9, Ch11)*
+## 10. Como estimar e controlar custos do Azure OpenAI? *(Ch9, Ch11)*
 
-**Step 1: Measure your token consumption**
+**Passo 1: Meça seu consumo de tokens**
 
 ```bash
-# Query actual token usage over the last 7 days
+# Consultar uso real de tokens nos últimos 7 dias
 az monitor metrics list \
   --resource /subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.CognitiveServices/accounts/{name} \
   --metric "ProcessedPromptTokens" "GeneratedCompletionTokens" \
@@ -256,160 +256,160 @@ az monitor metrics list \
   --interval PT1H --output table
 ```
 
-**Step 2: Calculate monthly cost**
+**Passo 2: Calcule o custo mensal**
 
 ```
-Monthly cost = (Avg prompt tokens/request × prompt price per 1K)
-             + (Avg completion tokens/request × completion price per 1K)
-             × Requests per month
+Custo mensal = (Média de tokens de prompt/requisição × preço de prompt por 1K)
+             + (Média de tokens de completion/requisição × preço de completion por 1K)
+             × Requisições por mês
 
-Example (GPT-4o):
-  800 prompt tokens × $0.0025/1K = $0.002
-  400 completion tokens × $0.01/1K = $0.004
-  Per request = $0.006
-  100K requests/month = $600/month
+Exemplo (GPT-4o):
+  800 tokens de prompt × $0.0025/1K = $0.002
+  400 tokens de completion × $0.01/1K = $0.004
+  Por requisição = $0.006
+  100K requisições/mês = $600/mês
 ```
 
-**Step 3: Evaluate PTU vs Standard**
+**Passo 3: Avalie PTU vs Standard**
 
-| Factor | Standard (PayGo) | Provisioned (PTU) |
-|--------|-------------------|-------------------|
-| Best when | < 100K TPM sustained | > 100K TPM sustained for 8+ hrs/day |
-| Cost model | Per token | Fixed hourly per PTU |
-| 429 risk | Yes (quota-limited) | No (provisioned capacity) |
-| Break-even | Below crossover point | Above crossover point |
+| Fator | Standard (PayGo) | Provisionado (PTU) |
+|-------|-------------------|---------------------|
+| Ideal quando | < 100K TPM sustentado | > 100K TPM sustentado por 8+ hrs/dia |
+| Modelo de custo | Por token | Fixo por hora por PTU |
+| Risco de 429 | Sim (limitado por cota) | Não (capacidade provisionada) |
+| Ponto de equilíbrio | Abaixo do ponto de cruzamento | Acima do ponto de cruzamento |
 
-**Step 4: Set guardrails**
+**Passo 4: Estabeleça guardrails**
 
-- Azure Budget alert at 80% of expected monthly spend
-- Per-deployment TPM/RPM limits to prevent runaway costs
-- Log token usage per caller for chargeback
+- Alerta de Budget do Azure a 80% do gasto mensal esperado
+- Limites de TPM/RPM por deployment para prevenir custos descontrolados
+- Registre o uso de tokens por chamador para chargeback
 
-💡 **Pro Tip**: Retries are hidden cost amplifiers. If 10% of requests get 429'd and retry 3 times, your actual token consumption is 1.3× what your application logs show. Always measure at the Azure resource level, not the application level.
+💡 **Dica Pro**: Retries são amplificadores ocultos de custo. Se 10% das requisições recebem 429 e fazem retry 3 vezes, seu consumo real de tokens é 1,3× o que os logs da sua aplicação mostram. Sempre meça no nível do recurso Azure, não no nível da aplicação.
 
 ---
 
-## 11. What's the difference between PTU and Standard deployments? *(Ch11)*
+## 11. Qual a diferença entre deployments PTU e Standard? *(Ch11)*
 
-| Attribute | Standard (PayGo) | Provisioned (PTU) |
-|-----------|-------------------|-------------------|
-| **Billing** | Per 1K tokens (input + output priced separately) | Hourly per PTU (fixed cost regardless of usage) |
-| **Latency** | Best-effort, variable | Lower and more consistent (dedicated capacity) |
-| **Throttling** | TPM/RPM limits, 429 responses when exceeded | Provisioned capacity, minimal 429s |
-| **Commitment** | None | Minimum 1-month reservation |
-| **Best for** | Dev/test, bursty workloads, low volume | Production, steady traffic, latency-sensitive apps |
-| **Scaling** | Automatic (within quota) | Manual (add/remove PTUs) |
+| Atributo | Standard (PayGo) | Provisionado (PTU) |
+|----------|-------------------|---------------------|
+| **Cobrança** | Por 1K tokens (entrada + saída cobrados separadamente) | Por hora por PTU (custo fixo independente do uso) |
+| **Latência** | Melhor esforço, variável | Menor e mais consistente (capacidade dedicada) |
+| **Throttling** | Limites de TPM/RPM, respostas 429 quando excedidos | Capacidade provisionada, 429s mínimos |
+| **Compromisso** | Nenhum | Reserva mínima de 1 mês |
+| **Ideal para** | Dev/test, workloads com picos, baixo volume | Produção, tráfego constante, apps sensíveis à latência |
+| **Escalabilidade** | Automática (dentro da cota) | Manual (adicionar/remover PTUs) |
 
-**When to switch to PTU:**
-1. Your standard deployment's 429 rate exceeds 5%
-2. You have sustained traffic above 100K TPM for 8+ hours/day
-3. Latency consistency matters (e.g., user-facing chat)
-4. You can commit to 1+ month of capacity
+**Quando migrar para PTU:**
+1. A taxa de 429 do seu deployment standard excede 5%
+2. Você tem tráfego sustentado acima de 100K TPM por 8+ horas/dia
+3. Consistência de latência importa (ex.: chat voltado ao usuário)
+4. Você pode se comprometer com 1+ mês de capacidade
 
-**PTU sizing calculation:**
+**Cálculo de dimensionamento de PTU:**
 
 ```
-Sustained TPM needed: 180,000
-Approximate PTU capacity (GPT-4o): ~3,600 TPM per PTU
-Base PTUs: 180,000 ÷ 3,600 = 50 PTUs
-With 25% burst headroom: 63 PTUs
+TPM sustentado necessário: 180.000
+Capacidade aproximada por PTU (GPT-4o): ~3.600 TPM por PTU
+PTUs base: 180.000 ÷ 3.600 = 50 PTUs
+Com 25% de margem para picos: 63 PTUs
 ```
 
-⚠️ **Production Gotcha**: PTUs are region-specific and subject to availability. If you need 100+ PTUs of a specific model, check regional capacity with your Microsoft account team *before* planning the migration. Popular regions fill up.
+⚠️ **Armadilha em Produção**: PTUs são específicos por região e sujeitos à disponibilidade. Se você precisa de 100+ PTUs de um modelo específico, verifique a capacidade regional com seu time de contas Microsoft *antes* de planejar a migração. Regiões populares esgotam rapidamente.
 
 ---
 
-## 12. How do I implement multi-tenancy for AI workloads on AKS? *(Ch10)*
+## 12. Como implementar multi-tenancy para workloads de IA no AKS? *(Ch10)*
 
-**Three isolation levels, from lightest to strictest:**
+**Três níveis de isolamento, do mais leve ao mais restrito:**
 
-| Level | Mechanism | GPU Isolation | Use When |
-|-------|-----------|---------------|----------|
-| Namespace + ResourceQuota | Kubernetes namespaces | Time-slicing (shared) | Dev/test, trusted teams |
-| Namespace + NetworkPolicy + dedicated nodes | Node pool per tenant | Dedicated GPU per pod | Production, compliance |
-| Separate clusters | Cluster per tenant | Full isolation | Regulated industries, untrusted tenants |
+| Nível | Mecanismo | Isolamento de GPU | Quando Usar |
+|-------|-----------|-------------------|-------------|
+| Namespace + ResourceQuota | Namespaces do Kubernetes | Time-slicing (compartilhado) | Dev/test, times confiáveis |
+| Namespace + NetworkPolicy + nós dedicados | Node pool por tenant | GPU dedicada por pod | Produção, compliance |
+| Clusters separados | Cluster por tenant | Isolamento total | Setores regulamentados, tenants não confiáveis |
 
-**Minimum viable multi-tenancy (namespace level):**
+**Multi-tenancy mínimo viável (nível de namespace):**
 
-1. One namespace per team with `ResourceQuota` capping GPU requests
-2. `NetworkPolicy` denying cross-namespace traffic
-3. `LimitRange` preventing any single pod from consuming all resources
-4. OPA Gatekeeper policies enforcing image sources and resource limits
-5. Kubecost for per-namespace cost attribution
+1. Um namespace por time com `ResourceQuota` limitando requisições de GPU
+2. `NetworkPolicy` negando tráfego entre namespaces
+3. `LimitRange` impedindo que um único pod consuma todos os recursos
+4. Políticas OPA Gatekeeper aplicando fontes de imagem e limites de recursos
+5. Kubecost para atribuição de custo por namespace
 
-**GPU-specific considerations:**
-- **ResourceQuotas** limit the *number* of GPUs a namespace can request, but not GPU *memory* — a pod can still consume all VRAM on a shared GPU
-- **NVIDIA GPU time-slicing** allows 2-4 workloads to share a GPU but provides zero memory isolation
-- **NVIDIA MPS (Multi-Process Service)** offers slightly better sharing but still no hard memory boundaries
-- For production multi-tenancy, use **dedicated GPU nodes** per team via node selectors and taints
+**Considerações específicas para GPU:**
+- **ResourceQuotas** limitam o *número* de GPUs que um namespace pode solicitar, mas não a *memória* de GPU — um pod ainda pode consumir toda a VRAM de uma GPU compartilhada
+- **NVIDIA GPU time-slicing** permite que 2-4 workloads compartilhem uma GPU, mas oferece zero isolamento de memória
+- **NVIDIA MPS (Multi-Process Service)** oferece compartilhamento um pouco melhor, mas ainda sem limites rígidos de memória
+- Para multi-tenancy em produção, use **nós de GPU dedicados** por time via node selectors e taints
 
-💡 **Pro Tip**: Label your GPU nodes with `gpu-type: t4` or `gpu-type: a100` and use `nodeSelector` in deployments. This prevents a dev workload from accidentally landing on an expensive A100 node.
+💡 **Dica Pro**: Rotule seus nós de GPU com `gpu-type: t4` ou `gpu-type: a100` e use `nodeSelector` nos deployments. Isso evita que um workload de desenvolvimento caia acidentalmente em um nó A100 caro.
 
 ---
 
-## 13. How do I troubleshoot GPU driver issues on Azure VMs? *(Ch12)*
+## 13. Como solucionar problemas de driver de GPU em VMs do Azure? *(Ch12)*
 
-**Symptom: `nvidia-smi` returns "command not found" or "driver not loaded"**
+**Sintoma: `nvidia-smi` retorna "command not found" ou "driver not loaded"**
 
 ```bash
-# Step 1: Check if the NVIDIA driver extension is installed
+# Passo 1: Verificar se a extensão de driver NVIDIA está instalada
 az vm extension list --resource-group <rg> --vm-name <vm> --output table
 
-# Step 2: If missing, install it
+# Passo 2: Se estiver faltando, instalar
 az vm extension set \
   --resource-group <rg> --vm-name <vm> \
   --name NvidiaGpuDriverLinux \
   --publisher Microsoft.HCPCompute \
   --version 1.9
 
-# Step 3: Reboot and verify
+# Passo 3: Reiniciar e verificar
 az vm restart --resource-group <rg> --name <vm>
-# After reboot, SSH in and run:
+# Após reiniciar, conecte via SSH e execute:
 nvidia-smi
 ```
 
-**Symptom: Driver installed but CUDA errors in your application**
+**Sintoma: Driver instalado mas erros de CUDA na sua aplicação**
 
-This is almost always a CUDA toolkit version mismatch. Check compatibility:
+Isso quase sempre é incompatibilidade de versão do CUDA toolkit. Verifique a compatibilidade:
 
 ```bash
-# Check driver version
+# Verificar versão do driver
 nvidia-smi --query-gpu=driver_version --format=csv,noheader
-# Example output: 535.129.03
+# Exemplo de saída: 535.129.03
 
-# Check CUDA version the driver supports
+# Verificar a versão de CUDA que o driver suporta
 nvidia-smi | head -3
-# Look for "CUDA Version: 12.2"
+# Procure por "CUDA Version: 12.2"
 
-# Verify your container's CUDA toolkit matches
+# Verificar se o CUDA toolkit do seu container é compatível
 docker inspect <image> | grep CUDA
 ```
 
-The CUDA toolkit in your container must be ≤ the driver's supported CUDA version. If your container uses CUDA 12.3 but the driver supports 12.2, it will fail silently or throw `CUDA error: no kernel image is available`.
+O CUDA toolkit no seu container deve ser ≤ a versão de CUDA suportada pelo driver. Se seu container usa CUDA 12.3, mas o driver suporta 12.2, ele falhará silenciosamente ou lançará `CUDA error: no kernel image is available`.
 
-⚠️ **Production Gotcha**: The Azure NVIDIA driver extension auto-updates by default. Pin the version in production to prevent an auto-update from breaking CUDA compatibility: `--version 1.9 --settings '{"driverVersion":"535.129.03"}'`.
+⚠️ **Armadilha em Produção**: A extensão de driver NVIDIA do Azure atualiza automaticamente por padrão. Fixe a versão em produção para evitar que uma atualização automática quebre a compatibilidade CUDA: `--version 1.9 --settings '{"driverVersion":"535.129.03"}'`.
 
 ---
 
-## 14. How do I handle Azure OpenAI 429 (throttling) errors? *(Ch11, Ch12)*
+## 14. Como lidar com erros 429 (throttling) do Azure OpenAI? *(Ch11, Ch12)*
 
-**Understand the 429:**
-Azure OpenAI returns HTTP 429 when your requests exceed the deployment's TPM (Tokens Per Minute) or RPM (Requests Per Minute) quota. The response includes a `Retry-After` header indicating how long to wait.
+**Entendendo o 429:**
+O Azure OpenAI retorna HTTP 429 quando suas requisições excedem a cota de TPM (Tokens Por Minuto) ou RPM (Requisições Por Minuto) do deployment. A resposta inclui um header `Retry-After` indicando quanto tempo esperar.
 
-**Immediate mitigations (no infrastructure changes):**
+**Mitigações imediatas (sem mudanças de infraestrutura):**
 
-1. **Exponential backoff with jitter** — Don't retry immediately. Wait `min(2^attempt × 100ms + random(0-100ms), 60s)`.
-2. **Reduce prompt size** — Shorter system prompts consume fewer tokens. Every token saved increases effective throughput.
-3. **Limit max_tokens** — Set it to the minimum your application needs, not the model maximum.
+1. **Backoff exponencial com jitter** — Não faça retry imediatamente. Espere `min(2^tentativa × 100ms + random(0-100ms), 60s)`.
+2. **Reduza o tamanho do prompt** — System prompts mais curtos consomem menos tokens. Cada token economizado aumenta o throughput efetivo.
+3. **Limite max_tokens** — Defina para o mínimo que sua aplicação precisa, não o máximo do modelo.
 
-**Infrastructure mitigations:**
+**Mitigações de infraestrutura:**
 
-1. **Increase quota** — Request higher TPM/RPM limits via Azure portal (may take 1-3 business days).
-2. **Add deployments** — Deploy the same model in a second region and load-balance with Azure API Management or a custom router.
-3. **Migrate to PTU** — Provisioned capacity eliminates quota-based throttling entirely.
-4. **Implement a token budget** — Track cumulative TPM per caller and reject requests at the application layer before they hit Azure OpenAI.
+1. **Aumente a cota** — Solicite limites maiores de TPM/RPM pelo portal do Azure (pode levar 1-3 dias úteis).
+2. **Adicione deployments** — Faça deploy do mesmo modelo em uma segunda região e balanceie a carga com Azure API Management ou um roteador customizado.
+3. **Migre para PTU** — Capacidade provisionada elimina completamente o throttling baseado em cota.
+4. **Implemente um orçamento de tokens** — Rastreie o TPM acumulado por chamador e rejeite requisições na camada da aplicação antes que cheguem ao Azure OpenAI.
 
-**Monitoring query (KQL):**
+**Consulta de monitoramento (KQL):**
 
 ```kusto
 AzureDiagnostics
@@ -421,164 +421,164 @@ AzureDiagnostics
 
 ---
 
-## 15. What storage backend should I use for model files and training data? *(Ch3, Ch6)*
+## 15. Qual backend de armazenamento devo usar para arquivos de modelo e dados de treinamento? *(Ch3, Ch6)*
 
-| Storage Type | Throughput | Latency | Best For | Cost |
-|-------------|-----------|---------|----------|------|
-| **Azure Blob (Hot)** | 60 Gbps (per account) | ~10-20 ms | Model artifact storage, training data archive | 💲 |
-| **Azure Blob (Premium)** | Higher IOPS | ~2-5 ms | Active training datasets | 💲💲 |
-| **Azure NetApp Files** | 4,500 MiB/s (Ultra) | ~1 ms | Multi-node training checkpoints, shared data | 💲💲💲 |
-| **NVMe (local SSD)** | 7+ GB/s | ~0.1 ms | Model loading cache, scratch space | Included in VM |
-| **Azure Managed Lustre** | 500+ MB/s per client | ~1 ms | HPC-scale training datasets | 💲💲💲 |
+| Tipo de Armazenamento | Throughput | Latência | Ideal Para | Custo |
+|----------------------|-----------|----------|------------|-------|
+| **Azure Blob (Hot)** | 60 Gbps (por conta) | ~10-20 ms | Armazenamento de artefatos de modelo, arquivo de dados de treinamento | 💲 |
+| **Azure Blob (Premium)** | IOPS mais alto | ~2-5 ms | Datasets de treinamento ativos | 💲💲 |
+| **Azure NetApp Files** | 4.500 MiB/s (Ultra) | ~1 ms | Checkpoints de treinamento multi-node, dados compartilhados | 💲💲💲 |
+| **NVMe (SSD local)** | 7+ GB/s | ~0,1 ms | Cache de carregamento de modelo, espaço temporário | Incluso na VM |
+| **Azure Managed Lustre** | 500+ MB/s por cliente | ~1 ms | Datasets de treinamento em escala HPC | 💲💲💲 |
 
-**Recommended pattern:**
-- Store model artifacts in **Blob Storage (Hot)** → download to local NVMe on pod/VM start
-- Training datasets on **Blob (Premium)** or **ANF** depending on I/O requirements
-- Checkpoints to **ANF** or **Blob** (ANF if checkpoint frequency < 5 min; Blob otherwise)
+**Padrão recomendado:**
+- Armazene artefatos de modelo no **Blob Storage (Hot)** → faça download para NVMe local ao iniciar o pod/VM
+- Datasets de treinamento no **Blob (Premium)** ou **ANF** dependendo dos requisitos de I/O
+- Checkpoints no **ANF** ou **Blob** (ANF se frequência de checkpoint < 5 min; Blob caso contrário)
 
-💡 **Pro Tip**: For AKS inference pods, use an init container that copies the model from Blob to the node's local SSD (`emptyDir`). This eliminates Blob latency on every model reload and survives pod restarts on the same node.
+💡 **Dica Pro**: Para pods de inferência no AKS, use um init container que copia o modelo do Blob para o SSD local do nó (`emptyDir`). Isso elimina a latência do Blob em cada reload do modelo e sobrevive a reinicializações do pod no mesmo nó.
 
 ---
 
-## 16. How do I implement blue-green deployments for ML models? *(Ch6, Ch10)*
+## 16. Como implementar deployments blue-green para modelos de ML? *(Ch6, Ch10)*
 
-**Azure ML Managed Endpoints** support traffic splitting natively:
+**Azure ML Managed Endpoints** suportam divisão de tráfego nativamente:
 
 ```bash
-# Deploy new model version as "green"
+# Fazer deploy da nova versão do modelo como "green"
 az ml online-deployment create --name green \
   --endpoint-name prod-api \
   --model azureml:fraud-detector:5 \
   --instance-type Standard_NC4as_T4_v3 \
   --instance-count 2
 
-# Shift 10% traffic to green (canary)
+# Direcionar 10% do tráfego para green (canary)
 az ml online-endpoint update --name prod-api \
   --traffic "blue=90 green=10"
 
-# Monitor for 1 hour, then promote
+# Monitorar por 1 hora, depois promover
 az ml online-endpoint update --name prod-api \
   --traffic "blue=0 green=100"
 
-# Delete old deployment
+# Deletar deployment antigo
 az ml online-deployment delete --name blue --endpoint-name prod-api --yes
 ```
 
-**On AKS**, use Kubernetes-native strategies:
+**No AKS**, use estratégias nativas do Kubernetes:
 
-1. Deploy the new model version as a separate Deployment with a different label (`model-version: v5`)
-2. Use an **Istio VirtualService** or **NGINX ingress** weighted routing to split traffic
-3. Monitor P95 latency and error rate between versions
-4. Promote or rollback by adjusting traffic weights
+1. Faça deploy da nova versão do modelo como um Deployment separado com um label diferente (`model-version: v5`)
+2. Use um **Istio VirtualService** ou roteamento ponderado do **NGINX ingress** para dividir o tráfego
+3. Monitore latência P95 e taxa de erro entre as versões
+4. Promova ou faça rollback ajustando os pesos do tráfego
 
-⚠️ **Production Gotcha**: ML model blue-green is more expensive than app blue-green because each deployment holds a full copy of the model in GPU memory. During the transition, you're paying for 2× the GPU capacity. Keep the transition window short (hours, not days).
+⚠️ **Armadilha em Produção**: Blue-green de modelos de ML é mais caro que blue-green de aplicações porque cada deployment mantém uma cópia completa do modelo na memória da GPU. Durante a transição, você está pagando por 2× a capacidade de GPU. Mantenha a janela de transição curta (horas, não dias).
 
 ---
 
-## 17. How do I right-size GPU VMs for inference? *(Ch3, Ch9)*
+## 17. Como dimensionar corretamente VMs de GPU para inferência? *(Ch3, Ch9)*
 
-**Step 1: Profile your model's memory and compute requirements**
+**Passo 1: Profile os requisitos de memória e computação do seu modelo**
 
 ```bash
-# Run a benchmark with realistic input
+# Executar benchmark com entrada realista
 python benchmark.py --model ./model --batch-size 1 --num-requests 1000
-# Output: Avg latency 45ms, P95 72ms, GPU util 34%, VRAM used 11.2GB
+# Saída: Avg latency 45ms, P95 72ms, GPU util 34%, VRAM used 11.2GB
 ```
 
-**Step 2: Match to the smallest GPU that fits**
+**Passo 2: Escolha a menor GPU que atende**
 
-| If VRAM needed is... | And target latency is... | Use... |
-|----------------------|-------------------------|--------|
+| Se a VRAM necessária é... | E a latência alvo é... | Use... |
+|---------------------------|------------------------|--------|
 | < 14 GB | < 100 ms | `Standard_NC4as_T4_v3` (T4, 16 GB) |
 | 14-22 GB | < 50 ms | `Standard_NV36ads_A10_v5` (A10, 24 GB) |
 | 22-75 GB | < 30 ms | `Standard_NC24ads_A100_v4` (A100, 80 GB) |
-| > 80 GB | Any | Multi-GPU (ND96 series) |
+| > 80 GB | Qualquer | Multi-GPU (série ND96) |
 
-**Step 3: Validate with load testing**
+**Passo 3: Valide com teste de carga**
 
-Run a realistic load test for 30+ minutes and check:
-- GPU memory doesn't grow over time (no leak)
-- P95 latency stays within SLA at peak QPS
-- GPU utilization is 40-80% at expected traffic (room for bursts)
+Execute um teste de carga realista por 30+ minutos e verifique:
+- A memória da GPU não cresce ao longo do tempo (sem vazamento)
+- A latência P95 permanece dentro do SLA no pico de QPS
+- A utilização de GPU está entre 40-80% no tráfego esperado (margem para picos)
 
-💡 **Pro Tip**: Start with the smallest GPU that fits your model and scale *out* (more replicas) rather than *up* (bigger GPU). Two T4 replicas often cost less than one A100 and provide better availability.
+💡 **Dica Pro**: Comece com a menor GPU que comporte seu modelo e escale *horizontalmente* (mais réplicas) em vez de *verticalmente* (GPU maior). Duas réplicas T4 frequentemente custam menos que uma A100 e oferecem melhor disponibilidade.
 
 ---
 
-## 18. What should I include in an AI workload runbook? *(Ch7, Ch12)*
+## 18. O que devo incluir em um runbook de workload de IA? *(Ch7, Ch12)*
 
-**Every GPU inference service should have a runbook covering:**
+**Todo serviço de inferência com GPU deve ter um runbook cobrindo:**
 
-1. **Service overview** — Model name/version, endpoint URL, expected QPS, SLA targets
-2. **Architecture diagram** — Compute (VM/AKS), storage, networking, dependencies
-3. **Health check commands:**
+1. **Visão geral do serviço** — Nome/versão do modelo, URL do endpoint, QPS esperado, metas de SLA
+2. **Diagrama de arquitetura** — Computação (VM/AKS), armazenamento, rede, dependências
+3. **Comandos de health check:**
    ```bash
    curl -s https://inference.internal/health | jq .status
    kubectl get pods -n ml-prod -l app=inference -o wide
    nvidia-smi --query-gpu=utilization.gpu,memory.used --format=csv
    ```
-4. **Common failure scenarios and fixes:**
-   - OOM → Reduce batch size or restart pod
-   - High latency → Check GPU utilization, scale out if > 80%
-   - 5xx errors → Check model loading, verify model file integrity
-   - Pod CrashLoopBackOff → Check GPU driver compatibility, review container logs
-5. **Escalation path** — L1 (restart pod), L2 (scale cluster), L3 (ML engineering team)
-6. **Rollback procedure** — Steps to revert to the previous model version
+4. **Cenários comuns de falha e correções:**
+   - OOM → Reduzir batch size ou reiniciar pod
+   - Alta latência → Verificar utilização de GPU, scale out se > 80%
+   - Erros 5xx → Verificar carregamento do modelo, validar integridade do arquivo de modelo
+   - Pod CrashLoopBackOff → Verificar compatibilidade de driver de GPU, revisar logs do container
+5. **Caminho de escalação** — L1 (reiniciar pod), L2 (escalar cluster), L3 (time de engenharia de ML)
+6. **Procedimento de rollback** — Passos para reverter para a versão anterior do modelo
 
 ---
 
-## 19. How do I handle GPU quota limitations on Azure? *(Ch3, Ch4)*
+## 19. Como lidar com limitações de cota de GPU no Azure? *(Ch3, Ch4)*
 
-**The quota challenge**: GPU VMs (N-series) have per-subscription, per-region vCPU quotas that default to 0 in most regions. You must request increases before deploying.
+**O desafio da cota**: VMs de GPU (série N) possuem cotas de vCPU por assinatura, por região, que são padrão 0 na maioria das regiões. Você deve solicitar aumentos antes de fazer deploy.
 
-**Check current quotas:**
+**Verificar cotas atuais:**
 
 ```bash
 az vm list-usage --location eastus --output table | grep -i "NC\|ND\|NV"
 ```
 
-**Request an increase:**
-1. Azure Portal → Subscriptions → Usage + Quotas → Request increase
-2. Or use the CLI: `az quota create` (requires `Microsoft.Quota` provider registration)
+**Solicitar um aumento:**
+1. Portal do Azure → Assinaturas → Uso + Cotas → Solicitar aumento
+2. Ou use a CLI: `az quota create` (requer registro do provider `Microsoft.Quota`)
 
-**Strategies for limited quota:**
+**Estratégias para cota limitada:**
 
-- **Multi-region deployment** — Split workloads across 2-3 regions (e.g., 50% eastus, 50% westus2)
-- **Right-size first** — Don't request A100 quota if T4 meets your latency SLA
-- **Spot VMs for dev/test** — Spot quota is separate from on-demand and often more available
-- **Subscription splitting** — Enterprise teams sometimes use separate subscriptions per workload to get independent quotas
+- **Deployment multi-região** — Distribua workloads entre 2-3 regiões (ex.: 50% eastus, 50% westus2)
+- **Dimensione corretamente primeiro** — Não solicite cota de A100 se T4 atende seu SLA de latência
+- **Spot VMs para dev/test** — A cota de Spot é separada da on-demand e frequentemente mais disponível
+- **Divisão de assinaturas** — Times enterprise às vezes usam assinaturas separadas por workload para obter cotas independentes
 
-⚠️ **Production Gotcha**: Quota approval is not instant. Plan 3-5 business days for standard requests, 1-2 weeks for large A100/H100 requests. Start the quota process the moment you begin capacity planning — not when you're ready to deploy.
-
----
-
-## 20. What's the recommended learning path for infra engineers getting into AI? *(Ch1, Ch15)*
-
-**Phase 1 — Foundation (Weeks 1-2):**
-- Read Ch1-4 of this book (why AI matters, data basics, compute, GPU deep dive)
-- Get **AI-900: Azure AI Fundamentals** certification
-- Deploy a GPU VM and run `nvidia-smi` — understand what you're looking at
-
-**Phase 2 — Hands-On (Weeks 3-4):**
-- Complete the labs in this book's extras
-- Deploy a model on AKS with a GPU node pool
-- Set up monitoring with DCGM Exporter + Prometheus + Grafana
-- Deploy an Azure OpenAI instance and hit it with a load test
-
-**Phase 3 — Production Skills (Weeks 5-8):**
-- Implement IaC for an ML workspace (Bicep or Terraform)
-- Build a cost dashboard for GPU workloads
-- Practice troubleshooting: simulate OOM, 429 throttling, driver issues
-- Read Ch7-12 and apply monitoring, security, cost engineering, and platform ops
-
-**Phase 4 — Leadership (Ongoing):**
-- Build an internal AI platform for your org (Ch10)
-- Present cost optimization results to leadership (Ch9)
-- Create runbooks and operational documentation (Ch12)
-- Mentor other infra engineers on AI readiness (Ch14)
-
-💡 **Pro Tip**: You don't need to understand backpropagation or loss functions. Your job is to make AI *run* — reliably, securely, and cost-effectively. Focus on the infrastructure layer, and partner with data scientists on the model layer.
+⚠️ **Armadilha em Produção**: A aprovação de cota não é instantânea. Planeje 3-5 dias úteis para solicitações padrão, 1-2 semanas para solicitações grandes de A100/H100. Inicie o processo de cota no momento em que começar o planejamento de capacidade — não quando estiver pronto para fazer deploy.
 
 ---
 
-> Infrastructure doesn't compete with AI — it makes AI reliable, secure, and scalable.
+## 20. Qual é o caminho de aprendizado recomendado para engenheiros de infraestrutura entrando em IA? *(Ch1, Ch15)*
+
+**Fase 1 — Fundamentos (Semanas 1-2):**
+- Leia os Ch1-4 deste livro (por que IA importa, fundamentos de dados, computação, deep dive em GPU)
+- Obtenha a certificação **AI-900: Azure AI Fundamentals**
+- Faça deploy de uma VM com GPU e execute `nvidia-smi` — entenda o que você está vendo
+
+**Fase 2 — Mão na Massa (Semanas 3-4):**
+- Complete os labs nos extras deste livro
+- Faça deploy de um modelo no AKS com um node pool de GPU
+- Configure monitoramento com DCGM Exporter + Prometheus + Grafana
+- Faça deploy de uma instância do Azure OpenAI e execute um teste de carga
+
+**Fase 3 — Habilidades de Produção (Semanas 5-8):**
+- Implemente IaC para um workspace de ML (Bicep ou Terraform)
+- Construa um dashboard de custos para workloads de GPU
+- Pratique troubleshooting: simule OOM, throttling 429, problemas de driver
+- Leia Ch7-12 e aplique monitoramento, segurança, engenharia de custos e operações de plataforma
+
+**Fase 4 — Liderança (Contínuo):**
+- Construa uma plataforma interna de IA para sua organização (Ch10)
+- Apresente resultados de otimização de custos para a liderança (Ch9)
+- Crie runbooks e documentação operacional (Ch12)
+- Seja mentor de outros engenheiros de infraestrutura em preparação para IA (Ch14)
+
+💡 **Dica Pro**: Você não precisa entender backpropagation ou funções de perda. Seu trabalho é fazer a IA *funcionar* — de forma confiável, segura e custo-eficiente. Foque na camada de infraestrutura e colabore com cientistas de dados na camada de modelo.
+
+---
+
+> Infraestrutura não compete com IA — ela torna a IA confiável, segura e escalável.

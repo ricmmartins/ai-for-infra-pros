@@ -1,98 +1,98 @@
-﻿# Chapter 3 — Compute: Where Intelligence Comes to Life
+﻿# Capítulo 3 — Compute: Onde a Inteligência Ganha Vida
 
-> "The difference between a training job that takes two days and one that takes ninety minutes isn't a faster GPU — it's knowing which GPU to pick and how to connect them."
-
----
-
-## The story you don't want to live
-
-Picture this: your ML team asks you to provision "a GPU cluster for training." You do what any seasoned infrastructure engineer would do — spin up eight `Standard_D16s_v5` virtual machines. Sixty-four vCPUs each, 128 GiB of RAM, premium SSD storage. On paper, serious horsepower.
-
-The team launches their training script. Progress bar: estimated completion in **47 hours**. You watch utilization metrics trickle in — CPUs are at 100 %, network barely registers, and nobody looks happy.
-
-Then a colleague suggests two `Standard_ND96asr_v4` nodes — each packing eight A100 GPUs connected by 200 Gb/s InfiniBand. Same training job, same dataset, same code. The job finishes in **90 minutes**. The difference isn't just the GPUs. It's how those GPUs talk to each other across nodes, how data flows through NVLink inside the node, and how InfiniBand keeps gradient synchronization from becoming the bottleneck. Compute for AI isn't about raw horsepower. It's about the *right kind* of horsepower, connected in the *right way*.
-
-This chapter gives you the map to make that call confidently — every time.
+> "A diferença entre um job de treinamento que leva dois dias e um que termina em noventa minutos não é uma GPU mais rápida — é saber qual GPU escolher e como conectá-las."
 
 ---
 
-## Training vs. Inference: Two Different Worlds
+## A história que você não quer viver
 
-Before you select a single VM SKU, you need to know which workload you're serving. Training and inference look superficially similar — both use models and data — but their infrastructure profiles are polar opposites.
+Imagine a cena: seu time de ML pede para você provisionar "um cluster de GPU para treinamento." Você faz o que qualquer engenheiro de infraestrutura experiente faria — sobe oito máquinas virtuais `Standard_D16s_v5`. Sessenta e quatro vCPUs cada, 128 GiB de RAM, armazenamento SSD premium. No papel, uma máquina de guerra.
 
-| Dimension | Training | Inference |
-|-----------|----------|-----------|
-| **Workload pattern** | Batch — runs for hours, days, or weeks | Real-time — millisecond response times |
-| **GPU demand** | Saturates every available GPU core | Often runs on a single GPU or even CPU |
-| **Memory pressure** | GPU memory–bound (model weights + gradients + optimizer states) | Compute-bound (forward pass only) |
-| **Scaling axis** | Scale *up* (bigger GPUs, more nodes) | Scale *out* (more replicas behind a load balancer) |
-| **Cost model** | Total job cost (hours × GPU count × price/hr) | Cost per request (latency × throughput × price) |
-| **Failure impact** | Restart from last checkpoint — hours of lost work | Dropped request — retry in milliseconds |
-| **Network sensitivity** | Extremely high — gradient sync every few seconds | Moderate — request/response payloads are small |
+O time lança o script de treinamento. Barra de progresso: tempo estimado de conclusão **47 horas**. Você observa as métricas de utilização chegarem aos poucos — CPUs a 100 %, rede mal aparece, e ninguém está feliz.
 
-**Infra ↔ AI Translation**
-Think of **training** as a massive batch job — like re-indexing a petabyte data warehouse overnight. Think of **inference** as a high-traffic API endpoint — like your organization's authentication service handling thousands of logins per second. The infrastructure patterns you already know map directly.
+Então um colega sugere dois nodes `Standard_ND96asr_v4` — cada um com oito GPUs A100 conectadas por InfiniBand de 200 Gb/s. Mesmo job de treinamento, mesmo dataset, mesmo código. O job termina em **90 minutos**. A diferença não são apenas as GPUs. É como essas GPUs se comunicam entre os nodes, como os dados fluem pelo NVLink dentro do node, e como o InfiniBand impede que a sincronização de gradientes se torne o gargalo. Compute para IA não é sobre força bruta. É sobre o *tipo certo* de força, conectada da *forma certa*.
 
-### When CPU is enough
-
-Not every AI workload needs a GPU. Lightweight inference scenarios — small classification models, embedding generation for search, or edge deployments — run perfectly well on `Standard_D` or `Standard_F` series VMs. If your model fits comfortably in system RAM and latency requirements are above 50 ms, benchmark on CPU first. GPUs are expensive; don't use them when you don't have to.
-
-💡 **Pro Tip**: Ask the ML team two questions before provisioning anything: (1) "Are we training or serving?" and (2) "What's the model size in parameters?" A 350-million-parameter model can often run inference on CPU. A 70-billion-parameter model cannot.
+Este capítulo oferece o mapa para você fazer essa escolha com confiança — sempre.
 
 ---
 
-## The Compute Spectrum: CPU, GPU, and Beyond
+## Treinamento vs. Inferência: Dois Mundos Diferentes
 
-### Why GPUs dominate AI
+Antes de selecionar um único SKU de VM, você precisa saber qual workload vai atender. Treinamento e inferência parecem superficialmente similares — ambos usam modelos e dados — mas seus perfis de infraestrutura são diametralmente opostos.
 
-A modern server CPU has 32–128 cores optimized for complex, branching logic — great for web servers, databases, and general-purpose computing. A modern data-center GPU like the NVIDIA H100 has **16,896 CUDA cores** and **528 Tensor Cores**, all designed to do one thing extremely well: multiply matrices in parallel.
+| Dimensão | Treinamento | Inferência |
+|----------|-------------|------------|
+| **Padrão de workload** | Batch — roda por horas, dias ou semanas | Tempo real — tempos de resposta em milissegundos |
+| **Demanda de GPU** | Satura todos os cores de GPU disponíveis | Frequentemente roda em uma única GPU ou mesmo CPU |
+| **Pressão de memória** | Limitado pela memória da GPU (pesos do modelo + gradientes + estados do otimizador) | Limitado por compute (apenas forward pass) |
+| **Eixo de escalabilidade** | Scale *up* (GPUs maiores, mais nodes) | Scale *out* (mais réplicas atrás de um load balancer) |
+| **Modelo de custo** | Custo total do job (horas × quantidade de GPUs × preço/hr) | Custo por requisição (latência × throughput × preço) |
+| **Impacto de falha** | Reiniciar do último checkpoint — horas de trabalho perdido | Requisição descartada — retry em milissegundos |
+| **Sensibilidade à rede** | Extremamente alta — sincronização de gradientes a cada poucos segundos | Moderada — payloads de request/response são pequenos |
 
-AI workloads — training and inference alike — are fundamentally matrix multiplication. Every layer of a neural network multiplies an input matrix by a weight matrix, adds a bias, and applies an activation function. A CPU processes these operations sequentially across a few dozen cores. A GPU processes thousands of them simultaneously. The result: operations that take minutes on a CPU finish in seconds on a GPU.
+**Tradução Infra ↔ IA**
+Pense no **treinamento** como um job batch massivo — como reindexar um data warehouse de petabytes durante a madrugada. Pense na **inferência** como um endpoint de API com alto tráfego — como o serviço de autenticação da sua organização atendendo milhares de logins por segundo. Os padrões de infraestrutura que você já conhece se aplicam diretamente.
 
-**Infra ↔ AI Translation**
-Think of a GPU like a network interface card that offloads packet processing from the CPU. Just as a SmartNIC handles millions of packets per second without burdening the host processor, a GPU offloads millions of matrix operations. The CPU orchestrates; the GPU executes the heavy math.
+### Quando CPU é suficiente
+
+Nem todo workload de IA precisa de GPU. Cenários leves de inferência — modelos pequenos de classificação, geração de embeddings para busca, ou deployments em edge — rodam perfeitamente bem em VMs da série `Standard_D` ou `Standard_F`. Se o seu modelo cabe confortavelmente na RAM do sistema e os requisitos de latência estão acima de 50 ms, faça benchmark em CPU primeiro. GPUs são caras; não use quando não for necessário.
+
+💡 **Dica**: Faça duas perguntas ao time de ML antes de provisionar qualquer coisa: (1) "Estamos treinando ou servindo?" e (2) "Qual o tamanho do modelo em parâmetros?" Um modelo de 350 milhões de parâmetros frequentemente consegue rodar inferência em CPU. Um modelo de 70 bilhões de parâmetros, não.
+
+---
+
+## O Espectro de Compute: CPU, GPU e Além
+
+### Por que GPUs dominam a IA
+
+Uma CPU de servidor moderna tem 32–128 cores otimizados para lógica complexa e com ramificações — ótima para servidores web, bancos de dados e computação de propósito geral. Uma GPU moderna de data center como a NVIDIA H100 tem **16.896 CUDA cores** e **528 Tensor Cores**, todos projetados para fazer uma coisa extremamente bem: multiplicar matrizes em paralelo.
+
+Workloads de IA — tanto treinamento quanto inferência — são fundamentalmente multiplicação de matrizes. Cada camada de uma rede neural multiplica uma matriz de entrada por uma matriz de pesos, soma um viés e aplica uma função de ativação. Uma CPU processa essas operações sequencialmente em algumas dezenas de cores. Uma GPU processa milhares delas simultaneamente. O resultado: operações que levam minutos em CPU terminam em segundos em GPU.
+
+**Tradução Infra ↔ IA**
+Pense na GPU como uma placa de rede que descarrega o processamento de pacotes da CPU. Assim como uma SmartNIC processa milhões de pacotes por segundo sem sobrecarregar o processador host, uma GPU descarrega milhões de operações matriciais. A CPU orquestra; a GPU executa a matemática pesada.
 
 ### CUDA Cores vs. Tensor Cores
 
-Not all GPU cores are equal. **CUDA cores** are general-purpose parallel processors — they handle any floating-point math. **Tensor Cores** are specialized units that perform mixed-precision matrix multiply-and-accumulate operations in a single clock cycle. For AI workloads using FP16 or BF16 precision (which is most training today), Tensor Cores deliver up to **8× the throughput** of CUDA cores alone.
+Nem todos os cores de GPU são iguais. **CUDA cores** são processadores paralelos de propósito geral — eles lidam com qualquer operação de ponto flutuante. **Tensor Cores** são unidades especializadas que realizam operações de multiplicação e acumulação de matrizes em precisão mista em um único ciclo de clock. Para workloads de IA usando precisão FP16 ou BF16 (que é a maioria dos treinamentos hoje), Tensor Cores entregam até **8× o throughput** dos CUDA cores sozinhos.
 
-When you see GPU specs, pay attention to the Tensor Core count. That number determines your real-world AI performance more than the CUDA core count.
+Quando você vir especificações de GPU, preste atenção na contagem de Tensor Cores. Esse número determina o desempenho real de IA mais do que a contagem de CUDA cores.
 
-### Beyond GPUs: TPUs, Trainium, and custom silicon
+### Além das GPUs: TPUs, Trainium e silício customizado
 
-Google's **Tensor Processing Units (TPUs)** and AWS's **Trainium** chips are purpose-built AI accelerators available only on their respective clouds. They offer strong performance for specific frameworks but lock you into a single cloud provider. **FPGAs** appear in specialized inference scenarios where deterministic latency matters. For most Azure-based AI work, NVIDIA GPUs remain the standard — the tooling ecosystem (CUDA, cuDNN, NCCL, TensorRT) is unmatched, and your ML team's code almost certainly expects NVIDIA hardware.
+As **Tensor Processing Units (TPUs)** do Google e os chips **Trainium** da AWS são aceleradores de IA construídos especificamente, disponíveis apenas em suas respectivas clouds. Eles oferecem bom desempenho para frameworks específicos, mas prendem você a um único provedor de cloud. **FPGAs** aparecem em cenários especializados de inferência onde latência determinística importa. Para a maioria dos trabalhos de IA baseados em Azure, GPUs NVIDIA continuam sendo o padrão — o ecossistema de ferramentas (CUDA, cuDNN, NCCL, TensorRT) é imbatível, e o código do seu time de ML quase certamente espera hardware NVIDIA.
 
 ---
 
-## Azure GPU VM Families — The Decision Matrix
+## Famílias de VMs com GPU no Azure — A Matriz de Decisão
 
-Choosing the right GPU VM family is the single highest-impact decision you'll make for an AI workload. Get it right and training finishes on time, within budget. Get it wrong and you'll burn money on idle hardware or wait days for results that should take hours.
+Escolher a família certa de VM com GPU é a decisão de maior impacto que você vai tomar para um workload de IA. Acerte e o treinamento termina no prazo, dentro do orçamento. Erre e você vai queimar dinheiro em hardware ocioso ou esperar dias por resultados que deveriam levar horas.
 
-**Decision Matrix: Azure GPU VM Families**
+**Matriz de Decisão: Famílias de VMs com GPU no Azure**
 
-| Family | SKU Example | GPUs | GPU Memory | Interconnect | Best For | Approx. Cost/hr |
-|--------|-------------|------|------------|--------------|----------|-----------------|
-| **NC T4 v3** | `Standard_NC4as_T4_v3` | 1× T4 | 16 GiB | Ethernet | Cost-efficient inference, light training, dev/test | $0.53 |
-| **NC T4 v3** | `Standard_NC64as_T4_v3` | 4× T4 | 64 GiB | Ethernet | Multi-model inference, batch scoring | $4.25 |
-| **ND A100 v4** | `Standard_ND96asr_v4` | 8× A100 40 GB | 320 GiB | InfiniBand 200 Gb/s | Distributed training, large model fine-tuning | $27.20 |
-| **ND H100 v5** | `Standard_ND96isr_H100_v5` | 8× H100 80 GB | 640 GiB | InfiniBand 400 Gb/s | Flagship training, LLMs, NCCL-optimized | $98.32 |
-| **NV A10 v5** | `Standard_NV36ads_A10_v5` | 1× A10 (full) | 24 GiB | Ethernet | Visualization, lightweight AI, dev/test | $1.80 |
-| **NV A10 v5** | `Standard_NV6ads_A10_v5` | 1/6× A10 | 4 GiB | Ethernet | Fractional GPU for small workloads | $0.45 |
-| **D/E/F series** | `Standard_D16s_v5` | None | — | Accelerated Networking | Preprocessing, data pipelines, CPU inference | $0.77 |
+| Família | Exemplo de SKU | GPUs | Memória de GPU | Interconexão | Melhor Para | Custo Aprox./hr |
+|---------|----------------|------|----------------|--------------|-------------|-----------------|
+| **NC T4 v3** | `Standard_NC4as_T4_v3` | 1× T4 | 16 GiB | Ethernet | Inferência custo-eficiente, treinamento leve, dev/test | $0,53 |
+| **NC T4 v3** | `Standard_NC64as_T4_v3` | 4× T4 | 64 GiB | Ethernet | Inferência multi-modelo, scoring em batch | $4,25 |
+| **ND A100 v4** | `Standard_ND96asr_v4` | 8× A100 40 GB | 320 GiB | InfiniBand 200 Gb/s | Treinamento distribuído, fine-tuning de modelos grandes | $27,20 |
+| **ND H100 v5** | `Standard_ND96isr_H100_v5` | 8× H100 80 GB | 640 GiB | InfiniBand 400 Gb/s | Treinamento flagship, LLMs, otimizado para NCCL | $98,32 |
+| **NV A10 v5** | `Standard_NV36ads_A10_v5` | 1× A10 (completa) | 24 GiB | Ethernet | Visualização, IA leve, dev/test | $1,80 |
+| **NV A10 v5** | `Standard_NV6ads_A10_v5` | 1/6× A10 | 4 GiB | Ethernet | GPU fracionária para workloads pequenos | $0,45 |
+| **Séries D/E/F** | `Standard_D16s_v5` | Nenhuma | — | Accelerated Networking | Pré-processamento, pipelines de dados, inferência em CPU | $0,77 |
 
-*Prices are approximate pay-as-you-go rates for East US. Always check [Azure Pricing Calculator](https://azure.microsoft.com/pricing/calculator/) for current rates.*
+*Preços aproximados no modelo pay-as-you-go para East US. Sempre consulte a [Calculadora de Preços do Azure](https://azure.microsoft.com/pricing/calculator/) para valores atualizados.*
 
-⚠️ **Production Gotcha**: The **original ND-series** (ND6s, ND12s, ND24s, ND24rs) was **retired in September 2023**. If you find Terraform templates, ARM scripts, or blog posts referencing these SKUs, they will fail to deploy. Always verify against the [Azure VM retirement page](https://learn.microsoft.com/azure/virtual-machines/sizes/overview) before provisioning. The current ND-series VMs are `Standard_ND96asr_v4` (A100) and `Standard_ND96isr_H100_v5` (H100) — completely different hardware.
+⚠️ **Pegadinha de Produção**: A **série ND original** (ND6s, ND12s, ND24s, ND24rs) foi **descontinuada em setembro de 2023**. Se você encontrar templates Terraform, scripts ARM ou posts de blog referenciando esses SKUs, o deploy vai falhar. Sempre verifique na [página de descontinuação de VMs do Azure](https://learn.microsoft.com/azure/virtual-machines/sizes/overview) antes de provisionar. As VMs ND-series atuais são `Standard_ND96asr_v4` (A100) e `Standard_ND96isr_H100_v5` (H100) — hardware completamente diferente.
 
-### Choosing the right family
+### Escolhendo a família certa
 
-**For inference** — start with `Standard_NC4as_T4_v3`. The T4 GPU is NVIDIA's workhorse for inference: it supports INT8 and FP16 precision, has dedicated Tensor Cores, and costs a fraction of the A100. If your model fits in 16 GiB of GPU memory, the T4 is your first stop. Need to serve multiple models? The `Standard_NC64as_T4_v3` gives you four T4s in a single VM.
+**Para inferência** — comece com `Standard_NC4as_T4_v3`. A GPU T4 é o cavalo de batalha da NVIDIA para inferência: suporta precisão INT8 e FP16, tem Tensor Cores dedicados e custa uma fração do A100. Se o seu modelo cabe em 16 GiB de memória de GPU, a T4 é sua primeira parada. Precisa servir múltiplos modelos? A `Standard_NC64as_T4_v3` oferece quatro T4s em uma única VM.
 
-**For training** — the choice depends on model size. Fine-tuning a model under 10 billion parameters? A single `Standard_ND96asr_v4` node with eight A100s and NVLink may be sufficient. Training a 70B+ parameter model from scratch? You need multiple `Standard_ND96isr_H100_v5` nodes connected by InfiniBand, running DeepSpeed or PyTorch FSDP for distributed training.
+**Para treinamento** — a escolha depende do tamanho do modelo. Fazendo fine-tuning de um modelo com menos de 10 bilhões de parâmetros? Um único node `Standard_ND96asr_v4` com oito A100s e NVLink pode ser suficiente. Treinando um modelo de 70B+ parâmetros do zero? Você precisa de múltiplos nodes `Standard_ND96isr_H100_v5` conectados por InfiniBand, rodando DeepSpeed ou PyTorch FSDP para treinamento distribuído.
 
-**For dev/test** — use `Standard_NV6ads_A10_v5` (fractional A10 GPU) or even CPU-only VMs. Don't burn ND-series quota on Jupyter notebooks.
+**Para dev/test** — use `Standard_NV6ads_A10_v5` (GPU A10 fracionária) ou mesmo VMs somente com CPU. Não queime cota de ND-series em Jupyter notebooks.
 
-**Pro Tip**: GPU SKUs have limited regional availability. Always check before your deployment pipeline runs:
+**Dica**: SKUs de GPU têm disponibilidade regional limitada. Sempre verifique antes que seu pipeline de deploy execute:
 
 ```bash
 az vm list-skus \
@@ -102,34 +102,34 @@ az vm list-skus \
   -o table
 ```
 
-If the `Restrictions` column shows `NotAvailableForSubscription`, you need to request a quota increase through the Azure portal.
+Se a coluna `Restrictions` mostrar `NotAvailableForSubscription`, você precisa solicitar um aumento de cota pelo portal do Azure.
 
 ---
 
-## Clustering: When One VM Isn't Enough
+## Clustering: Quando Uma VM Não é Suficiente
 
-There are three reasons you distribute an AI workload: the model is too large for a single GPU's memory, training is too slow on a single node, or you need to serve more inference requests than one VM can handle. Each reason points to a different clustering strategy.
+Existem três razões para distribuir um workload de IA: o modelo é grande demais para a memória de uma única GPU, o treinamento é lento demais em um único node, ou você precisa atender mais requisições de inferência do que uma VM consegue. Cada razão aponta para uma estratégia de clustering diferente.
 
-**Decision Matrix: Clustering Platforms**
+**Matriz de Decisão: Plataformas de Clustering**
 
-| Platform | Best For | GPU Support | Scaling | Complexity |
-|----------|----------|-------------|---------|------------|
-| **AKS** | Inference at scale, microservices | GPU node pools, device plugin, taints | Horizontal Pod Autoscaler, Cluster Autoscaler | Medium |
-| **Azure Machine Learning** | Experiment tracking, managed training | Managed compute clusters, auto-provisioning | Built-in, job-based | Low |
-| **VMSS** | Homogeneous GPU workloads, batch | Custom images with pre-installed drivers | Instance-based autoscaling | Low–Medium |
-| **Ray / DeepSpeed / Horovod** | Distributed training frameworks | Run on top of AKS or VMs | Framework-managed | High |
+| Plataforma | Melhor Para | Suporte a GPU | Escalabilidade | Complexidade |
+|------------|-------------|---------------|----------------|--------------|
+| **AKS** | Inferência em escala, microsserviços | GPU node pools, device plugin, taints | Horizontal Pod Autoscaler, Cluster Autoscaler | Média |
+| **Azure Machine Learning** | Rastreamento de experimentos, treinamento gerenciado | Clusters de compute gerenciados, auto-provisionamento | Integrado, baseado em jobs | Baixa |
+| **VMSS** | Workloads homogêneos de GPU, batch | Imagens customizadas com drivers pré-instalados | Autoscaling baseado em instâncias | Baixa–Média |
+| **Ray / DeepSpeed / Horovod** | Frameworks de treinamento distribuído | Rodam sobre AKS ou VMs | Gerenciado pelo framework | Alta |
 
-### AKS for GPU workloads
+### AKS para workloads com GPU
 
-Azure Kubernetes Service is the most common platform for serving AI models at scale. When you add GPU VMs to an AKS cluster, you need three things configured correctly: the **node pool taint**, the **NVIDIA device plugin**, and the **pod tolerations**.
+O Azure Kubernetes Service é a plataforma mais comum para servir modelos de IA em escala. Quando você adiciona VMs com GPU a um cluster AKS, precisa de três coisas configuradas corretamente: o **taint do node pool**, o **NVIDIA device plugin** e as **tolerations dos pods**.
 
-AKS automatically applies a taint to GPU node pools so that non-GPU workloads don't accidentally land on expensive GPU nodes:
+O AKS aplica automaticamente um taint nos node pools de GPU para que workloads sem GPU não caiam acidentalmente em nodes de GPU caros:
 
 ```
 sku=gpu:NoSchedule
 ```
 
-Your GPU pods must include a matching toleration and explicitly request GPU resources:
+Seus pods de GPU devem incluir uma toleration correspondente e solicitar explicitamente recursos de GPU:
 
 ```yaml
 apiVersion: v1
@@ -150,82 +150,82 @@ spec:
         nvidia.com/gpu: 1
 ```
 
-The NVIDIA device plugin (`k8s-device-plugin`, current version v0.18.0) runs as a DaemonSet on GPU nodes. It exposes `nvidia.com/gpu` as a schedulable resource to the Kubernetes scheduler. Without it, Kubernetes has no idea GPUs exist on the node.
+O NVIDIA device plugin (`k8s-device-plugin`, versão atual v0.18.0) roda como DaemonSet nos nodes de GPU. Ele expõe `nvidia.com/gpu` como um recurso agendável para o scheduler do Kubernetes. Sem ele, o Kubernetes não tem ideia de que GPUs existem no node.
 
-⚠️ **Production Gotcha**: The GPU taint in AKS is `sku=gpu:NoSchedule` — **not** `nvidia.com/gpu`. Many online tutorials use the wrong taint key, which means your tolerations won't match and pods will stay in `Pending` forever. Check the [AKS GPU documentation](https://learn.microsoft.com/azure/aks/gpu-cluster) for the current specification.
+⚠️ **Pegadinha de Produção**: O taint de GPU no AKS é `sku=gpu:NoSchedule` — **não** `nvidia.com/gpu`. Muitos tutoriais online usam a chave de taint errada, o que significa que suas tolerations não vão bater e os pods vão ficar em `Pending` para sempre. Consulte a [documentação de GPU do AKS](https://learn.microsoft.com/azure/aks/gpu-cluster) para a especificação atual.
 
-💡 **Pro Tip**: Azure now offers **fully managed GPU node pools** (in preview) that automatically install GPU drivers, the NVIDIA device plugin, and a metrics exporter. This eliminates the most common GPU-on-Kubernetes headache — driver version mismatches. Check the [AKS release notes](https://learn.microsoft.com/azure/aks/release-notes) for availability in your region.
+💡 **Dica**: O Azure agora oferece **node pools de GPU totalmente gerenciados** (em preview) que instalam automaticamente os drivers de GPU, o NVIDIA device plugin e um exportador de métricas. Isso elimina a dor de cabeça mais comum de GPU no Kubernetes — incompatibilidade de versão de drivers. Consulte as [notas de versão do AKS](https://learn.microsoft.com/azure/aks/release-notes) para disponibilidade na sua região.
 
-### Azure Machine Learning compute clusters
+### Clusters de compute do Azure Machine Learning
 
-If your ML team uses Azure Machine Learning for experiment tracking and model management, its **managed compute clusters** handle provisioning, scaling, and teardown automatically. You define the VM size, minimum and maximum node count, and idle timeout. AML spins up GPU nodes when a training job is submitted and scales to zero when idle — no wasted spend.
+Se seu time de ML usa o Azure Machine Learning para rastreamento de experimentos e gerenciamento de modelos, os **clusters de compute gerenciados** cuidam do provisionamento, escalabilidade e teardown automaticamente. Você define o tamanho da VM, contagem mínima e máxima de nodes, e timeout de ociosidade. O AML sobe nodes de GPU quando um job de treinamento é submetido e escala para zero quando ocioso — sem desperdício.
 
-### Distributed training frameworks
+### Frameworks de treinamento distribuído
 
-When a single node isn't enough, you need a distributed training framework. The major options:
+Quando um único node não é suficiente, você precisa de um framework de treinamento distribuído. As principais opções:
 
-- **Data Parallelism**: The most common approach. The same model is replicated across every GPU. Each GPU processes a different batch of data, computes gradients locally, and then all GPUs synchronize gradients (all-reduce). Frameworks handle this transparently.
+- **Data Parallelism**: A abordagem mais comum. O mesmo modelo é replicado em todas as GPUs. Cada GPU processa um batch diferente de dados, calcula gradientes localmente, e então todas as GPUs sincronizam gradientes (all-reduce). Os frameworks lidam com isso de forma transparente.
 
-- **Model Parallelism**: When the model itself doesn't fit in a single GPU's memory (common with 70B+ parameter models), you split the model layers across multiple GPUs. This requires careful planning and significantly more inter-GPU communication.
+- **Model Parallelism**: Quando o próprio modelo não cabe na memória de uma única GPU (comum com modelos de 70B+ parâmetros), você divide as camadas do modelo entre múltiplas GPUs. Isso requer planejamento cuidadoso e significativamente mais comunicação entre GPUs.
 
-- **Pipeline Parallelism**: A hybrid approach where different model layers live on different GPUs, and data flows through them in a pipeline. This reduces the memory problem of model parallelism while improving GPU utilization.
+- **Pipeline Parallelism**: Uma abordagem híbrida onde camadas diferentes do modelo ficam em GPUs diferentes, e os dados fluem por elas em um pipeline. Isso reduz o problema de memória do model parallelism enquanto melhora a utilização das GPUs.
 
-| Framework | Developer | Strengths |
-|-----------|-----------|-----------|
-| **DeepSpeed** | Microsoft | ZeRO optimizer, efficient memory management, 3D parallelism |
-| **PyTorch FSDP** | Meta | Native PyTorch integration, Fully Sharded Data Parallel |
-| **Horovod** | Uber/LF AI | Framework-agnostic, simple API, MPI-based |
-| **Ray Train** | Anyscale | Python-native, elastic scaling, multi-framework |
+| Framework | Desenvolvedor | Pontos Fortes |
+|-----------|---------------|---------------|
+| **DeepSpeed** | Microsoft | Otimizador ZeRO, gerenciamento eficiente de memória, paralelismo 3D |
+| **PyTorch FSDP** | Meta | Integração nativa com PyTorch, Fully Sharded Data Parallel |
+| **Horovod** | Uber/LF AI | Agnóstico a framework, API simples, baseado em MPI |
+| **Ray Train** | Anyscale | Nativo em Python, escalabilidade elástica, multi-framework |
 
-**Infra ↔ AI Translation**
-Distributed training is conceptually similar to a **distributed database cluster**. Data parallelism is like database sharding — each node holds all the logic (the model) but processes a different subset of data. Model parallelism is like partitioning a monolithic application into microservices — each node handles a different piece of the logic. In both worlds, the network between nodes determines total system performance.
+**Tradução Infra ↔ IA**
+Treinamento distribuído é conceitualmente similar a um **cluster de banco de dados distribuído**. Data parallelism é como sharding de banco de dados — cada node possui toda a lógica (o modelo) mas processa um subconjunto diferente dos dados. Model parallelism é como particionar uma aplicação monolítica em microsserviços — cada node cuida de uma parte diferente da lógica. Em ambos os mundos, a rede entre os nodes determina o desempenho total do sistema.
 
 ---
 
-## Networking: The Hidden Multiplier
+## Rede: O Multiplicador Oculto
 
-Here's a fact that surprises most infrastructure engineers when they first encounter AI workloads: **networking is often the bottleneck, not the GPU**. In distributed training, GPUs must synchronize gradients after every forward-backward pass. With eight GPUs per node and multiple nodes, that synchronization generates tens of gigabytes of network traffic every few seconds. If your network can't keep up, GPUs sit idle waiting for data — and you're paying for expensive silicon that's doing nothing.
+Aqui vai um fato que surpreende a maioria dos engenheiros de infraestrutura quando encontram workloads de IA pela primeira vez: **a rede frequentemente é o gargalo, não a GPU**. No treinamento distribuído, as GPUs precisam sincronizar gradientes após cada passada forward-backward. Com oito GPUs por node e múltiplos nodes, essa sincronização gera dezenas de gigabytes de tráfego de rede a cada poucos segundos. Se sua rede não consegue acompanhar, as GPUs ficam ociosas esperando por dados — e você está pagando por silício caro que não está fazendo nada.
 
-### InfiniBand and RDMA
+### InfiniBand e RDMA
 
-**InfiniBand** is a high-performance networking technology that enables **RDMA (Remote Direct Memory Access)** — the ability for one machine to read from or write to another machine's GPU memory *without involving either CPU*. This is critical for distributed training because gradient synchronization happens directly between GPUs across nodes, bypassing the operating system's network stack entirely.
+**InfiniBand** é uma tecnologia de rede de alto desempenho que possibilita **RDMA (Remote Direct Memory Access)** — a capacidade de uma máquina ler ou escrever na memória de GPU de outra máquina *sem envolver nenhuma das CPUs*. Isso é crítico para treinamento distribuído porque a sincronização de gradientes acontece diretamente entre GPUs em diferentes nodes, ignorando completamente a pilha de rede do sistema operacional.
 
-In Azure, InfiniBand is available on:
+No Azure, InfiniBand está disponível em:
 
-- **`Standard_ND96asr_v4`** — 200 Gb/s InfiniBand (HDR)
-- **`Standard_ND96isr_H100_v5`** — 400 Gb/s InfiniBand (NDR)
+- **`Standard_ND96asr_v4`** — InfiniBand 200 Gb/s (HDR)
+- **`Standard_ND96isr_H100_v5`** — InfiniBand 400 Gb/s (NDR)
 
-These are not optional "nice to have" features. For distributed training with NCCL (NVIDIA Collective Communications Library), InfiniBand can deliver **10× or more throughput** compared to TCP/IP-based Ethernet. NCCL automatically detects and uses InfiniBand when available, falling back to TCP when it isn't. The performance gap is dramatic.
+Esses não são recursos opcionais "legais de ter". Para treinamento distribuído com NCCL (NVIDIA Collective Communications Library), InfiniBand pode entregar **10× ou mais throughput** comparado a Ethernet baseada em TCP/IP. O NCCL detecta e usa InfiniBand automaticamente quando disponível, recorrendo a TCP quando não está. A diferença de desempenho é dramática.
 
 ### Accelerated Networking
 
-For VMs that don't support InfiniBand (NC-series, NV-series, D/E/F-series), **Accelerated Networking** is the next best optimization. It uses **SR-IOV (Single Root I/O Virtualization)** to bypass the host operating system's virtual switch, giving the VM near-bare-metal network performance.
+Para VMs que não suportam InfiniBand (séries NC, NV, D/E/F), **Accelerated Networking** é a melhor otimização disponível. Ela usa **SR-IOV (Single Root I/O Virtualization)** para contornar o virtual switch do sistema operacional host, dando à VM desempenho de rede próximo ao bare-metal.
 
-The impact is significant: network latency drops from approximately **500 μs to ~25 μs**, and throughput reaches the VM's maximum bandwidth. Accelerated Networking is enabled by default on most newer Azure VMs and supported across D, E, F, and N series. There's no extra cost — just verify it's enabled on your NIC.
+O impacto é significativo: a latência de rede cai de aproximadamente **500 μs para ~25 μs**, e o throughput atinge a largura de banda máxima da VM. Accelerated Networking vem habilitada por padrão na maioria das VMs mais recentes do Azure e é suportada nas séries D, E, F e N. Não há custo extra — apenas verifique se está habilitada na sua NIC.
 
-### Networking comparison
+### Comparação de rede
 
-| Feature | Throughput | Latency | Available On | Use Case |
-|---------|-----------|---------|--------------|----------|
-| **InfiniBand NDR** | 400 Gb/s | < 2 μs | ND H100 v5 | Multi-node LLM training |
-| **InfiniBand HDR** | 200 Gb/s | < 2 μs | ND A100 v4 | Distributed training |
-| **Accelerated Networking** | Up to 100 Gbps | ~25 μs | Most D/E/F/N series | Inference, data pipelines |
-| **Standard Ethernet** | Up to 100 Gbps | ~500 μs | All VMs | General workloads |
-| **VNet Peering** | Azure backbone | < 2 ms (same region) | All VNets | Cross-VNet communication |
+| Recurso | Throughput | Latência | Disponível Em | Caso de Uso |
+|---------|-----------|----------|---------------|-------------|
+| **InfiniBand NDR** | 400 Gb/s | < 2 μs | ND H100 v5 | Treinamento de LLM multi-node |
+| **InfiniBand HDR** | 200 Gb/s | < 2 μs | ND A100 v4 | Treinamento distribuído |
+| **Accelerated Networking** | Até 100 Gbps | ~25 μs | Maioria das séries D/E/F/N | Inferência, pipelines de dados |
+| **Ethernet Padrão** | Até 100 Gbps | ~500 μs | Todas as VMs | Workloads gerais |
+| **VNet Peering** | Backbone do Azure | < 2 ms (mesma região) | Todas as VNets | Comunicação entre VNets |
 
-### Proximity placement groups
+### Grupos de posicionamento por proximidade
 
-⚠️ **Production Gotcha**: Deploying distributed training nodes across different **availability zones** adds cross-zone network latency that can reduce training throughput by **30–50 %**. For multi-node training jobs, always use a **[proximity placement group](https://learn.microsoft.com/azure/virtual-machines/co-location)** to co-locate your VMs in the same data center. This applies to both standalone VMs and AKS node pools.
+⚠️ **Pegadinha de Produção**: Fazer deploy de nodes de treinamento distribuído em diferentes **zonas de disponibilidade** adiciona latência de rede entre zonas que pode reduzir o throughput de treinamento em **30–50 %**. Para jobs de treinamento multi-node, sempre use um **[grupo de posicionamento por proximidade](https://learn.microsoft.com/azure/virtual-machines/co-location)** para colocar suas VMs no mesmo data center. Isso se aplica tanto a VMs standalone quanto a node pools do AKS.
 
 ```bash
-# Create a proximity placement group
+# Criar um grupo de posicionamento por proximidade
 az ppg create \
   --resource-group rg-ai-training \
   --name ppg-training-cluster \
   --location eastus2 \
   --intent-vm-sizes Standard_ND96asr_v4
 
-# Create a VMSS within the proximity placement group
+# Criar um VMSS dentro do grupo de posicionamento por proximidade
 az vmss create \
   --resource-group rg-ai-training \
   --name vmss-training \
@@ -236,42 +236,42 @@ az vmss create \
   --accelerated-networking true
 ```
 
-💡 **Pro Tip**: When troubleshooting slow distributed training, check network throughput *before* blaming the GPUs. Run `ib_write_bw` (InfiniBand bandwidth test) between nodes. If you see significantly less than the expected 200 or 400 Gb/s, the problem is likely network configuration — not the model code.
+💡 **Dica**: Ao investigar treinamento distribuído lento, verifique o throughput da rede *antes* de culpar as GPUs. Execute `ib_write_bw` (teste de largura de banda InfiniBand) entre os nodes. Se você observar significativamente menos do que os 200 ou 400 Gb/s esperados, o problema provavelmente é configuração de rede — não o código do modelo.
 
 ---
 
-## Example Architecture: LLM Inference on AKS
+## Arquitetura de Exemplo: Inferência de LLM no AKS
 
 ```mermaid
  graph TD
-     A["Users / Clients"] --> B["Azure Load Balancer /<br/>Application Gateway"]
-     B --> C["AKS Cluster"]
-     C --> D["GPU Pod<br/>(Model Server)"]
-     C --> E["GPU Pod<br/>(Model Server)"]
-     D --> F["Azure Blob Storage<br/>(Model Weights)"]
+     A["Usuários / Clientes"] --> B["Azure Load Balancer /<br/>Application Gateway"]
+     B --> C["Cluster AKS"]
+     C --> D["Pod GPU<br/>(Model Server)"]
+     C --> E["Pod GPU<br/>(Model Server)"]
+     D --> F["Azure Blob Storage<br/>(Pesos do Modelo)"]
      E --> F
      C --> G["Azure Monitor +<br/>Managed Prometheus +<br/>Grafana"]                              
 ```
 
-This reference architecture shows a production LLM inference deployment combining several components you've learned about in this chapter:
+Esta arquitetura de referência mostra um deploy de inferência de LLM em produção combinando vários componentes que você aprendeu neste capítulo:
 
-- **AKS cluster** with GPU node pools (`Standard_NC4as_T4_v3`) running model-serving containers. The Horizontal Pod Autoscaler adjusts replica count based on request queue depth. The Cluster Autoscaler adds or removes GPU nodes based on pending pods.
+- **Cluster AKS** com node pools de GPU (`Standard_NC4as_T4_v3`) rodando containers de servir modelos. O Horizontal Pod Autoscaler ajusta a contagem de réplicas com base na profundidade da fila de requisições. O Cluster Autoscaler adiciona ou remove nodes de GPU com base em pods pendentes.
 
-- **Azure Blob Storage** holds model weights and configuration files. On pod startup, the model server downloads weights from Blob Storage (or mounts them via BlobFuse2 with local NVMe caching for faster access).
+- **Azure Blob Storage** armazena os pesos e arquivos de configuração do modelo. Na inicialização do pod, o model server baixa os pesos do Blob Storage (ou os monta via BlobFuse2 com cache local em NVMe para acesso mais rápido).
 
-- **Azure Monitor + Managed Prometheus** collects GPU utilization metrics via DCGM Exporter, node-level metrics via kube-state-metrics, and application-level metrics via OpenTelemetry. Grafana dashboards visualize GPU memory usage, inference latency percentiles, and request throughput.
+- **Azure Monitor + Managed Prometheus** coleta métricas de utilização de GPU via DCGM Exporter, métricas no nível do node via kube-state-metrics, e métricas no nível da aplicação via OpenTelemetry. Dashboards do Grafana visualizam uso de memória da GPU, percentis de latência de inferência e throughput de requisições.
 
-- **Azure Load Balancer / Application Gateway** distributes incoming inference requests across model-serving pods, with health probes ensuring traffic only reaches healthy replicas.
+- **Azure Load Balancer / Application Gateway** distribui requisições de inferência entre os pods de servir modelos, com health probes garantindo que o tráfego alcance apenas réplicas saudáveis.
 
-This pattern scales from a proof-of-concept with two GPU nodes to a production deployment serving thousands of requests per second — the infrastructure primitives are the same, only the node count changes.
+Esse padrão escala de uma prova de conceito com dois nodes de GPU até um deploy em produção atendendo milhares de requisições por segundo — os primitivos de infraestrutura são os mesmos, apenas a contagem de nodes muda.
 
 ---
 
-## Hands-On: Create Your First GPU VM
+## Mão na Massa: Crie Sua Primeira VM com GPU
 
-Time to get your hands dirty. This lab walks you through provisioning a GPU VM, installing NVIDIA drivers, and validating that the GPU is operational. We'll use `Standard_NC4as_T4_v3` — the smallest and most cost-effective GPU option, perfect for learning.
+Hora de colocar a mão na massa. Este lab guia você pelo provisionamento de uma VM com GPU, instalação de drivers NVIDIA e validação de que a GPU está operacional. Vamos usar `Standard_NC4as_T4_v3` — a opção de GPU menor e mais custo-eficiente, perfeita para aprender.
 
-### Step 0: Set your variables
+### Passo 0: Defina suas variáveis
 
 ```bash
 RESOURCE_GROUP="rg-ai-lab"
@@ -281,9 +281,9 @@ VM_SIZE="Standard_NC4as_T4_v3"
 ADMIN_USER="azureuser"
 ```
 
-### Step 1: Check GPU quota availability
+### Passo 1: Verifique a disponibilidade de cota de GPU
 
-Before creating anything, verify that the GPU SKU is available in your target region and that you have sufficient quota:
+Antes de criar qualquer coisa, verifique se o SKU de GPU está disponível na sua região alvo e se você tem cota suficiente:
 
 ```bash
 az vm list-skus \
@@ -294,9 +294,9 @@ az vm list-skus \
   -o table
 ```
 
-If the output shows `NotAvailableForSubscription`, request a quota increase in the Azure portal under **Subscriptions → Usage + quotas**.
+Se a saída mostrar `NotAvailableForSubscription`, solicite um aumento de cota no portal do Azure em **Assinaturas → Uso + cotas**.
 
-### Step 2: Create the resource group
+### Passo 2: Crie o grupo de recursos
 
 ```bash
 az group create \
@@ -304,7 +304,7 @@ az group create \
   --location $LOCATION
 ```
 
-### Step 3: Create the GPU VM
+### Passo 3: Crie a VM com GPU
 
 ```bash
 az vm create \
@@ -318,11 +318,11 @@ az vm create \
   --public-ip-sku Standard
 ```
 
-This provisions an Ubuntu 22.04 VM with one NVIDIA T4 GPU, 4 vCPUs, and 28 GiB of RAM. Accelerated Networking is enabled for optimal network performance.
+Isso provisiona uma VM Ubuntu 22.04 com uma GPU NVIDIA T4, 4 vCPUs e 28 GiB de RAM. Accelerated Networking está habilitada para desempenho de rede ideal.
 
-### Step 4: Install NVIDIA drivers (recommended — VM Extension)
+### Passo 4: Instale os drivers NVIDIA (recomendado — VM Extension)
 
-The Azure VM Extension is the recommended approach. It installs the correct NVIDIA driver version for your VM's GPU, handles kernel module signing for Secure Boot, and integrates with Azure's update management:
+A Azure VM Extension é a abordagem recomendada. Ela instala a versão correta do driver NVIDIA para a GPU da sua VM, cuida da assinatura do módulo do kernel para Secure Boot e se integra ao gerenciamento de atualizações do Azure:
 
 ```bash
 az vm extension set \
@@ -333,7 +333,7 @@ az vm extension set \
   --version 1.6
 ```
 
-The extension takes 5–10 minutes to install. Monitor progress:
+A extensão leva 5–10 minutos para instalar. Monitore o progresso:
 
 ```bash
 az vm extension show \
@@ -344,9 +344,9 @@ az vm extension show \
   -o table
 ```
 
-### Step 5: Validate the GPU
+### Passo 5: Valide a GPU
 
-SSH into the VM and confirm the GPU is recognized:
+Conecte via SSH na VM e confirme que a GPU é reconhecida:
 
 ```bash
 ssh $ADMIN_USER@$(az vm show \
@@ -356,102 +356,102 @@ ssh $ADMIN_USER@$(az vm show \
   --query publicIps -o tsv)
 ```
 
-Once connected:
+Uma vez conectado:
 
 ```bash
 nvidia-smi
 ```
 
-You should see output showing one Tesla T4 GPU with 15 GiB of available memory, driver version, and CUDA version. If `nvidia-smi` returns "command not found," the driver extension hasn't finished installing — wait a few minutes and try again.
+Você deve ver uma saída mostrando uma GPU Tesla T4 com 15 GiB de memória disponível, versão do driver e versão do CUDA. Se `nvidia-smi` retornar "command not found", a extensão do driver ainda não terminou de instalar — aguarde alguns minutos e tente novamente.
 
-### Alternative: Manual CUDA installation
+### Alternativa: Instalação manual do CUDA
 
-If you need a specific CUDA version or the VM Extension doesn't cover your scenario, install directly from NVIDIA's repository:
+Se você precisa de uma versão específica do CUDA ou a VM Extension não cobre seu cenário, instale diretamente do repositório da NVIDIA:
 
 ```bash
-# Add NVIDIA CUDA repository
+# Adicionar repositório NVIDIA CUDA
 wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-ubuntu2204.pin
 sudo mv cuda-ubuntu2204.pin /etc/apt/preferences.d/cuda-repository-pin-600
 sudo apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/3bf863cc.pub
 sudo add-apt-repository "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/ /"
 
-# Install CUDA toolkit
+# Instalar CUDA toolkit
 sudo apt-get update && sudo apt-get install -y cuda
 
-# Verify
+# Verificar
 nvidia-smi
 ```
 
-### Step 6: Clean up
+### Passo 6: Limpeza
 
-GPU VMs are expensive even when idle. Delete the resource group when you're done:
+VMs com GPU são caras mesmo quando ociosas. Delete o grupo de recursos quando terminar:
 
 ```bash
 az group delete --name $RESOURCE_GROUP --yes --no-wait
 ```
 
-⚠️ **Production Gotcha**: A single `Standard_NC4as_T4_v3` costs approximately $0.53/hour. That's manageable for a lab. But an `Standard_ND96isr_H100_v5` costs roughly $98/hour — leaving one running over a weekend costs over **$4,700**. Always set up [Azure cost alerts](https://learn.microsoft.com/azure/cost-management-billing/costs/cost-mgt-alerts-monitor-usage-spending) and auto-shutdown policies for GPU VMs.
+⚠️ **Pegadinha de Produção**: Uma única `Standard_NC4as_T4_v3` custa aproximadamente $0,53/hora. Isso é administrável para um lab. Mas uma `Standard_ND96isr_H100_v5` custa cerca de $98/hora — deixar uma rodando durante um fim de semana custa mais de **$4.700**. Sempre configure [alertas de custo do Azure](https://learn.microsoft.com/azure/cost-management-billing/costs/cost-mgt-alerts-monitor-usage-spending) e políticas de desligamento automático para VMs com GPU.
 
 ---
 
-## Monitoring GPU Workloads
+## Monitoramento de Workloads com GPU
 
-GPU infrastructure requires purpose-built observability. Traditional CPU metrics (load average, memory usage) tell you nothing about whether your GPU is being utilized or starving for data.
+Infraestrutura de GPU requer observabilidade construída especificamente para esse propósito. Métricas tradicionais de CPU (load average, uso de memória) não dizem nada sobre se sua GPU está sendo utilizada ou passando fome por dados.
 
-| Metric | Tool | What It Tells You |
-|--------|------|-------------------|
-| GPU utilization (%) | `nvidia-smi`, DCGM Exporter | Whether the GPU is actually computing or sitting idle |
-| GPU memory used (GiB) | `nvidia-smi`, DCGM Exporter | Whether you're close to OOM (out-of-memory) errors |
-| GPU temperature (°C) | `nvidia-smi`, DCGM Exporter | Thermal throttling — GPUs slow down above 83 °C |
-| Inference latency (P50/P95/P99) | Application Insights, OpenTelemetry | End-user experience and SLA compliance |
-| Token throughput (tokens/sec) | Application logs, Azure OpenAI metrics | Model serving efficiency |
-| Node availability | AKS Cluster Autoscaler, VMSS | Scaling events and failure recovery |
+| Métrica | Ferramenta | O Que Ela Revela |
+|---------|------------|------------------|
+| Utilização da GPU (%) | `nvidia-smi`, DCGM Exporter | Se a GPU está realmente computando ou ociosa |
+| Memória de GPU usada (GiB) | `nvidia-smi`, DCGM Exporter | Se você está próximo de erros OOM (out-of-memory) |
+| Temperatura da GPU (°C) | `nvidia-smi`, DCGM Exporter | Thermal throttling — GPUs desaceleram acima de 83 °C |
+| Latência de inferência (P50/P95/P99) | Application Insights, OpenTelemetry | Experiência do usuário final e conformidade com SLA |
+| Throughput de tokens (tokens/seg) | Logs da aplicação, métricas do Azure OpenAI | Eficiência no servir do modelo |
+| Disponibilidade de nodes | AKS Cluster Autoscaler, VMSS | Eventos de escalabilidade e recuperação de falhas |
 
-💡 **Pro Tip**: Deploy **NVIDIA DCGM Exporter** as a DaemonSet in your AKS GPU node pools. It exposes GPU metrics in Prometheus format, which **Azure Managed Prometheus** scrapes automatically. Pair it with pre-built **Grafana dashboards** for GPU utilization, memory, temperature, and error rates. This gives you the same visibility into GPU health that you're used to having for CPU and memory with standard infrastructure monitoring.
-
----
-
-## Security Considerations
-
-GPU infrastructure inherits all the security requirements of your existing environments — plus a few AI-specific concerns:
-
-- **RBAC**: Control who can provision GPU VMs and access model artifacts. GPU quota is expensive; treat it like a premium resource.
-- **Workload isolation**: Use dedicated AKS node pools and Kubernetes namespaces for GPU workloads. Prevent non-GPU pods from landing on GPU nodes via taints.
-- **Secrets management**: Store model API keys, storage account credentials, and registry tokens in **Azure Key Vault**. Use **Managed Identity** to authenticate from VMs and pods without embedded credentials.
-- **Network isolation**: Use **Private Link** for Azure ML workspaces, container registries, and storage accounts. Apply **NSG rules** to restrict SSH access to GPU VMs. Place training clusters behind **Azure Firewall** when compliance requires it.
-- **GPU quota governance**: Set per-team or per-project GPU quotas to prevent cost overruns. Monitor quota usage with Azure Cost Management alerts.
-- **Driver security**: Use the Azure VM Extension for driver installation to ensure signed, validated drivers. Manual CUDA installs bypass this validation chain.
+💡 **Dica**: Faça deploy do **NVIDIA DCGM Exporter** como DaemonSet nos node pools de GPU do seu AKS. Ele expõe métricas de GPU no formato Prometheus, que o **Azure Managed Prometheus** coleta automaticamente. Combine com **dashboards pré-construídos do Grafana** para utilização de GPU, memória, temperatura e taxas de erro. Isso oferece a mesma visibilidade sobre a saúde das GPUs que você está acostumado a ter para CPU e memória com monitoramento de infraestrutura padrão.
 
 ---
 
-## Chapter Checklist
+## Considerações de Segurança
 
-Before you move on, make sure you can confidently answer these questions:
+Infraestrutura de GPU herda todos os requisitos de segurança dos seus ambientes existentes — mais algumas preocupações específicas de IA:
 
-- **I can distinguish training from inference** and know which compute profile each requires.
-- **I understand why GPUs dominate AI** — massive parallelism for matrix math — and when CPUs are sufficient.
-- **I can select the right Azure GPU VM family**: NC T4 v3 for inference, ND A100/H100 for training, NV A10 for dev/test.
-- **I know the original ND-series is retired** (September 2023) and will not use those SKUs.
-- **I can check GPU SKU availability** in my target region using `az vm list-skus`.
-- **I understand clustering options**: AKS for inference at scale, Azure ML for managed training, VMSS for batch GPU workloads.
-- **I know AKS GPU taints** (`sku=gpu:NoSchedule`) and how to configure tolerations and the NVIDIA device plugin.
-- **I understand why networking is the hidden multiplier**: InfiniBand (200–400 Gb/s), RDMA, and NCCL are what make distributed training feasible.
-- **I can provision a GPU VM**, install drivers via the Azure VM Extension, and validate with `nvidia-smi`.
-- **I have GPU monitoring covered**: DCGM Exporter, Managed Prometheus, and Grafana dashboards for GPU utilization, memory, and temperature.
-- **I will always clean up GPU resources** and set cost alerts to avoid surprise bills.
+- **RBAC**: Controle quem pode provisionar VMs com GPU e acessar artefatos de modelo. Cota de GPU é cara; trate-a como um recurso premium.
+- **Isolamento de workloads**: Use node pools dedicados no AKS e namespaces do Kubernetes para workloads de GPU. Previna que pods sem GPU caiam em nodes de GPU via taints.
+- **Gerenciamento de segredos**: Armazene chaves de API de modelos, credenciais de storage accounts e tokens de registry no **Azure Key Vault**. Use **Managed Identity** para autenticação a partir de VMs e pods sem credenciais embutidas.
+- **Isolamento de rede**: Use **Private Link** para workspaces do Azure ML, registros de container e storage accounts. Aplique **regras de NSG** para restringir acesso SSH a VMs com GPU. Coloque clusters de treinamento atrás do **Azure Firewall** quando compliance exigir.
+- **Governança de cota de GPU**: Defina cotas de GPU por time ou por projeto para evitar estouros de custo. Monitore uso de cotas com alertas do Azure Cost Management.
+- **Segurança de drivers**: Use a Azure VM Extension para instalação de drivers para garantir drivers assinados e validados. Instalações manuais de CUDA ignoram essa cadeia de validação.
 
 ---
 
-## What's Next
+## Checklist do Capítulo
 
-Now that you understand which VMs to provision and how to connect them, it's time to look inside the GPU itself. **Chapter 4** takes you deep into GPU architecture — CUDA, memory hierarchy, multi-GPU strategies, and the driver ecosystem. You don't need to write CUDA kernels, but understanding what happens inside the silicon will make you a better troubleshooter, a better capacity planner, and a more effective partner to your ML teams.
+Antes de seguir em frente, certifique-se de que consegue responder com confiança a estas questões:
+
+- **Sei distinguir treinamento de inferência** e sei qual perfil de compute cada um requer.
+- **Entendo por que GPUs dominam a IA** — paralelismo massivo para operações matriciais — e quando CPUs são suficientes.
+- **Consigo selecionar a família certa de VM com GPU no Azure**: NC T4 v3 para inferência, ND A100/H100 para treinamento, NV A10 para dev/test.
+- **Sei que a série ND original foi descontinuada** (setembro de 2023) e não vou usar esses SKUs.
+- **Consigo verificar a disponibilidade de SKUs de GPU** na minha região alvo usando `az vm list-skus`.
+- **Entendo as opções de clustering**: AKS para inferência em escala, Azure ML para treinamento gerenciado, VMSS para workloads batch de GPU.
+- **Conheço os taints de GPU do AKS** (`sku=gpu:NoSchedule`) e como configurar tolerations e o NVIDIA device plugin.
+- **Entendo por que a rede é o multiplicador oculto**: InfiniBand (200–400 Gb/s), RDMA e NCCL são o que torna o treinamento distribuído viável.
+- **Consigo provisionar uma VM com GPU**, instalar drivers pela Azure VM Extension e validar com `nvidia-smi`.
+- **Tenho monitoramento de GPU coberto**: DCGM Exporter, Managed Prometheus e dashboards do Grafana para utilização, memória e temperatura da GPU.
+- **Sempre vou limpar recursos de GPU** e configurar alertas de custo para evitar surpresas na fatura.
 
 ---
 
-*Further reading:*
-- [Azure GPU-optimized VM sizes](https://learn.microsoft.com/azure/virtual-machines/sizes/gpu-accelerated/overview)
-- [NVIDIA GPU driver extension for Linux](https://learn.microsoft.com/azure/virtual-machines/extensions/hpccompute-gpu-linux)
-- [Use GPUs on AKS](https://learn.microsoft.com/azure/aks/gpu-cluster)
-- [InfiniBand-enabled VM sizes](https://learn.microsoft.com/azure/virtual-machines/sizes/high-performance-compute/overview)
-- [Accelerated Networking overview](https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview)
-- [Azure proximity placement groups](https://learn.microsoft.com/azure/virtual-machines/co-location)
+## Próximos Passos
+
+Agora que você entende quais VMs provisionar e como conectá-las, é hora de olhar para dentro da GPU. O **Capítulo 4** te leva ao fundo da arquitetura de GPU — CUDA, hierarquia de memória, estratégias multi-GPU e o ecossistema de drivers. Você não precisa escrever CUDA kernels, mas entender o que acontece dentro do silício vai fazer de você um troubleshooter melhor, um planejador de capacidade melhor e um parceiro mais eficiente para seus times de ML.
+
+---
+
+*Leitura complementar:*
+- [Tamanhos de VMs otimizadas para GPU no Azure](https://learn.microsoft.com/azure/virtual-machines/sizes/gpu-accelerated/overview)
+- [Extensão de driver de GPU NVIDIA para Linux](https://learn.microsoft.com/azure/virtual-machines/extensions/hpccompute-gpu-linux)
+- [Usar GPUs no AKS](https://learn.microsoft.com/azure/aks/gpu-cluster)
+- [Tamanhos de VMs habilitadas para InfiniBand](https://learn.microsoft.com/azure/virtual-machines/sizes/high-performance-compute/overview)
+- [Visão geral do Accelerated Networking](https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview)
+- [Grupos de posicionamento por proximidade do Azure](https://learn.microsoft.com/azure/virtual-machines/co-location)

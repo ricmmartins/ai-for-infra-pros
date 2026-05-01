@@ -1,367 +1,367 @@
-# Chapter 9 — Cost Engineering for AI Workloads
+# Capítulo 9 — Engenharia de Custos para Cargas de Trabalho de IA
 
-> "The cloud doesn't have a spending problem. It has a visibility problem."
-
----
-
-## The $127,000 Monday Morning
-
-It's Monday morning. You're halfway through your coffee when an email from finance lands with the subject line: **"URGENT: Azure bill — $127,000 — please explain."** Last month's forecast was $42,000. You open Azure Cost Management and start drilling down. Two ND96isr_H100_v5 VMs jump off the screen — provisioned three weeks ago for a "quick experiment" and never shut down. At roughly $98/hour each, running 24/7 for three weeks, that's approximately $33,000 in idle GPU time. Nobody was using them. Nobody even remembered they were running.
-
-This isn't a hypothetical. Variations of this story play out in organizations every month. The ML engineer who provisioned those VMs wasn't being reckless — they were iterating fast, which is exactly what you want from your data science team. The failure wasn't human; it was systemic. No auto-shutdown policy, no budget alerts, no tagging to trace the VMs back to a project or owner.
-
-This chapter gives you the frameworks, formulas, and operational practices to make sure that email never lands in your inbox. Not by slowing down experimentation, but by building guardrails that make cost awareness automatic.
+> "A nuvem não tem um problema de gastos. Ela tem um problema de visibilidade."
 
 ---
 
-## Why AI Cost Engineering Is Different
+## A Segunda-Feira de $127.000
 
-If you've managed cloud costs for traditional workloads, you already know the fundamentals: right-size VMs, use reserved instances, shut down dev/test environments at night. AI workloads follow the same principles — but the stakes are dramatically higher and the spending patterns are far less predictable.
+É segunda-feira de manhã. Você está no meio do seu café quando chega um e-mail do financeiro com o assunto: **"URGENTE: fatura do Azure — $127.000 — favor explicar."** A previsão do mês passado era $42.000. Você abre o Azure Cost Management e começa a investigar. Duas VMs ND96isr_H100_v5 saltam na tela — provisionadas há três semanas para um "experimento rápido" e nunca foram desligadas. A aproximadamente $98/hora cada, rodando 24/7 por três semanas, isso dá cerca de $33.000 em tempo ocioso de GPU. Ninguém estava usando. Ninguém sequer lembrava que elas estavam ligadas.
 
-### GPU VMs Cost 10–100× More Than General-Purpose VMs
+Isso não é hipotético. Variações dessa história acontecem em organizações todo mês. O engenheiro de ML que provisionou essas VMs não estava sendo descuidado — ele estava iterando rápido, que é exatamente o que você quer da sua equipe de data science. A falha não foi humana; foi sistêmica. Sem política de desligamento automático, sem alertas de orçamento, sem tags para rastrear as VMs até um projeto ou responsável.
 
-A Standard_D4s_v5 (4 vCPUs, 16 GB RAM) costs roughly $0.19/hour. An ND96isr_H100_v5 (8× H100 GPUs) costs roughly $98/hour. That's a 500× difference. A misconfigured general-purpose VM running idle for a weekend costs you $9. A misconfigured GPU VM running idle for a weekend costs you $4,700. The margin for error shrinks dramatically.
-
-### Training Is Bursty
-
-Traditional workloads tend toward steady-state patterns — web servers handle predictable traffic, databases serve consistent queries. AI training is fundamentally different. A team might consume zero GPU hours for two weeks while preparing data, then spike to 64 GPUs for a five-day training run, then drop back to zero. This burst pattern makes forecasting difficult and makes reserved capacity commitments risky without careful planning.
-
-### Token-Based Pricing Adds a Variable Layer
-
-When your teams consume Azure OpenAI services, costs scale with usage in a way that's harder to predict than VM hours. A chatbot that handles 1,000 queries per day with short prompts costs a fraction of one that processes 1,000 legal documents with 100K-token contexts. Both are "the same application" from an infrastructure perspective, but the cost profiles are wildly different.
-
-### Experimentation Culture Conflicts with Budget Discipline
-
-Data scientists need to experiment — that's how models improve. But experimentation means spinning up resources on short notice, trying different configurations, and sometimes abandoning approaches midway. Telling the ML team "submit a purchase order before provisioning any GPU" kills velocity. The solution isn't less experimentation; it's better guardrails around experimentation.
-
-**Infra ↔ AI Translation**: GPU idle time is like leaving every light on in a stadium after the game ends. The hourly electricity bill is enormous, nobody's benefiting from it, and the fix is a simple timer — but someone has to install the timer before the first game.
+Este capítulo oferece os frameworks, fórmulas e práticas operacionais para garantir que esse e-mail nunca chegue à sua caixa de entrada. Não desacelerando a experimentação, mas construindo guardrails que tornam a consciência de custos automática.
 
 ---
 
-## GPU Cost Modeling
+## Por Que a Engenharia de Custos de IA É Diferente
 
-Before you can optimize costs, you need to model them. AI workloads have two fundamentally different cost profiles: **training** (running your own models on GPU VMs) and **inference** (consuming a model API like Azure OpenAI). Let's build the formulas for each.
+Se você já gerenciou custos de nuvem para cargas de trabalho tradicionais, já conhece os fundamentos: dimensionar VMs corretamente, usar reserved instances, desligar ambientes de dev/test à noite. Cargas de trabalho de IA seguem os mesmos princípios — mas os valores em jogo são dramaticamente maiores e os padrões de gasto são muito menos previsíveis.
 
-### GPU VM Pricing by Family
+### VMs com GPU Custam 10–100× Mais que VMs de Uso Geral
 
-The table below provides approximate pay-as-you-go costs for common Azure GPU VM SKUs. These prices change frequently — always verify against the [Azure Pricing Calculator](https://azure.microsoft.com/pricing/calculator/) for current rates.
+Uma Standard_D4s_v5 (4 vCPUs, 16 GB RAM) custa aproximadamente $0,19/hora. Uma ND96isr_H100_v5 (8× H100 GPUs) custa aproximadamente $98/hora. Isso é uma diferença de 500×. Uma VM de uso geral mal configurada rodando ociosa no fim de semana custa $9. Uma VM com GPU mal configurada rodando ociosa no fim de semana custa $4.700. A margem para erro diminui drasticamente.
 
-| VM SKU | GPU | GPU Count | GPU Memory | Approx. Cost/Hour (Pay-as-you-go) | Primary Use Case |
+### Treinamento É Intermitente
+
+Cargas de trabalho tradicionais tendem a padrões de estado estacionário — servidores web lidam com tráfego previsível, bancos de dados atendem consultas consistentes. O treinamento de IA é fundamentalmente diferente. Uma equipe pode consumir zero horas de GPU por duas semanas enquanto prepara dados, depois disparar para 64 GPUs durante cinco dias de treinamento, e voltar a zero. Esse padrão intermitente dificulta previsões e torna compromissos de capacidade reservada arriscados sem planejamento cuidadoso.
+
+### Precificação Baseada em Tokens Adiciona uma Camada Variável
+
+Quando suas equipes consomem serviços do Azure OpenAI, os custos escalam com o uso de uma forma mais difícil de prever do que horas de VM. Um chatbot que atende 1.000 consultas por dia com prompts curtos custa uma fração de um que processa 1.000 documentos jurídicos com contextos de 100K tokens. Ambos são "a mesma aplicação" do ponto de vista de infraestrutura, mas os perfis de custo são completamente diferentes.
+
+### Cultura de Experimentação Entra em Conflito com Disciplina Orçamentária
+
+Data scientists precisam experimentar — é assim que modelos melhoram. Mas experimentação significa provisionar recursos com pouca antecedência, testar diferentes configurações e às vezes abandonar abordagens no meio do caminho. Dizer à equipe de ML "envie uma ordem de compra antes de provisionar qualquer GPU" mata a velocidade. A solução não é menos experimentação; é melhores guardrails ao redor da experimentação.
+
+**Infra ↔ IA — Tradução**: Tempo ocioso de GPU é como deixar todas as luzes de um estádio ligadas depois que o jogo termina. A conta de energia por hora é enorme, ninguém está se beneficiando, e a solução é um simples timer — mas alguém precisa instalar o timer antes do primeiro jogo.
+
+---
+
+## Modelagem de Custos de GPU
+
+Antes de otimizar custos, você precisa modelá-los. Cargas de trabalho de IA têm dois perfis de custo fundamentalmente diferentes: **treinamento** (executar seus próprios modelos em VMs com GPU) e **inferência** (consumir uma API de modelo como o Azure OpenAI). Vamos construir as fórmulas para cada um.
+
+### Preços de VMs com GPU por Família
+
+A tabela abaixo apresenta custos aproximados de pay-as-you-go para SKUs de VMs com GPU comuns no Azure. Esses preços mudam frequentemente — sempre verifique na [Calculadora de Preços do Azure](https://azure.microsoft.com/pricing/calculator/) para valores atualizados.
+
+| SKU da VM | GPU | Qtd. de GPUs | Memória GPU | Custo Aprox./Hora (Pay-as-you-go) | Caso de Uso Principal |
 |---|---|---|---|---|---|
-| NC4as_T4_v3 | NVIDIA T4 | 1 | 16 GB | ~$0.53 | Inference, light fine-tuning |
-| NC24ads_A100_v4 | NVIDIA A100 | 1 | 80 GB | ~$3.67 | Training, inference |
-| NC48ads_A100_v4 | NVIDIA A100 | 2 | 160 GB | ~$7.35 | Multi-GPU training |
-| ND96asr_v4 | NVIDIA A100 | 8 | 320 GB | ~$27.20 | Large-scale training |
-| ND96isr_H100_v5 | NVIDIA H100 | 8 | 640 GB | ~$98.00 | Frontier model training |
+| NC4as_T4_v3 | NVIDIA T4 | 1 | 16 GB | ~$0,53 | Inferência, fine-tuning leve |
+| NC24ads_A100_v4 | NVIDIA A100 | 1 | 80 GB | ~$3,67 | Treinamento, inferência |
+| NC48ads_A100_v4 | NVIDIA A100 | 2 | 160 GB | ~$7,35 | Treinamento multi-GPU |
+| ND96asr_v4 | NVIDIA A100 | 8 | 320 GB | ~$27,20 | Treinamento em larga escala |
+| ND96isr_H100_v5 | NVIDIA H100 | 8 | 640 GB | ~$98,00 | Treinamento de modelos de fronteira |
 
-> **Note**: Prices are approximate, in USD, and vary by region. East US and West US 2 tend to have the most availability for GPU SKUs.
+> **Nota**: Os preços são aproximados, em USD, e variam por região. East US e West US 2 tendem a ter maior disponibilidade para SKUs com GPU.
 
-### Training Cost Formula
+### Fórmula de Custo de Treinamento
 
-For training workloads running on GPU VMs, the core formula is:
+Para cargas de trabalho de treinamento executadas em VMs com GPU, a fórmula base é:
 
 ```
 Training Cost = (GPU count × Hours × Price/GPU-hour) + Storage + Networking
 ```
 
-**Worked example — fine-tuning a 7B parameter model:**
+**Exemplo prático — fine-tuning de um modelo de 7B parâmetros:**
 
-| Component | Calculation | Cost |
+| Componente | Cálculo | Custo |
 |---|---|---|
-| Compute | 2× A100 GPUs × 18 hours × $3.67/hr | $132.12 |
-| Storage | 500 GB Premium SSD × 18 hours | ~$2.50 |
-| Networking | Negligible (single VM) | ~$0 |
+| Computação | 2× A100 GPUs × 18 horas × $3,67/hr | $132,12 |
+| Armazenamento | 500 GB Premium SSD × 18 horas | ~$2,50 |
+| Rede | Desprezível (VM única) | ~$0 |
 | **Total** | | **~$135** |
 
-**Worked example — pre-training a 70B parameter model:**
+**Exemplo prático — pré-treinamento de um modelo de 70B parâmetros:**
 
-| Component | Calculation | Cost |
+| Componente | Cálculo | Custo |
 |---|---|---|
-| Compute | 64× H100 GPUs (8 VMs) × 72 hours × $98/hr per VM | $56,448 |
-| Storage | 10 TB across nodes × 72 hours | ~$85 |
-| Networking | Inter-node InfiniBand (included in ND SKU) | $0 |
-| **Total** | | **~$56,533** |
+| Computação | 64× H100 GPUs (8 VMs) × 72 horas × $98/hr por VM | $56.448 |
+| Armazenamento | 10 TB entre nós × 72 horas | ~$85 |
+| Rede | InfiniBand entre nós (incluído no SKU ND) | $0 |
+| **Total** | | **~$56.533** |
 
-The difference between these examples illustrates why right-sizing matters. Provisioning H100s for a job that runs fine on A100s doesn't just waste money — it wastes 3–4× the money.
+A diferença entre esses exemplos ilustra por que o dimensionamento correto importa. Provisionar H100s para um trabalho que roda bem em A100s não apenas desperdiça dinheiro — desperdiça 3–4× o dinheiro.
 
-### Inference Cost Formula (Azure OpenAI)
+### Fórmula de Custo de Inferência (Azure OpenAI)
 
-For Azure OpenAI consumption, costs are token-based:
+Para consumo do Azure OpenAI, os custos são baseados em tokens:
 
 ```
 Inference Cost = Requests × Avg Tokens/Request × Price per 1K Tokens
 ```
 
-**Worked example — customer support chatbot (GPT-4o):**
+**Exemplo prático — chatbot de suporte ao cliente (GPT-4o):**
 
-| Component | Calculation | Cost |
+| Componente | Cálculo | Custo |
 |---|---|---|
-| Input tokens | 10,000 requests/day × 800 tokens × $0.0025/1K | $20.00/day |
-| Output tokens | 10,000 requests/day × 400 tokens × $0.01/1K | $40.00/day |
-| **Daily total** | | **$60/day** |
-| **Monthly total** | $60 × 30 | **~$1,800/month** |
+| Tokens de entrada | 10.000 requests/dia × 800 tokens × $0,0025/1K | $20,00/dia |
+| Tokens de saída | 10.000 requests/dia × 400 tokens × $0,01/1K | $40,00/dia |
+| **Total diário** | | **$60/dia** |
+| **Total mensal** | $60 × 30 | **~$1.800/mês** |
 
-**Worked example — same chatbot using GPT-4o-mini:**
+**Exemplo prático — mesmo chatbot usando GPT-4o-mini:**
 
-| Component | Calculation | Cost |
+| Componente | Cálculo | Custo |
 |---|---|---|
-| Input tokens | 10,000 requests/day × 800 tokens × $0.00015/1K | $1.20/day |
-| Output tokens | 10,000 requests/day × 400 tokens × $0.0006/1K | $2.40/day |
-| **Daily total** | | **$3.60/day** |
-| **Monthly total** | $3.60 × 30 | **~$108/month** |
+| Tokens de entrada | 10.000 requests/dia × 800 tokens × $0,00015/1K | $1,20/dia |
+| Tokens de saída | 10.000 requests/dia × 400 tokens × $0,0006/1K | $2,40/dia |
+| **Total diário** | | **$3,60/dia** |
+| **Total mensal** | $3,60 × 30 | **~$108/mês** |
 
-That's a 94% cost reduction for queries where GPT-4o-mini delivers acceptable quality — and for many customer support scenarios, it does.
+Isso é uma redução de 94% nos custos para consultas onde o GPT-4o-mini entrega qualidade aceitável — e para muitos cenários de suporte ao cliente, ele entrega.
 
-> **Note**: Token prices shown are approximate and subject to change. Always verify current pricing on the [Azure OpenAI pricing page](https://azure.microsoft.com/pricing/details/cognitive-services/openai-service/).
+> **Nota**: Os preços de tokens mostrados são aproximados e sujeitos a alteração. Sempre verifique os preços atuais na [página de preços do Azure OpenAI](https://azure.microsoft.com/pricing/details/cognitive-services/openai-service/).
 
-### Decision Matrix: Compute Purchasing Models
+### Matriz de Decisão: Modelos de Compra de Computação
 
-| Factor | Pay-as-you-go | 1-Year Reserved | 3-Year Reserved | Spot VMs |
+| Fator | Pay-as-you-go | Reserved 1 Ano | Reserved 3 Anos | Spot VMs |
 |---|---|---|---|---|
-| **Discount** | 0% (baseline) | ~30–40% | ~50–60% | ~60–90% |
-| **Commitment** | None | 1 year | 3 years | None |
-| **Eviction risk** | None | None | None | High |
-| **Best for** | Experimentation, unpredictable workloads | Steady-state inference | Long-term training clusters | Fault-tolerant training |
-| **Budget predictability** | Low | High | High | Low |
-| **Flexibility** | Maximum | Moderate (can exchange) | Low | Maximum |
+| **Desconto** | 0% (base) | ~30–40% | ~50–60% | ~60–90% |
+| **Compromisso** | Nenhum | 1 ano | 3 anos | Nenhum |
+| **Risco de evicção** | Nenhum | Nenhum | Nenhum | Alto |
+| **Ideal para** | Experimentação, cargas imprevisíveis | Inferência em estado estacionário | Clusters de treinamento de longo prazo | Treinamento tolerante a falhas |
+| **Previsibilidade orçamentária** | Baixa | Alta | Alta | Baixa |
+| **Flexibilidade** | Máxima | Moderada (permite troca) | Baixa | Máxima |
 
-💡 **Pro Tip**: Don't commit to reserved instances until you have at least 2–3 months of utilization data. Many organizations reserve too early, then end up paying for GPUs they don't use. Start with pay-as-you-go, measure actual consumption, then reserve only the baseline you're confident you'll sustain.
+💡 **Dica**: Não se comprometa com reserved instances até ter pelo menos 2–3 meses de dados de utilização. Muitas organizações reservam cedo demais e acabam pagando por GPUs que não usam. Comece com pay-as-you-go, meça o consumo real e reserve apenas a base que você tem confiança de que vai sustentar.
 
 ---
 
-## Spot and Low-Priority VMs for Training
+## Spot VMs e VMs de Baixa Prioridade para Treinamento
 
-Azure Spot VMs offer the same GPU hardware at 60–90% discount — but Azure can reclaim them with as little as 30 seconds' notice when capacity is needed. For the right workloads, this is the single biggest cost lever available.
+As Spot VMs do Azure oferecem o mesmo hardware de GPU com 60–90% de desconto — mas o Azure pode recuperá-las com apenas 30 segundos de aviso quando a capacidade é necessária. Para as cargas de trabalho certas, essa é a maior alavanca de redução de custos disponível.
 
-### When Spot Is Safe
+### Quando Spot É Seguro
 
-Spot VMs work well when your training framework supports **checkpoint-and-resume**. This means the training job periodically saves its state (model weights, optimizer state, learning rate schedule, current epoch) to durable storage. If the VM is evicted, a new Spot VM picks up from the last checkpoint instead of starting over.
+Spot VMs funcionam bem quando seu framework de treinamento suporta **checkpoint-and-resume**. Isso significa que o job de treinamento salva periodicamente seu estado (pesos do modelo, estado do otimizador, learning rate schedule, epoch atual) em armazenamento durável. Se a VM for despejada, uma nova Spot VM retoma do último checkpoint em vez de recomeçar do zero.
 
-Frameworks that support this well:
+Frameworks que suportam isso bem:
 
-- **PyTorch Lightning**: Built-in checkpointing with `ModelCheckpoint` callback
-- **DeepSpeed**: Automatic checkpointing integrated with ZeRO optimizer
-- **Hugging Face Transformers**: `save_steps` and `resume_from_checkpoint` parameters
-- **Azure ML**: Managed checkpointing for training jobs
+- **PyTorch Lightning**: Checkpointing nativo com callback `ModelCheckpoint`
+- **DeepSpeed**: Checkpointing automático integrado com o otimizador ZeRO
+- **Hugging Face Transformers**: Parâmetros `save_steps` e `resume_from_checkpoint`
+- **Azure ML**: Checkpointing gerenciado para jobs de treinamento
 
-### When Spot Is NOT Safe
+### Quando Spot NÃO É Seguro
 
-Do not use Spot VMs when:
+Não use Spot VMs quando:
 
-- **Deadlines are non-negotiable**: If a model must be trained by Friday, repeated evictions could push you past deadline
-- **Checkpointing isn't implemented**: Without checkpointing, every eviction restarts training from scratch — potentially costing more than pay-as-you-go
-- **Jobs are very short** (under 1 hour): The overhead of checkpoint/resume outweighs the savings
-- **You're running inference in production**: Production endpoints need availability guarantees that Spot cannot provide
+- **Prazos são inegociáveis**: Se um modelo precisa estar treinado até sexta-feira, evicções repetidas podem empurrar você além do prazo
+- **Checkpointing não está implementado**: Sem checkpointing, cada evicção reinicia o treinamento do zero — potencialmente custando mais que pay-as-you-go
+- **Jobs são muito curtos** (menos de 1 hora): O overhead de checkpoint/resume supera a economia
+- **Você está rodando inferência em produção**: Endpoints de produção precisam de garantias de disponibilidade que Spot não pode oferecer
 
-### Implementing Checkpoint-and-Resume
+### Implementando Checkpoint-and-Resume
 
-The pattern is straightforward:
+O padrão é direto:
 
-1. **Save checkpoints to Azure Blob Storage or Azure Files** — not to local SSD (which is lost on eviction)
-2. **Set checkpoint frequency** based on cost of lost work. If training costs $50/hour, checkpoint every 15 minutes to cap re-work at $12.50 per eviction
-3. **Build your startup script** to check for existing checkpoints and resume if found
-4. **Use Azure VM Scale Sets with Spot** to automatically replace evicted VMs
+1. **Salve checkpoints no Azure Blob Storage ou Azure Files** — não no SSD local (que é perdido na evicção)
+2. **Defina a frequência de checkpoint** com base no custo do trabalho perdido. Se o treinamento custa $50/hora, faça checkpoint a cada 15 minutos para limitar o retrabalho a $12,50 por evicção
+3. **Construa seu script de inicialização** para verificar checkpoints existentes e retomar se encontrar
+4. **Use Azure VM Scale Sets com Spot** para substituir automaticamente VMs despejadas
 
-⚠️ **Production Gotcha**: Spot VMs can be evicted with only 30 seconds' notice. Your checkpoint must write to durable storage, not local disk. If your checkpoint takes 5 minutes to write 20 GB of model state, you'll lose it on eviction. Either checkpoint more frequently with smaller state, or use faster storage (Premium SSD or Azure NetApp Files as a staging layer before Blob).
+⚠️ **Cuidado em Produção**: Spot VMs podem ser despejadas com apenas 30 segundos de aviso. Seu checkpoint precisa gravar em armazenamento durável, não em disco local. Se seu checkpoint leva 5 minutos para gravar 20 GB de estado do modelo, você vai perdê-lo na evicção. Ou faça checkpoint com mais frequência e estado menor, ou use armazenamento mais rápido (Premium SSD ou Azure NetApp Files como camada intermediária antes do Blob).
 
-### Spot Savings Example
+### Exemplo de Economia com Spot
 
-| Scenario | Pay-as-you-go | Spot (70% discount) | Savings |
+| Cenário | Pay-as-you-go | Spot (70% de desconto) | Economia |
 |---|---|---|---|
-| 8× A100 training, 72 hours | $1,958 | $587 | $1,371 |
-| 8× H100 training, 72 hours | $7,056 | $2,117 | $4,939 |
-| 4× T4 inference testing, 40 hours | $85 | $25 | $60 |
+| 8× A100 treinamento, 72 horas | $1.958 | $587 | $1.371 |
+| 8× H100 treinamento, 72 horas | $7.056 | $2.117 | $4.939 |
+| 4× T4 teste de inferência, 40 horas | $85 | $25 | $60 |
 
-Even accounting for occasional evictions and re-work, Spot VMs typically deliver 50–80% net savings on fault-tolerant training workloads.
+Mesmo contabilizando evicções ocasionais e retrabalho, Spot VMs tipicamente entregam 50–80% de economia líquida em cargas de treinamento tolerantes a falhas.
 
 ---
 
-## Right-Sizing Strategies
+## Estratégias de Dimensionamento Correto
 
-The most expensive GPU is the one that's doing nothing — or doing work that a cheaper GPU could handle equally well. Right-sizing AI workloads requires matching the GPU to the task, not defaulting to the most powerful hardware available.
+A GPU mais cara é aquela que não está fazendo nada — ou fazendo trabalho que uma GPU mais barata faria igualmente bem. Dimensionar corretamente cargas de trabalho de IA exige combinar a GPU com a tarefa, não usar o hardware mais poderoso disponível por padrão.
 
-### Don't Use H100s When T4s Will Do
+### Não Use H100s Quando T4s Resolvem
 
-This is the most common cost mistake in AI infrastructure. A team requests H100s "because we want the best performance," but their actual workload is running inference on a 7B parameter model that fits comfortably in a T4's 16 GB of memory. The H100 is 185× more expensive per hour than a single T4. Unless they're training a frontier model or need the H100's specific capabilities (FP8 Tensor Cores, higher memory bandwidth), they're burning money.
+Este é o erro de custo mais comum em infraestrutura de IA. Uma equipe solicita H100s "porque queremos o melhor desempenho", mas a carga de trabalho real é rodar inferência em um modelo de 7B parâmetros que cabe confortavelmente nos 16 GB de memória de uma T4. A H100 é 185× mais cara por hora do que uma única T4. A menos que estejam treinando um modelo de fronteira ou precisem das capacidades específicas da H100 (FP8 Tensor Cores, maior largura de banda de memória), estão queimando dinheiro.
 
-**General sizing guidelines:**
+**Diretrizes gerais de dimensionamento:**
 
-| Workload | Recommended Starting SKU | Why |
+| Carga de Trabalho | SKU Inicial Recomendado | Por Quê |
 |---|---|---|
-| Inference (models ≤13B) | NC-series T4 | 16 GB memory, cost-effective |
-| Inference (models 13B–70B) | NC-series A100 | 80 GB memory, good throughput |
-| Fine-tuning (models ≤13B) | NC-series A100 (1–2 GPUs) | Sufficient memory with LoRA/QLoRA |
-| Fine-tuning (models 70B+) | ND-series A100 (8 GPUs) | Needs multi-GPU + NVLink |
-| Pre-training | ND-series H100 | Maximum throughput, NVLink + InfiniBand |
+| Inferência (modelos ≤13B) | NC-series T4 | 16 GB de memória, custo-benefício |
+| Inferência (modelos 13B–70B) | NC-series A100 | 80 GB de memória, bom throughput |
+| Fine-tuning (modelos ≤13B) | NC-series A100 (1–2 GPUs) | Memória suficiente com LoRA/QLoRA |
+| Fine-tuning (modelos 70B+) | ND-series A100 (8 GPUs) | Necessita multi-GPU + NVLink |
+| Pré-treinamento | ND-series H100 | Throughput máximo, NVLink + InfiniBand |
 
-### GPU Utilization Benchmarking
+### Benchmarking de Utilização de GPU
 
-Before scaling up, measure what you're actually using. Run `nvidia-smi` or use Azure Monitor GPU metrics to check:
+Antes de escalar para cima, meça o que você está realmente usando. Execute `nvidia-smi` ou use as métricas de GPU do Azure Monitor para verificar:
 
-- **GPU Compute Utilization (%)**: If consistently below 30%, the GPU is oversized for the workload or the data pipeline is the bottleneck
-- **GPU Memory Utilization (%)**: If below 50%, a smaller GPU may work. If above 90%, you may need more memory or to enable gradient checkpointing
-- **GPU Memory Used (GB)**: Compare to the GPU's total memory to understand headroom
+- **Utilização de Computação da GPU (%)**: Se consistentemente abaixo de 30%, a GPU está superdimensionada para a carga de trabalho ou o pipeline de dados é o gargalo
+- **Utilização de Memória da GPU (%)**: Se abaixo de 50%, uma GPU menor pode funcionar. Se acima de 90%, você pode precisar de mais memória ou habilitar gradient checkpointing
+- **Memória de GPU Usada (GB)**: Compare com a memória total da GPU para entender a folga
 
-**Infra ↔ AI Translation**: Right-sizing GPUs is exactly like right-sizing VMs in traditional infrastructure. You wouldn't run a static website on a 64-core VM. Same principle — but the cost of getting it wrong is 100× higher because GPU VMs are 100× more expensive.
+**Infra ↔ IA — Tradução**: Dimensionar GPUs corretamente é exatamente como dimensionar VMs em infraestrutura tradicional. Você não rodaria um site estático em uma VM de 64 cores. Mesmo princípio — mas o custo de errar é 100× maior porque VMs com GPU são 100× mais caras.
 
-### Auto-Shutdown Policies for Dev/Test
+### Políticas de Desligamento Automático para Dev/Test
 
-Every GPU VM provisioned for development, experimentation, or testing should have an **auto-shutdown policy**. Azure supports this natively through two mechanisms:
+Toda VM com GPU provisionada para desenvolvimento, experimentação ou teste deve ter uma **política de desligamento automático**. O Azure suporta isso nativamente através de dois mecanismos:
 
-- **Azure DevTest Labs auto-shutdown**: Set a daily shutdown time on individual VMs
-- **Azure Automation runbooks**: Schedule shutdown across resource groups or by tag
-- **Azure Policy**: Enforce that all GPU VMs in dev/test subscriptions must have auto-shutdown enabled
+- **Auto-shutdown do Azure DevTest Labs**: Defina um horário de desligamento diário em VMs individuais
+- **Runbooks do Azure Automation**: Agende o desligamento por resource groups ou por tag
+- **Azure Policy**: Exija que todas as VMs com GPU em assinaturas de dev/test tenham auto-shutdown habilitado
 
-💡 **Pro Tip**: Set the default auto-shutdown time to 7:00 PM local time for all dev/test GPU VMs. Engineers who need their VM to run overnight can extend it manually — but the default should be "off." A single ND96isr_H100_v5 left running from Friday evening to Monday morning costs approximately $4,700. Auto-shutdown eliminates this entirely.
+💡 **Dica**: Defina o horário padrão de auto-shutdown para 19:00 no horário local para todas as VMs com GPU de dev/test. Engenheiros que precisam da VM rodando à noite podem estender manualmente — mas o padrão deve ser "desligado". Uma única ND96isr_H100_v5 deixada ligada da sexta à noite até segunda de manhã custa aproximadamente $4.700. O auto-shutdown elimina isso completamente.
 
-### Scaling Down After Experiments
+### Reduzindo Recursos Após Experimentos
 
-Establish a process — not just a hope — for decommissioning experiment resources:
+Estabeleça um processo — não apenas uma esperança — para descomissionar recursos de experimentos:
 
-1. **Tag every GPU resource** with `experiment-name`, `owner`, and `expected-end-date`
-2. **Run a weekly report** listing GPU VMs older than their expected end date
-3. **Auto-notify owners** 48 hours before you deallocate
-4. **Deallocate** if no response — data is on persistent storage, the VM can be recreated
+1. **Tagueie todo recurso de GPU** com `experiment-name`, `owner` e `expected-end-date`
+2. **Execute um relatório semanal** listando VMs com GPU mais antigas que a data de término esperada
+3. **Notifique automaticamente os responsáveis** 48 horas antes de desalocar
+4. **Desaloque** se não houver resposta — os dados estão em armazenamento persistente, a VM pode ser recriada
 
 ---
 
-## Azure OpenAI Cost Optimization
+## Otimização de Custos do Azure OpenAI
 
-Azure OpenAI pricing splits into two models: **Standard (pay-per-token)** and **Provisioned Throughput Units (PTU)**. Choosing the wrong one — or not choosing at all — is one of the most common sources of unexpected AI spend.
+A precificação do Azure OpenAI se divide em dois modelos: **Standard (pay-per-token)** e **Provisioned Throughput Units (PTU)**. Escolher o errado — ou não escolher — é uma das fontes mais comuns de gastos inesperados com IA.
 
 ### Standard (Pay-per-Token)
 
-Standard deployment charges per 1,000 tokens consumed. It's simple, requires no commitment, and scales to zero when unused. This is the right choice for:
+O deployment Standard cobra por 1.000 tokens consumidos. É simples, não exige compromisso e escala a zero quando não utilizado. É a escolha certa para:
 
-- Applications in development or early production
-- Workloads with unpredictable or variable traffic
-- Low-volume use cases (under a few hundred thousand tokens per day)
+- Aplicações em desenvolvimento ou produção inicial
+- Cargas de trabalho com tráfego imprevisível ou variável
+- Casos de uso de baixo volume (menos de algumas centenas de milhares de tokens por dia)
 
-The risk is that costs scale linearly with usage. If your application goes viral or an upstream team starts sending higher volumes, your bill grows proportionally with no ceiling.
+O risco é que os custos escalam linearmente com o uso. Se sua aplicação viralizar ou uma equipe upstream começar a enviar volumes maiores, sua fatura cresce proporcionalmente sem teto.
 
 ### Provisioned Throughput Units (PTU)
 
-PTU deployments reserve dedicated model capacity, measured in Provisioned Throughput Units. You pay a fixed hourly or monthly rate regardless of how many tokens you consume. Throughput per PTU varies by model, version, and region, so you should always use the [Azure OpenAI capacity calculator](https://oai.azure.com/portal/calculator) to estimate PTU requirements for your specific workload.
+Deployments com PTU reservam capacidade dedicada de modelo, medida em Provisioned Throughput Units. Você paga uma taxa fixa por hora ou mensal independentemente de quantos tokens consumir. O throughput por PTU varia por modelo, versão e região, então você deve sempre usar a [calculadora de capacidade do Azure OpenAI](https://oai.azure.com/portal/calculator) para estimar os requisitos de PTU para sua carga de trabalho específica.
 
-PTU makes sense when:
+PTU faz sentido quando:
 
-- You have **sustained, predictable traffic** with high utilization
-- You need **guaranteed latency** that shared (standard) deployments can't provide
-- Your token volume is high enough that the **per-token cost under PTU is lower** than standard pricing
+- Você tem **tráfego sustentado e previsível** com alta utilização
+- Você precisa de **latência garantida** que deployments compartilhados (standard) não podem oferecer
+- Seu volume de tokens é alto o suficiente para que o **custo por token sob PTU seja menor** que o preço standard
 
-### When PTU Pays for Itself
+### Quando o PTU Se Paga
 
-The break-even point depends on your model, region, and traffic pattern, but as a general guideline: if your standard deployment is consistently utilized at **60–70% or above** of what a PTU allocation would provide, PTU typically becomes cheaper. Below that utilization, you're paying for reserved capacity you're not using.
+O ponto de equilíbrio depende do seu modelo, região e padrão de tráfego, mas como diretriz geral: se seu deployment standard está consistentemente utilizado a **60–70% ou acima** do que uma alocação de PTU proporcionaria, o PTU tipicamente se torna mais barato. Abaixo dessa utilização, você está pagando por capacidade reservada que não está usando.
 
-### Decision Matrix: Standard vs PTU
+### Matriz de Decisão: Standard vs PTU
 
-| Factor | Standard (Pay-per-Token) | Provisioned Throughput (PTU) |
+| Fator | Standard (Pay-per-Token) | Provisioned Throughput (PTU) |
 |---|---|---|
-| **Pricing model** | Per 1K tokens consumed | Fixed hourly/monthly rate |
-| **Commitment** | None | Monthly or yearly |
-| **Best for** | Variable/unpredictable traffic | Steady, high-volume traffic |
-| **Latency** | Shared capacity (variable) | Dedicated capacity (consistent) |
-| **Cost at low volume** | Lower | Higher (paying for idle capacity) |
-| **Cost at high volume** | Higher (linear scaling) | Lower (amortized across tokens) |
-| **Scale to zero** | Yes | No (minimum PTU commitment) |
+| **Modelo de precificação** | Por 1K tokens consumidos | Taxa fixa por hora/mês |
+| **Compromisso** | Nenhum | Mensal ou anual |
+| **Ideal para** | Tráfego variável/imprevisível | Tráfego estável e de alto volume |
+| **Latência** | Capacidade compartilhada (variável) | Capacidade dedicada (consistente) |
+| **Custo em baixo volume** | Menor | Maior (pagando por capacidade ociosa) |
+| **Custo em alto volume** | Maior (escala linear) | Menor (amortizado entre tokens) |
+| **Escala a zero** | Sim | Não (compromisso mínimo de PTU) |
 
-> **Note**: PTU pricing, throughput-per-unit ratios, and minimum commitments vary by model, version, and region. Always use the Azure OpenAI capacity calculator for accurate sizing.
+> **Nota**: Preços de PTU, proporções de throughput por unidade e compromissos mínimos variam por modelo, versão e região. Sempre use a calculadora de capacidade do Azure OpenAI para dimensionamento preciso.
 
-### Token Optimization Strategies
+### Estratégias de Otimização de Tokens
 
-Regardless of whether you use Standard or PTU, reducing token consumption directly reduces cost:
+Independentemente de usar Standard ou PTU, reduzir o consumo de tokens reduz diretamente o custo:
 
-**Prompt caching**: Azure OpenAI supports automatic prompt caching for repeated prefixes. If your system prompt is 2,000 tokens and identical across all requests, cached tokens are charged at a reduced rate. Structure your prompts with the static portion first.
+**Cache de prompts**: O Azure OpenAI suporta cache automático de prompts para prefixos repetidos. Se seu system prompt tem 2.000 tokens e é idêntico em todas as requisições, tokens em cache são cobrados com tarifa reduzida. Estruture seus prompts com a parte estática primeiro.
 
-**Shorter system prompts**: A 3,000-token system prompt that could be 800 tokens wastes 2,200 tokens per request. At 10,000 requests per day with GPT-4o, that's 22 million wasted input tokens — roughly $55/day or $1,650/month in unnecessary spend.
+**System prompts mais curtos**: Um system prompt de 3.000 tokens que poderia ter 800 desperdiça 2.200 tokens por requisição. A 10.000 requisições por dia com GPT-4o, isso são 22 milhões de tokens de entrada desperdiçados — aproximadamente $55/dia ou $1.650/mês em gastos desnecessários.
 
-**Response length limits**: Use the `max_tokens` parameter to cap response length. If your application only needs 200-word answers, don't allow 2,000-token responses. This is both a cost and a latency optimization.
+**Limites de tamanho de resposta**: Use o parâmetro `max_tokens` para limitar o tamanho da resposta. Se sua aplicação precisa apenas de respostas de 200 palavras, não permita respostas de 2.000 tokens. Isso é tanto uma otimização de custo quanto de latência.
 
-**Multi-model routing**: Not every request needs your most capable (and most expensive) model. Route simple classification, extraction, or FAQ queries to GPT-4o-mini and reserve GPT-4o for complex reasoning, multi-step analysis, or tasks where quality measurably suffers with the smaller model. A well-implemented routing layer can cut inference costs by 50–80%.
+**Roteamento multi-modelo**: Nem toda requisição precisa do seu modelo mais capaz (e mais caro). Roteie consultas simples de classificação, extração ou FAQ para o GPT-4o-mini e reserve o GPT-4o para raciocínio complexo, análise em múltiplas etapas ou tarefas onde a qualidade piora mensuravelmente com o modelo menor. Uma camada de roteamento bem implementada pode reduzir custos de inferência em 50–80%.
 
-💡 **Pro Tip**: Build a simple evaluation harness that runs the same 200 representative queries through both GPT-4o and GPT-4o-mini, then have a domain expert score the outputs. If GPT-4o-mini scores within 5% on 70%+ of queries, you've identified a huge cost savings opportunity with minimal quality impact.
+💡 **Dica**: Monte um harness de avaliação simples que execute as mesmas 200 consultas representativas no GPT-4o e no GPT-4o-mini, e peça a um especialista do domínio para pontuar as saídas. Se o GPT-4o-mini pontuar dentro de 5% em 70%+ das consultas, você identificou uma enorme oportunidade de economia com impacto mínimo na qualidade.
 
 ---
 
-## FinOps Practices for AI
+## Práticas de FinOps para IA
 
-FinOps — the practice of bringing financial accountability to cloud spending — is critical for AI workloads because the cost of getting it wrong is so much higher. A team that over-provisions CPU VMs might waste hundreds of dollars. A team that over-provisions GPU VMs wastes tens of thousands.
+FinOps — a prática de trazer responsabilidade financeira aos gastos com nuvem — é crítica para cargas de trabalho de IA porque o custo de errar é muito maior. Uma equipe que superdimensiona VMs de CPU pode desperdiçar centenas de dólares. Uma equipe que superdimensiona VMs com GPU desperdiça dezenas de milhares.
 
-### Cost Attribution: Tagging
+### Atribuição de Custos: Tags
 
-Every AI resource should be tagged with at minimum:
+Todo recurso de IA deve ser tageado com no mínimo:
 
-| Tag | Purpose | Example |
+| Tag | Finalidade | Exemplo |
 |---|---|---|
-| `cost-center` | Financial attribution | `CC-4521-ML` |
-| `project` | Which initiative | `customer-churn-model` |
-| `team` | Who owns it | `data-science-west` |
+| `cost-center` | Atribuição financeira | `CC-4521-ML` |
+| `project` | Qual iniciativa | `customer-churn-model` |
+| `team` | Quem é responsável | `data-science-west` |
 | `environment` | Dev, test, prod | `dev` |
-| `expected-end-date` | When to review/delete | `2025-03-15` |
+| `expected-end-date` | Quando revisar/excluir | `2025-03-15` |
 
-Use **Azure Policy** to enforce that GPU VM SKUs (NC*, ND*) cannot be created without these tags. This is a non-negotiable governance control.
+Use **Azure Policy** para exigir que SKUs de VMs com GPU (NC*, ND*) não possam ser criadas sem essas tags. Este é um controle de governança inegociável.
 
-⚠️ **Production Gotcha**: Tags are only useful if they're enforced at provisioning time. If you allow untagged resources and try to tag retroactively, you'll always be playing catch-up. Deploy an Azure Policy with `deny` effect that blocks GPU VM creation without required tags. Teams will push back — hold the line.
+⚠️ **Cuidado em Produção**: Tags só são úteis se forem exigidas no momento do provisionamento. Se você permitir recursos sem tags e tentar tagear retroativamente, estará sempre correndo atrás. Implemente uma Azure Policy com efeito `deny` que bloqueie a criação de VMs com GPU sem as tags obrigatórias. As equipes vão resistir — mantenha a posição.
 
-### Budgets and Alerts
+### Orçamentos e Alertas
 
-Azure Cost Management supports budgets with action-triggered alerts. For AI workloads, set up a three-tier alerting strategy:
+O Azure Cost Management suporta orçamentos com alertas acionáveis. Para cargas de trabalho de IA, configure uma estratégia de alertas em três níveis:
 
-| Alert Threshold | Action | Purpose |
+| Limite do Alerta | Ação | Finalidade |
 |---|---|---|
-| 50% of monthly budget | Email notification to team leads | Early visibility |
-| 75% of monthly budget | Email + Teams notification to team + finance | Escalation |
-| 90% of monthly budget | Email + automated action (e.g., stop non-production VMs) | Prevention |
+| 50% do orçamento mensal | Notificação por e-mail para líderes da equipe | Visibilidade antecipada |
+| 75% do orçamento mensal | E-mail + notificação no Teams para equipe + financeiro | Escalação |
+| 90% do orçamento mensal | E-mail + ação automatizada (ex.: parar VMs de não-produção) | Prevenção |
 
-Create separate budgets for GPU compute, Azure OpenAI, and storage — don't lump them into one budget where a spike in GPU spend hides behind headroom in storage.
+Crie orçamentos separados para computação com GPU, Azure OpenAI e armazenamento — não junte tudo em um orçamento só onde um pico de gasto com GPU se esconde atrás da folga no armazenamento.
 
-### Chargeback and Showback
+### Chargeback e Showback
 
-For organizations with shared GPU clusters, decide between:
+Para organizações com clusters de GPU compartilhados, decida entre:
 
-- **Showback**: Teams see what they consume but aren't billed directly. Lower friction, but weaker incentive to optimize
-- **Chargeback**: Teams are billed for consumption from their own budget. Stronger incentive, but requires accurate metering and can create perverse incentives (teams hoard reserved capacity)
+- **Showback**: As equipes veem o que consomem mas não são cobradas diretamente. Menor atrito, mas incentivo mais fraco para otimizar
+- **Chargeback**: As equipes são cobradas pelo consumo do próprio orçamento. Incentivo mais forte, mas exige medição precisa e pode criar incentivos perversos (equipes acumulam capacidade reservada)
 
-Most organizations start with showback and move to chargeback as the AI practice matures and cost attribution tooling becomes reliable.
+A maioria das organizações começa com showback e migra para chargeback conforme a prática de IA amadurece e as ferramentas de atribuição de custos se tornam confiáveis.
 
-### GPU Quota Governance
+### Governança de Cotas de GPU
 
-Azure GPU quotas are your first line of defense against runaway provisioning. By default, most subscriptions have zero quota for ND-series VMs — you must explicitly request it. Use this to your advantage:
+As cotas de GPU do Azure são sua primeira linha de defesa contra provisionamento descontrolado. Por padrão, a maioria das assinaturas tem cota zero para VMs da série ND — você precisa solicitar explicitamente. Use isso a seu favor:
 
-1. **Centralize quota requests** through a platform or FinOps team
-2. **Approve quota by project**, not by individual
-3. **Set subscription-level quotas** that cap the maximum number of GPU VMs any single team can provision
-4. **Review quota allocations quarterly** and reclaim unused quota
+1. **Centralize as solicitações de cota** através de uma equipe de plataforma ou FinOps
+2. **Aprove cotas por projeto**, não por indivíduo
+3. **Defina cotas no nível da assinatura** que limitem o número máximo de VMs com GPU que qualquer equipe individual pode provisionar
+4. **Revise alocações de cota trimestralmente** e recupere cotas não utilizadas
 
-### Regular Cost Reviews
+### Revisões Regulares de Custos
 
-Schedule a **monthly AI cost review** that brings together infrastructure, data science, and finance stakeholders. Review:
+Agende uma **revisão mensal de custos de IA** que reúna stakeholders de infraestrutura, data science e financeiro. Revise:
 
-- Total GPU spend vs budget
-- GPU utilization rates across all VMs
-- Azure OpenAI token consumption trends
-- Top 5 cost drivers and optimization opportunities
-- Resources older than their expected end date
+- Gasto total com GPU vs orçamento
+- Taxas de utilização de GPU em todas as VMs
+- Tendências de consumo de tokens do Azure OpenAI
+- Top 5 drivers de custo e oportunidades de otimização
+- Recursos mais antigos que sua data de término esperada
 
-This meeting is where you catch the "$33,000 idle GPU" problem before it becomes a "$127,000 email from finance" problem.
+Essa reunião é onde você pega o problema dos "$33.000 em GPU ociosa" antes que ele se torne o problema do "e-mail de $127.000 do financeiro".
 
 ---
 
-## Cost Attribution in Shared Clusters (AKS)
+## Atribuição de Custos em Clusters Compartilhados (AKS)
 
-When multiple teams share an AKS cluster with GPU node pools, cost attribution becomes more complex than simple VM tagging. You need namespace-level visibility into who's consuming what.
+Quando múltiplas equipes compartilham um cluster AKS com node pools de GPU, a atribuição de custos se torna mais complexa que simples tags em VMs. Você precisa de visibilidade no nível de namespace sobre quem está consumindo o quê.
 
-### Namespace-Level Cost Tracking
+### Rastreamento de Custos por Namespace
 
-In a shared AKS cluster, each team or project should have its own Kubernetes namespace. This gives you a natural boundary for cost attribution:
+Em um cluster AKS compartilhado, cada equipe ou projeto deve ter seu próprio namespace Kubernetes. Isso oferece uma fronteira natural para atribuição de custos:
 
-- **Azure Cost Analysis** can break down AKS costs by namespace when the AKS cost analysis add-on is enabled
-- **OpenCost** (CNCF project) provides real-time cost allocation by namespace, pod, and label
-- **Kubecost** offers similar functionality with additional optimization recommendations
+- **Azure Cost Analysis** pode decompor custos do AKS por namespace quando o add-on de análise de custos do AKS está habilitado
+- **OpenCost** (projeto CNCF) fornece alocação de custos em tempo real por namespace, pod e label
+- **Kubecost** oferece funcionalidade similar com recomendações adicionais de otimização
 
-### Resource Quotas per Namespace
+### Resource Quotas por Namespace
 
-Kubernetes **ResourceQuotas** prevent any single namespace from consuming more than its share of cluster resources. For GPU workloads, this is essential:
+**ResourceQuotas** do Kubernetes impedem que qualquer namespace individual consuma mais do que sua parcela dos recursos do cluster. Para cargas de trabalho com GPU, isso é essencial:
 
 ```yaml
 apiVersion: v1
@@ -375,47 +375,47 @@ spec:
     limits.nvidia.com/gpu: "4"
 ```
 
-This caps the `team-nlp` namespace at 4 GPUs, regardless of how many pods they try to schedule. Without this, a single team's runaway training job could consume every GPU in the cluster.
+Isso limita o namespace `team-nlp` a 4 GPUs, independentemente de quantos pods eles tentem agendar. Sem isso, um job de treinamento descontrolado de uma única equipe poderia consumir todas as GPUs do cluster.
 
-### Cluster Proportional Autoscaler
+### Autoscaler Proporcional do Cluster
 
-Use the **cluster autoscaler** to scale GPU node pools to zero when no GPU pods are pending. This ensures you're not paying for idle GPU nodes during off-hours. Configure the autoscaler with:
+Use o **cluster autoscaler** para escalar node pools de GPU a zero quando não há pods de GPU pendentes. Isso garante que você não pague por nós de GPU ociosos fora do horário. Configure o autoscaler com:
 
-- **Scale-down delay**: How long a node must be idle before being removed (e.g., 10 minutes for dev clusters, 30 minutes for production)
-- **Scale-down utilization threshold**: Remove nodes below a GPU utilization threshold
-- **Maximum node count**: Hard cap on how many GPU nodes the autoscaler can provision
+- **Atraso para redução de escala**: Quanto tempo um nó deve ficar ocioso antes de ser removido (ex.: 10 minutos para clusters de dev, 30 minutos para produção)
+- **Limite de utilização para redução**: Remover nós abaixo de um limite de utilização de GPU
+- **Contagem máxima de nós**: Limite rígido de quantos nós de GPU o autoscaler pode provisionar
 
-### Tools Comparison
+### Comparação de Ferramentas
 
-| Tool | Cost | Namespace Attribution | GPU Support | Optimization Recommendations |
+| Ferramenta | Custo | Atribuição por Namespace | Suporte a GPU | Recomendações de Otimização |
 |---|---|---|---|---|
-| Azure Cost Analysis | Included | Yes (with add-on) | Yes | Basic |
-| OpenCost | Free (open-source) | Yes | Yes | Limited |
-| Kubecost | Free tier + paid | Yes | Yes | Detailed |
+| Azure Cost Analysis | Incluído | Sim (com add-on) | Sim | Básicas |
+| OpenCost | Gratuito (open-source) | Sim | Sim | Limitadas |
+| Kubecost | Tier gratuito + pago | Sim | Sim | Detalhadas |
 
-💡 **Pro Tip**: Enable the AKS cost analysis add-on (`az aks update --enable-cost-analysis`) before you need it. It requires time to accumulate data before it becomes useful. If you enable it after a cost incident, you won't have historical data to analyze.
-
----
-
-## Chapter Checklist
-
-Before moving on, confirm you have these cost engineering practices in place:
-
-- **Cost model documented** for both training (GPU-hours) and inference (tokens) workloads
-- **Tagging policy enforced** via Azure Policy — all GPU resources tagged with cost-center, project, team, and environment
-- **Budget alerts configured** at 50%, 75%, and 90% thresholds with escalating actions
-- **Auto-shutdown enabled** on all dev/test GPU VMs
-- **Spot VMs evaluated** for fault-tolerant training workloads with checkpointing implemented
-- **Right-sizing validated** — GPU utilization benchmarked before provisioning larger SKUs
-- **Azure OpenAI pricing model selected** — Standard vs PTU evaluated based on utilization data
-- **Token optimization implemented** — prompt caching, system prompt trimming, response length limits, multi-model routing
-- **GPU quota governance** centralized with approval workflow
-- **Monthly cost review meeting** scheduled with infra, data science, and finance stakeholders
-- **Namespace-level cost tracking** enabled for shared AKS clusters
-- **Weekly idle resource report** running to catch forgotten experiments
+💡 **Dica**: Habilite o add-on de análise de custos do AKS (`az aks update --enable-cost-analysis`) antes de precisar dele. Ele requer tempo para acumular dados antes de se tornar útil. Se você habilitá-lo após um incidente de custos, não terá dados históricos para analisar.
 
 ---
 
-## What's Next
+## Checklist do Capítulo
 
-Cost is controlled. But as your AI platform grows from one team to ten, you need operational patterns that scale: fleet management, multi-tenancy, scheduling, and SLA design. Chapter 10 takes you from running AI projects to running an AI platform.
+Antes de seguir em frente, confirme que você tem estas práticas de engenharia de custos implementadas:
+
+- **Modelo de custos documentado** tanto para cargas de treinamento (GPU-hours) quanto de inferência (tokens)
+- **Política de tags exigida** via Azure Policy — todos os recursos de GPU tageados com cost-center, project, team e environment
+- **Alertas de orçamento configurados** nos limites de 50%, 75% e 90% com ações escalonadas
+- **Auto-shutdown habilitado** em todas as VMs com GPU de dev/test
+- **Spot VMs avaliadas** para cargas de treinamento tolerantes a falhas com checkpointing implementado
+- **Dimensionamento correto validado** — utilização de GPU benchmarkada antes de provisionar SKUs maiores
+- **Modelo de precificação do Azure OpenAI selecionado** — Standard vs PTU avaliado com base em dados de utilização
+- **Otimização de tokens implementada** — cache de prompts, redução de system prompts, limites de tamanho de resposta, roteamento multi-modelo
+- **Governança de cotas de GPU** centralizada com workflow de aprovação
+- **Reunião mensal de revisão de custos** agendada com stakeholders de infra, data science e financeiro
+- **Rastreamento de custos por namespace** habilitado para clusters AKS compartilhados
+- **Relatório semanal de recursos ociosos** em execução para detectar experimentos esquecidos
+
+---
+
+## Próximos Passos
+
+Os custos estão sob controle. Mas conforme sua plataforma de IA cresce de uma equipe para dez, você precisa de padrões operacionais que escalem: gerenciamento de frota, multi-tenancy, agendamento e design de SLAs. O Capítulo 10 leva você de rodar projetos de IA para rodar uma plataforma de IA.

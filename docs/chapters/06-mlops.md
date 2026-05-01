@@ -1,55 +1,55 @@
-# Chapter 6 — Model Lifecycle and MLOps from an Infra Lens
+# Capítulo 6 — Ciclo de Vida de Modelos e MLOps sob a Ótica de Infraestrutura
 
-*"Deploy this to production."*
-
----
-
-## The Model That Arrived Without a Birth Certificate
-
-A data scientist walks up to your desk — or, more realistically, drops a message in your team's channel — with a link to a shared drive. "Here's the model. It's a 15 GB PyTorch checkpoint. We need it in production by Friday." You open the folder and find a single file: `model_final_v2_FIXED.pt`.
-
-You start asking questions. Which version is this? What data was it trained on? What's the rollback plan if predictions go sideways? What are the latency and throughput SLAs? What framework and CUDA version does it require? The answers are vague at best. "It's the latest one. It works on my machine. Just put it behind an API."
-
-You've seen this movie before — just with different actors. Developers used to hand you a compiled binary and say "deploy this." That chaos led your industry to build container registries, CI/CD pipelines, semantic versioning, and automated rollback. Models are no different. They are artifacts — large, versioned, environment-dependent artifacts — and they deserve the same lifecycle management you've spent years building for application deployments. This chapter teaches you how to apply that hard-won operational discipline to the world of machine learning.
+*"Coloca isso em produção."*
 
 ---
 
-## Models Are Artifacts — Treat Them Like It
+## O Modelo que Chegou sem Certidão de Nascimento
 
-If you've ever pulled an image from a container registry, tagged a release in Git, or promoted a build from staging to production, you already understand the core concepts of model lifecycle management. The vocabulary changes, but the patterns are nearly identical.
+Um cientista de dados aparece na sua mesa — ou, mais realisticamente, manda uma mensagem no canal do seu time — com um link para uma pasta compartilhada. "Aqui está o modelo. É um checkpoint PyTorch de 15 GB. Precisamos dele em produção até sexta." Você abre a pasta e encontra um único arquivo: `model_final_v2_FIXED.pt`.
 
-**Infra ↔ AI Translation**:
+Você começa a fazer perguntas. Qual versão é essa? Com quais dados ele foi treinado? Qual é o plano de rollback se as predições saírem erradas? Quais são os SLAs de latência e throughput? Qual framework e versão de CUDA ele exige? As respostas são vagas, no melhor dos casos. "É a versão mais recente. Funciona na minha máquina. É só colocar atrás de uma API."
 
-| Infra Concept | ML Equivalent |
+Você já viu esse filme antes — só com atores diferentes. Desenvolvedores costumavam te entregar um binário compilado e dizer "faz o deploy disso." Esse caos levou a indústria a criar container registries, pipelines de CI/CD, versionamento semântico e rollback automatizado. Modelos não são diferentes. Eles são artefatos — artefatos grandes, versionados e dependentes de ambiente — e merecem o mesmo gerenciamento de ciclo de vida que você passou anos construindo para deploys de aplicações. Este capítulo ensina como aplicar essa disciplina operacional duramente conquistada ao mundo do machine learning.
+
+---
+
+## Modelos São Artefatos — Trate-os Como Tal
+
+Se você já fez pull de uma imagem de um container registry, tagueou um release no Git ou promoveu um build de staging para produção, você já entende os conceitos centrais do gerenciamento de ciclo de vida de modelos. O vocabulário muda, mas os padrões são quase idênticos.
+
+**Tradução Infra ↔ IA**:
+
+| Conceito de Infra | Equivalente em ML |
 |---|---|
-| Compiled binary / container image | Model checkpoint (weights file) |
+| Binário compilado / imagem de container | Checkpoint do modelo (arquivo de pesos) |
 | Container registry (ACR, Docker Hub) | Model registry (Azure ML, MLflow) |
-| CI build | Training run |
-| CD release pipeline | Model deployment pipeline |
-| Build manifest (Dockerfile) | Training configuration (hyperparameters, data version, framework version) |
-| Artifact signature | Model provenance and lineage |
-| Blue/green deployment | A/B testing with traffic splitting |
+| Build de CI | Execução de treinamento |
+| Pipeline de release de CD | Pipeline de deploy de modelo |
+| Manifesto de build (Dockerfile) | Configuração de treinamento (hiperparâmetros, versão dos dados, versão do framework) |
+| Assinatura de artefato | Proveniência e linhagem do modelo |
+| Deploy blue/green | A/B testing com divisão de tráfego |
 
-The key insight is this: a model file without metadata is like a container image without a tag. You can deploy it, but you can't reproduce it, audit it, or safely roll it back. Model lifecycle management exists to solve three problems that every infrastructure engineer already understands.
+A sacada principal é esta: um arquivo de modelo sem metadados é como uma imagem de container sem tag. Você pode fazer o deploy, mas não consegue reproduzi-lo, auditá-lo ou fazer rollback com segurança. O gerenciamento de ciclo de vida de modelos existe para resolver três problemas que todo engenheiro de infraestrutura já conhece.
 
-**Reproducibility.** If something goes wrong in production, you need to recreate the exact model that's running — same weights, same preprocessing, same framework version. Without tracked lineage, "retrain the model" becomes guesswork.
+**Reprodutibilidade.** Se algo der errado em produção, você precisa recriar o modelo exato que está rodando — mesmos pesos, mesmo pré-processamento, mesma versão do framework. Sem linhagem rastreada, "retreinar o modelo" vira adivinhação.
 
-**Compliance.** Regulated industries require audit trails. You need to prove which data trained a model, when it was deployed, and who approved it. This is no different from change management for infrastructure — just applied to model artifacts.
+**Conformidade.** Indústrias reguladas exigem trilhas de auditoria. Você precisa provar quais dados treinaram um modelo, quando ele foi implantado e quem aprovou. Isso não é diferente do gerenciamento de mudanças para infraestrutura — apenas aplicado a artefatos de modelo.
 
-**Rollback.** When a new model degrades prediction quality or violates latency SLAs, you need to revert to the last known-good version in minutes, not hours. This requires versioned artifacts and automated deployment pipelines — tools you already know how to build.
+**Rollback.** Quando um novo modelo degrada a qualidade das predições ou viola SLAs de latência, você precisa reverter para a última versão estável em minutos, não horas. Isso exige artefatos versionados e pipelines de deploy automatizados — ferramentas que você já sabe construir.
 
 ---
 
 ## Model Registries
 
-A model registry is the single source of truth for your organization's trained models. It stores model artifacts alongside metadata — version numbers, training metrics, lineage information, and deployment status. Think of it as your container registry, but purpose-built for ML artifacts.
+Um model registry é a fonte única de verdade para os modelos treinados da sua organização. Ele armazena artefatos de modelo junto com metadados — números de versão, métricas de treinamento, informações de linhagem e status de deploy. Pense nele como o seu container registry, mas construído especificamente para artefatos de ML.
 
 ### Azure Machine Learning Model Registry
 
-Azure ML's built-in registry provides versioning, tagging, and lineage tracking integrated with the broader Azure ML workspace. Every registered model gets an immutable version number, and you can attach arbitrary tags and properties for organizational filtering.
+O registry integrado do Azure ML oferece versionamento, tagging e rastreamento de linhagem integrados ao workspace mais amplo do Azure ML. Todo modelo registrado recebe um número de versão imutável, e você pode anexar tags e propriedades arbitrárias para filtragem organizacional.
 
 ```bash
-# Register a model from a local file
+# Registrar um modelo a partir de um arquivo local
 az ml model create \
   --name sentiment-classifier \
   --version 3 \
@@ -59,14 +59,14 @@ az ml model create \
   --resource-group ml-prod-rg \
   --workspace-name ml-prod-ws
 
-# List all versions of a model
+# Listar todas as versões de um modelo
 az ml model list \
   --name sentiment-classifier \
   --resource-group ml-prod-rg \
   --workspace-name ml-prod-ws \
   --output table
 
-# Show lineage — which run produced this model
+# Mostrar linhagem — qual execução produziu este modelo
 az ml model show \
   --name sentiment-classifier \
   --version 3 \
@@ -75,114 +75,114 @@ az ml model show \
   --query "jobs"
 ```
 
-💡 **Pro Tip**: Use Azure ML's model collections to group related models (e.g., all models in a recommendation pipeline). This makes it easier to promote or roll back an entire model ensemble rather than individual components.
+💡 **Dica**: Use as coleções de modelo do Azure ML para agrupar modelos relacionados (por exemplo, todos os modelos de um pipeline de recomendação). Isso facilita promover ou fazer rollback de um ensemble inteiro de modelos em vez de componentes individuais.
 
 ### MLflow Model Registry
 
-MLflow is the open-source standard for experiment tracking and model management. It's framework-agnostic — it wraps PyTorch, TensorFlow, scikit-learn, and dozens of other frameworks in a common packaging format. Azure ML natively integrates with MLflow, so you can use MLflow's APIs while storing artifacts in Azure.
+O MLflow é o padrão open-source para rastreamento de experimentos e gerenciamento de modelos. Ele é agnóstico a framework — encapsula PyTorch, TensorFlow, scikit-learn e dezenas de outros frameworks em um formato de empacotamento comum. O Azure ML integra nativamente com o MLflow, então você pode usar as APIs do MLflow enquanto armazena artefatos no Azure.
 
 ```bash
-# Start a local MLflow tracking server (for dev/test)
+# Iniciar um servidor de rastreamento MLflow local (para dev/test)
 mlflow server \
   --backend-store-uri sqlite:///mlflow.db \
   --default-artifact-root ./mlruns \
   --host 0.0.0.0 --port 5000
 
-# Register a model via the MLflow CLI
+# Registrar um modelo via CLI do MLflow
 mlflow models register \
   --model-uri runs:/<run-id>/model \
   --name sentiment-classifier
 
-# Transition a model to production stage
+# Transicionar um modelo para o estágio de produção
 mlflow models transition-stage \
   --name sentiment-classifier \
   --version 3 \
   --stage Production
 ```
 
-MLflow's `stages` concept (Staging, Production, Archived) maps directly to the promotion model infrastructure engineers use for application deployments. A model starts in "None," moves to "Staging" after validation, gets promoted to "Production" after approval, and is "Archived" when superseded.
+O conceito de `stages` do MLflow (Staging, Production, Archived) mapeia diretamente para o modelo de promoção que engenheiros de infraestrutura usam para deploys de aplicações. Um modelo começa em "None", passa para "Staging" após validação, é promovido para "Production" após aprovação, e vai para "Archived" quando é substituído.
 
-### Container Registries for Model Serving
+### Container Registries para Servir Modelos
 
-When models are served via containerized inference servers (like NVIDIA Triton, TorchServe, or a custom FastAPI wrapper), the container image itself becomes the deployable artifact. In this pattern, Azure Container Registry (ACR) acts as both your model registry and your container registry.
+Quando modelos são servidos por meio de servidores de inferência containerizados (como NVIDIA Triton, TorchServe ou um wrapper FastAPI customizado), a imagem de container em si se torna o artefato implantável. Nesse padrão, o Azure Container Registry (ACR) atua tanto como seu model registry quanto como seu container registry.
 
 ```bash
-# Build and push a model-serving container
+# Compilar e enviar um container de model serving
 az acr build \
   --registry mlmodelsacr \
   --image sentiment-classifier:v3 \
   --file Dockerfile.serve .
 
-# Verify the image
+# Verificar a imagem
 az acr repository show-tags \
   --name mlmodelsacr \
   --repository sentiment-classifier \
   --output table
 ```
 
-This approach works well when you want a single artifact (the container) to encapsulate model weights, dependencies, and serving code. It simplifies deployment because your existing container orchestration tooling (AKS, Container Apps) handles everything downstream.
+Essa abordagem funciona bem quando você quer um único artefato (o container) que encapsule pesos do modelo, dependências e código de serving. Ela simplifica o deploy porque suas ferramentas existentes de orquestração de containers (AKS, Container Apps) cuidam de tudo a partir daí.
 
-### Decision Matrix: Choosing a Model Registry
+### Matriz de Decisão: Escolhendo um Model Registry
 
-| Criteria | Azure ML Registry | MLflow Registry | ACR (Container) |
+| Critério | Azure ML Registry | MLflow Registry | ACR (Container) |
 |---|---|---|---|
-| **Best for** | Azure-native ML teams | Multi-cloud / OSS teams | Containerized serving |
-| **Versioning** | Built-in, immutable | Built-in with stages | Image tags |
-| **Lineage tracking** | Deep (jobs, data, env) | Run-level | Dockerfile only |
-| **Max artifact size** | Effectively unlimited | Backend-dependent | Layer-based |
-| **Framework lock-in** | None | None | None |
-| **Infra overhead** | Managed | Self-hosted or Azure ML | Managed (ACR) |
-| **When to avoid** | Multi-cloud requirement | Need deep Azure integration | Models without containers |
+| **Melhor para** | Times de ML nativos Azure | Times multi-cloud / OSS | Serving containerizado |
+| **Versionamento** | Integrado, imutável | Integrado com estágios | Tags de imagem |
+| **Rastreamento de linhagem** | Profundo (jobs, dados, env) | Nível de execução | Apenas Dockerfile |
+| **Tamanho máx. de artefato** | Praticamente ilimitado | Depende do backend | Baseado em camadas |
+| **Lock-in de framework** | Nenhum | Nenhum | Nenhum |
+| **Overhead de infra** | Gerenciado | Self-hosted ou Azure ML | Gerenciado (ACR) |
+| **Quando evitar** | Requisito multi-cloud | Precisa de integração profunda com Azure | Modelos sem containers |
 
-⚠️ **Production Gotcha**: Don't use shared file systems or blob storage as your "registry." Without immutable versions, atomic uploads, and metadata APIs, you end up with `model_final_v2_FIXED_actually_final.pt` — the exact chaos this chapter exists to prevent.
+⚠️ **Armadilha de Produção**: Não use sistemas de arquivos compartilhados ou blob storage como seu "registry." Sem versões imutáveis, uploads atômicos e APIs de metadados, você acaba com `model_final_v2_FIXED_actually_final.pt` — exatamente o caos que este capítulo existe para evitar.
 
 ---
 
-## CI/CD for Models
+## CI/CD para Modelos
 
-Model deployment is not a manual process. It's a pipeline — with stages, gates, and rollback mechanisms — just like your application CI/CD. The difference is that model validation involves statistical testing (accuracy, latency, fairness) in addition to the functional tests you're used to.
+Deploy de modelo não é um processo manual. É um pipeline — com estágios, gates e mecanismos de rollback — assim como o seu CI/CD de aplicações. A diferença é que a validação de modelos envolve testes estatísticos (acurácia, latência, fairness) além dos testes funcionais com os quais você já está acostumado.
 
-### The Model Promotion Pipeline
+### O Pipeline de Promoção de Modelo
 
-A production-grade model pipeline has three stages, each with distinct infrastructure requirements and validation gates.
+Um pipeline de modelos de nível produção tem três estágios, cada um com requisitos de infraestrutura distintos e gates de validação.
 
 ```
 ┌─────────┐     ┌─────────────┐     ┌──────────────┐
 │   DEV   │────▶│   STAGING   │────▶│  PRODUCTION  │
 │         │     │             │     │              │
-│ Train   │     │ Validate    │     │ Serve        │
-│ Track   │     │ Benchmark   │     │ Monitor      │
-│ Version │     │ Security    │     │ Auto-rollback│
+│ Treinar │     │ Validar     │     │ Servir       │
+│ Rastrear│     │ Benchmark   │     │ Monitorar    │
+│ Versionar│    │ Segurança   │     │ Auto-rollback│
 └─────────┘     └─────────────┘     └──────────────┘
      │               │                    │
-  GPU Compute    Inference Infra      Load Balanced
-  Blob Storage   Test Data Access     Multi-replica
-  Experiment     Isolated Network     Prod Network
-  Tracking                            SLA-bound
+  GPU Compute    Infra de Inferência  Load Balanced
+  Blob Storage   Acesso a Dados      Multi-réplica
+  Rastreamento   de Teste            Rede de Prod
+  de Experimentos Rede Isolada       Vinculado a SLA
 ```
 
-**Dev**: Data scientists train models using GPU compute. Your responsibility is providing the compute environment (GPU VMs or AKS GPU node pools), storage for training data and checkpoints, and experiment tracking infrastructure. Models that pass initial evaluation get registered in the model registry.
+**Dev**: Cientistas de dados treinam modelos usando GPU compute. Sua responsabilidade é fornecer o ambiente de computação (VMs com GPU ou node pools GPU no AKS), storage para dados de treinamento e checkpoints, e infraestrutura de rastreamento de experimentos. Modelos que passam na avaliação inicial são registrados no model registry.
 
-**Staging**: Registered models are deployed to a staging environment that mirrors production infrastructure — same VM SKUs, same network configuration, same inference server. Automated tests validate accuracy against a holdout dataset, measure latency under load, and run security scans. This stage is where most models fail, and that's by design.
+**Staging**: Modelos registrados são implantados em um ambiente de staging que espelha a infraestrutura de produção — mesmos SKUs de VM, mesma configuração de rede, mesmo servidor de inferência. Testes automatizados validam a acurácia contra um dataset holdout, medem a latência sob carga e executam scans de segurança. É neste estágio que a maioria dos modelos falha, e isso é proposital.
 
-**Production**: Models that clear all staging gates are deployed to production with traffic management (canary or blue/green). Monitoring detects degradation and triggers automated rollback. Your infrastructure must support running multiple model versions simultaneously during transitions.
+**Production**: Modelos que passam em todos os gates de staging são implantados em produção com gerenciamento de tráfego (canary ou blue/green). O monitoramento detecta degradação e dispara rollback automatizado. Sua infraestrutura precisa suportar a execução de múltiplas versões do modelo simultaneamente durante transições.
 
-### Automated Validation Gates
+### Gates de Validação Automatizados
 
-Every stage transition requires passing automated gates. Here's what to validate and what infrastructure each gate requires:
+Toda transição de estágio exige a passagem por gates automatizados. Aqui está o que validar e qual infraestrutura cada gate requer:
 
-| Gate | What It Checks | Infra Required |
+| Gate | O que Verifica | Infra Necessária |
 |---|---|---|
-| **Accuracy threshold** | Model metrics ≥ baseline (e.g., F1 > 0.92) | Test dataset storage, compute for evaluation |
-| **Latency benchmark** | P95 latency ≤ SLA (e.g., < 200ms) | Load testing infrastructure |
-| **Throughput test** | Requests/sec ≥ target under load | Load generator (k6, Locust) |
-| **Security scan** | No vulnerable dependencies, signed artifact | Container scanning (Triton, Defender) |
-| **Data validation** | Input schema matches expected format | Schema registry or validation service |
-| **Cost estimate** | Projected serving cost within budget | Cost modeling based on compute SKU |
+| **Threshold de acurácia** | Métricas do modelo ≥ baseline (ex.: F1 > 0.92) | Storage de dataset de teste, compute para avaliação |
+| **Benchmark de latência** | Latência P95 ≤ SLA (ex.: < 200ms) | Infraestrutura de teste de carga |
+| **Teste de throughput** | Requisições/seg ≥ meta sob carga | Gerador de carga (k6, Locust) |
+| **Scan de segurança** | Sem dependências vulneráveis, artefato assinado | Scanning de container (Triton, Defender) |
+| **Validação de dados** | Schema de entrada corresponde ao formato esperado | Schema registry ou serviço de validação |
+| **Estimativa de custo** | Custo projetado de serving dentro do orçamento | Modelagem de custo baseada no SKU de compute |
 
-### GitHub Actions Workflow for Model Deployment
+### Workflow do GitHub Actions para Deploy de Modelo
 
-Here's a practical CI/CD workflow that infrastructure engineers can own. It triggers when a new model version is registered, runs validation, and promotes to production.
+Aqui está um workflow prático de CI/CD que engenheiros de infraestrutura podem assumir. Ele é acionado quando uma nova versão de modelo é registrada, executa validação e promove para produção.
 
 ```yaml
 # .github/workflows/model-deploy.yml
@@ -282,51 +282,51 @@ jobs:
             --workspace-name ${{ env.AZURE_ML_WS }}
 ```
 
-**Infra ↔ AI Translation**: This is your blue/green deployment pipeline, but for model weights instead of container images. The `--traffic` flag works exactly like weighted routing in Azure Front Door or Application Gateway — you're shifting a percentage of production requests to the new model version while the old one continues serving.
+**Tradução Infra ↔ IA**: Esse é o seu pipeline de deploy blue/green, mas para pesos de modelo em vez de imagens de container. O flag `--traffic` funciona exatamente como roteamento ponderado no Azure Front Door ou Application Gateway — você está desviando uma porcentagem das requisições de produção para a nova versão do modelo enquanto a versão antiga continua servindo.
 
-### Infrastructure Responsibilities at Each Stage
+### Responsabilidades de Infraestrutura em Cada Estágio
 
-As the infrastructure engineer, your ownership spans the full pipeline:
+Como engenheiro de infraestrutura, sua responsabilidade abrange todo o pipeline:
 
-- **Compute provisioning**: GPU node pools for training (Dev), inference VMs for validation (Staging), auto-scaling GPU clusters for serving (Production).
-- **Networking**: Isolated VNets for staging, private endpoints for model registry access, load balancer configuration for traffic splitting.
-- **Storage**: High-throughput blob storage for training data, low-latency storage for model artifacts, retention policies for old model versions.
-- **Secrets management**: Key Vault integration for API keys, managed identity for pipeline authentication, RBAC for model registry access.
-- **Monitoring**: Deployment health dashboards, latency alerting, automated rollback triggers.
+- **Provisionamento de compute**: Node pools GPU para treinamento (Dev), VMs de inferência para validação (Staging), clusters GPU com auto-scaling para serving (Production).
+- **Rede**: VNets isoladas para staging, private endpoints para acesso ao model registry, configuração de load balancer para divisão de tráfego.
+- **Storage**: Blob storage de alto throughput para dados de treinamento, storage de baixa latência para artefatos de modelo, políticas de retenção para versões antigas de modelos.
+- **Gerenciamento de secrets**: Integração com Key Vault para API keys, managed identity para autenticação do pipeline, RBAC para acesso ao model registry.
+- **Monitoramento**: Dashboards de saúde do deploy, alertas de latência, gatilhos de rollback automatizado.
 
 ---
 
-## A/B Testing and Canary Deployments for Models
+## A/B Testing e Deploys Canary para Modelos
 
-Deploying a model to production isn't a binary event. You don't flip a switch and hope for the best. Instead, you gradually shift traffic to the new model version while monitoring performance — the same canary and blue/green patterns you use for application deployments.
+Fazer deploy de um modelo em produção não é um evento binário. Você não aperta um botão e torce pelo melhor. Em vez disso, você gradualmente desvia tráfego para a nova versão do modelo enquanto monitora o desempenho — os mesmos padrões canary e blue/green que você usa para deploys de aplicações.
 
-### Traffic Splitting Patterns
+### Padrões de Divisão de Tráfego
 
-Three patterns dominate model deployments, each with different infrastructure requirements:
+Três padrões dominam os deploys de modelo, cada um com requisitos de infraestrutura diferentes:
 
-**Canary (90/10 → 70/30 → 0/100).** Route a small percentage of traffic to the new model version. If metrics hold, increase the percentage. If they degrade, roll back. This is the safest pattern and the most common. Azure ML managed endpoints support this natively with the `--traffic` parameter.
+**Canary (90/10 → 70/30 → 0/100).** Roteie uma pequena porcentagem do tráfego para a nova versão do modelo. Se as métricas se mantiverem, aumente a porcentagem. Se degradarem, faça rollback. Este é o padrão mais seguro e o mais comum. Os managed endpoints do Azure ML suportam isso nativamente com o parâmetro `--traffic`.
 
-**Blue/Green.** Run two full production environments simultaneously. Route all traffic to "blue" (current) while validating "green" (new). When ready, switch the DNS or load balancer to green. Rollback is instant — just switch back. This pattern doubles your infrastructure cost during deployment but eliminates partial-traffic risks.
+**Blue/Green.** Execute dois ambientes de produção completos simultaneamente. Roteie todo o tráfego para "blue" (atual) enquanto valida "green" (novo). Quando estiver pronto, mude o DNS ou load balancer para green. O rollback é instantâneo — basta voltar. Esse padrão dobra o custo de infraestrutura durante o deploy, mas elimina riscos de tráfego parcial.
 
-**Shadow (Dark Launch).** Route 100% of traffic to the current model, but also send a copy of each request to the new model. Compare responses offline without affecting users. This is ideal for high-stakes deployments where even 10% traffic risk is unacceptable. The trade-off is double the inference compute during the shadow period.
+**Shadow (Dark Launch).** Roteie 100% do tráfego para o modelo atual, mas também envie uma cópia de cada requisição para o novo modelo. Compare as respostas offline sem afetar os usuários. Isso é ideal para deploys de alto risco onde até 10% de tráfego é inaceitável. O trade-off é o dobro de compute de inferência durante o período de shadow.
 
 ```bash
-# Azure ML: Shift traffic gradually
-# Start with 10% to the new deployment
+# Azure ML: Desviar tráfego gradualmente
+# Começar com 10% para o novo deployment
 az ml online-endpoint update \
   --name sentiment-prod \
   --traffic "stable=90 canary-v4=10" \
   --resource-group ml-prod-rg \
   --workspace-name ml-prod-ws
 
-# After monitoring confirms parity, increase to 50%
+# Após o monitoramento confirmar paridade, aumentar para 50%
 az ml online-endpoint update \
   --name sentiment-prod \
   --traffic "stable=50 canary-v4=50" \
   --resource-group ml-prod-rg \
   --workspace-name ml-prod-ws
 
-# Full cutover
+# Cutover completo
 az ml online-endpoint update \
   --name sentiment-prod \
   --traffic "canary-v4=100" \
@@ -334,31 +334,31 @@ az ml online-endpoint update \
   --workspace-name ml-prod-ws
 ```
 
-### Monitoring Model Performance During A/B Tests
+### Monitorando o Desempenho do Modelo Durante A/B Tests
 
-During a canary deployment, you're comparing two model versions head-to-head. Your monitoring must answer: is the new model at least as good as the old one? Here's what to track:
+Durante um deploy canary, você está comparando duas versões do modelo frente a frente. Seu monitoramento precisa responder: o novo modelo é pelo menos tão bom quanto o antigo? Aqui está o que rastrear:
 
-| Metric | Why It Matters | Alert Threshold |
+| Métrica | Por que Importa | Threshold de Alerta |
 |---|---|---|
-| **Prediction latency (P50/P95/P99)** | User experience and SLA compliance | P95 > 1.2× baseline |
-| **Error rate** | Model failures, timeout, OOM | > 0.5% |
-| **Prediction distribution** | Detect model drift or bias shift | Distribution divergence > threshold |
-| **GPU utilization** | Efficiency and cost impact | Sustained < 30% or > 95% |
-| **Request throughput** | Capacity validation | Drops below expected RPS |
+| **Latência de predição (P50/P95/P99)** | Experiência do usuário e conformidade com SLA | P95 > 1.2× baseline |
+| **Taxa de erro** | Falhas do modelo, timeout, OOM | > 0.5% |
+| **Distribuição de predições** | Detectar drift do modelo ou mudança de viés | Divergência de distribuição > threshold |
+| **Utilização de GPU** | Eficiência e impacto no custo | Sustentada < 30% ou > 95% |
+| **Throughput de requisições** | Validação de capacidade | Cai abaixo do RPS esperado |
 
-### Automated Rollback Triggers
+### Gatilhos de Rollback Automatizado
 
-Don't rely on humans to catch degradation at 3 AM. Configure automated rollback rules that revert traffic when metrics breach thresholds. Azure ML managed endpoints support deployment health monitoring, and you can build custom rollback logic using Azure Monitor alerts and Logic Apps or GitHub Actions webhooks.
+Não dependa de humanos para detectar degradação às 3 da manhã. Configure regras de rollback automatizado que revertem o tráfego quando as métricas ultrapassam thresholds. Os managed endpoints do Azure ML suportam monitoramento de saúde de deployment, e você pode construir lógica de rollback customizada usando alertas do Azure Monitor com Logic Apps ou webhooks do GitHub Actions.
 
 ```bash
-# Emergency rollback — shift all traffic back to stable
+# Rollback de emergência — desviar todo o tráfego de volta para stable
 az ml online-endpoint update \
   --name sentiment-prod \
   --traffic "stable=100" \
   --resource-group ml-prod-rg \
   --workspace-name ml-prod-ws
 
-# Then delete the failed deployment
+# Em seguida, excluir o deployment que falhou
 az ml online-deployment delete \
   --name canary-v4 \
   --endpoint-name sentiment-prod \
@@ -367,48 +367,48 @@ az ml online-deployment delete \
   --yes
 ```
 
-💡 **Pro Tip**: Define your rollback criteria before deployment, not after. Write them into your pipeline configuration. Common triggers: P95 latency exceeds 2× baseline for 5 minutes, error rate exceeds 1% for 3 minutes, or prediction confidence distribution diverges beyond a statistical threshold.
+💡 **Dica**: Defina seus critérios de rollback antes do deploy, não depois. Escreva-os na configuração do seu pipeline. Gatilhos comuns: latência P95 excede 2× o baseline por 5 minutos, taxa de erro excede 1% por 3 minutos, ou a distribuição de confiança das predições diverge além de um threshold estatístico.
 
 ---
 
-## Model Supply Chain Security
+## Segurança da Cadeia de Suprimentos de Modelos
 
-You wouldn't pull an unsigned container image from an unknown registry and run it in production. The same discipline must apply to model artifacts. Model files are executable code — especially when serialized with Python's `pickle` format — and the ML ecosystem is still maturing its security practices.
+Você não faria pull de uma imagem de container não assinada de um registry desconhecido para rodar em produção. A mesma disciplina precisa se aplicar a artefatos de modelo. Arquivos de modelo são código executável — especialmente quando serializados com o formato `pickle` do Python — e o ecossistema de ML ainda está amadurecendo suas práticas de segurança.
 
-### Model Signing and Provenance
+### Assinatura e Proveniência de Modelos
 
-Establish a chain of custody for every model artifact. At minimum, track:
+Estabeleça uma cadeia de custódia para cada artefato de modelo. No mínimo, rastreie:
 
-- **Who** initiated the training run (identity and authorization)
-- **What** code, data, and hyperparameters were used (reproducibility)
-- **When** the model was trained and registered (auditability)
-- **Where** the training ran (compute environment, region)
+- **Quem** iniciou a execução de treinamento (identidade e autorização)
+- **O que** foi usado: código, dados e hiperparâmetros (reprodutibilidade)
+- **Quando** o modelo foi treinado e registrado (auditabilidade)
+- **Onde** o treinamento foi executado (ambiente de compute, região)
 
-Azure ML automatically captures training job lineage. For additional signing, consider using Notary v2 (notation) to sign model containers stored in ACR:
+O Azure ML captura automaticamente a linhagem de jobs de treinamento. Para assinatura adicional, considere usar o Notary v2 (notation) para assinar containers de modelo armazenados no ACR:
 
 ```bash
-# Sign a model container image with notation
+# Assinar uma imagem de container de modelo com notation
 notation sign \
   mlmodelsacr.azurecr.io/sentiment-classifier:v3 \
   --key mySigningKey
 
-# Verify before deployment
+# Verificar antes do deploy
 notation verify \
   mlmodelsacr.azurecr.io/sentiment-classifier:v3
 ```
 
-### Container Image Security for Model Serving
+### Segurança de Imagens de Container para Model Serving
 
-Model serving containers inherit all the security concerns of any production container — plus additional risks from ML framework dependencies. Your container scanning pipeline should include:
+Containers de model serving herdam todas as preocupações de segurança de qualquer container de produção — além de riscos adicionais vindos das dependências de frameworks de ML. Seu pipeline de scanning de containers deve incluir:
 
 ```bash
-# Scan the model-serving image with Defender for Containers
+# Escanear a imagem de model serving com o Defender for Containers
 az acr task run \
   --registry mlmodelsacr \
   --name scan-sentiment-v3 \
   --file scan-task.yaml
 
-# Check for known vulnerabilities in ML framework dependencies
+# Verificar vulnerabilidades conhecidas nas dependências de frameworks de ML
 # (PyTorch, TensorFlow, ONNX Runtime, etc.)
 az acr repository show \
   --name mlmodelsacr \
@@ -416,36 +416,36 @@ az acr repository show \
   --query "changeableAttributes"
 ```
 
-⚠️ **Production Gotcha**: Model files downloaded from public hubs like Hugging Face can contain malicious code. PyTorch's default serialization uses Python `pickle`, which can execute arbitrary code during deserialization. A model file named `pytorch_model.bin` could contain a reverse shell payload that activates when your inference server loads the weights. **Always** scan model files from untrusted sources, prefer SafeTensors format over pickle, and run model loading in sandboxed environments before promoting to your registry. Treat model files with the same suspicion you'd give an unsigned container image from Docker Hub.
+⚠️ **Armadilha de Produção**: Arquivos de modelo baixados de hubs públicos como o Hugging Face podem conter código malicioso. A serialização padrão do PyTorch usa `pickle` do Python, que pode executar código arbitrário durante a desserialização. Um arquivo de modelo chamado `pytorch_model.bin` pode conter um payload de reverse shell que é ativado quando seu servidor de inferência carrega os pesos. **Sempre** escaneie arquivos de modelo de fontes não confiáveis, prefira o formato SafeTensors ao pickle e execute o carregamento de modelos em ambientes sandboxed antes de promovê-los ao seu registry. Trate arquivos de modelo com a mesma desconfiança que você daria a uma imagem de container não assinada do Docker Hub.
 
-### Securing the Model Pipeline
+### Protegendo o Pipeline de Modelos
 
-Apply the same supply chain principles you use for application code:
+Aplique os mesmos princípios de cadeia de suprimentos que você usa para código de aplicação:
 
-- **Private registries only**: Store models in Azure ML registries or private ACR instances — never on shared drives or public storage.
-- **Managed identity for access**: Use Azure Managed Identity for pipeline authentication to model registries. No service principal secrets in CI/CD variables.
-- **Network isolation**: Model registries should be accessible only via private endpoints. Training and inference compute should pull artifacts through your VNet.
-- **Immutable versions**: Once a model version is registered, it should not be overwritten. Treat model versions like container image digests — append, never mutate.
+- **Apenas registries privados**: Armazene modelos em registries do Azure ML ou instâncias privadas do ACR — nunca em pastas compartilhadas ou storage público.
+- **Managed identity para acesso**: Use Azure Managed Identity para autenticação do pipeline nos model registries. Nada de secrets de service principal em variáveis de CI/CD.
+- **Isolamento de rede**: Model registries devem ser acessíveis apenas via private endpoints. Compute de treinamento e inferência deve fazer pull de artefatos pela sua VNet.
+- **Versões imutáveis**: Uma vez que uma versão de modelo é registrada, ela não deve ser sobrescrita. Trate versões de modelo como digests de imagem de container — apenas adicione, nunca mude.
 
 ---
 
-## Reproducible Training Environments
+## Ambientes de Treinamento Reprodutíveis
 
-When a model needs retraining — because data drifts, requirements change, or a bug is discovered — you need to recreate the exact environment that produced the current version. "It worked on my machine" is even more dangerous in ML because training outcomes depend on framework versions, CUDA drivers, random seeds, and even GPU hardware generation.
+Quando um modelo precisa de retreinamento — porque os dados mudam, os requisitos se alteram ou um bug é descoberto — você precisa recriar o ambiente exato que produziu a versão atual. "Funciona na minha máquina" é ainda mais perigoso em ML porque os resultados do treinamento dependem de versões de framework, drivers CUDA, seeds aleatórias e até da geração do hardware da GPU.
 
-### What to Pin
+### O que Fixar
 
-A reproducible training environment locks down four categories:
+Um ambiente de treinamento reprodutível trava quatro categorias:
 
-| Category | What to Pin | Example |
+| Categoria | O que Fixar | Exemplo |
 |---|---|---|
-| **Framework** | ML library version | `pytorch==2.2.1`, `transformers==4.38.0` |
+| **Framework** | Versão da biblioteca de ML | `pytorch==2.2.1`, `transformers==4.38.0` |
 | **Runtime** | CUDA, cuDNN, Python | `CUDA 12.1`, `cuDNN 8.9.7`, `Python 3.11.8` |
-| **Data** | Dataset version or snapshot | `dataset-v2.3`, timestamped blob snapshot |
-| **Hardware** | GPU SKU and count | `Standard_NC24ads_A100_v4`, 4x A100 80GB |
+| **Dados** | Versão ou snapshot do dataset | `dataset-v2.3`, snapshot de blob com timestamp |
+| **Hardware** | SKU e quantidade de GPUs | `Standard_NC24ads_A100_v4`, 4x A100 80GB |
 
 ```dockerfile
-# Example: Pinned training environment
+# Exemplo: Ambiente de treinamento com versões fixas
 FROM mcr.microsoft.com/aifx/acpt/stable-ubuntu2204-cu121-py311-torch221:latest
 
 WORKDIR /training
@@ -456,26 +456,26 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY src/ ./src/
 COPY configs/ ./configs/
 
-# Pin the random seed for reproducibility
+# Fixar a seed aleatória para reprodutibilidade
 ENV PYTHONHASHSEED=42
 ENV CUBLAS_WORKSPACE_CONFIG=:4096:8
 
 ENTRYPOINT ["python", "src/train.py"]
 ```
 
-💡 **Pro Tip**: Use Azure ML curated environments or Microsoft's ACPT (Azure Container for PyTorch) base images. These are pre-validated combinations of CUDA, cuDNN, and framework versions that are tested against Azure GPU SKUs. Building your own CUDA stack from scratch is a reliability risk you don't need to take.
+💡 **Dica**: Use ambientes curados do Azure ML ou imagens base ACPT (Azure Container for PyTorch) da Microsoft. Essas são combinações pré-validadas de CUDA, cuDNN e versões de framework testadas contra SKUs de GPU do Azure. Construir sua própria stack CUDA do zero é um risco de confiabilidade que você não precisa correr.
 
-### Storage Architecture for Training Artifacts
+### Arquitetura de Storage para Artefatos de Treinamento
 
-Training produces a surprising volume of artifacts beyond the final model. Your storage architecture must handle:
+O treinamento produz um volume surpreendente de artefatos além do modelo final. Sua arquitetura de storage precisa lidar com:
 
-- **Checkpoints**: Intermediate model snapshots saved every N steps. A single training run on a large model can produce hundreds of gigabytes of checkpoints. Use Azure Blob Storage with hot tier for active runs, then lifecycle policies to move older checkpoints to cool or archive tier.
-- **Logs and metrics**: Per-step training metrics (loss, learning rate, gradient norms) logged to experiment tracking (MLflow or Azure ML). These are small but numerous — thousands of metric points per run.
-- **Datasets**: Versioned snapshots of training data. Use Azure Data Lake Storage Gen2 with hierarchical namespace for efficient large-dataset access. Enable versioning or immutable storage for compliance.
-- **Configuration**: Hyperparameters, environment definitions, and pipeline configurations. Store these in Git alongside your training code.
+- **Checkpoints**: Snapshots intermediários do modelo salvos a cada N passos. Uma única execução de treinamento em um modelo grande pode produzir centenas de gigabytes de checkpoints. Use Azure Blob Storage com camada hot para execuções ativas, depois políticas de lifecycle para mover checkpoints mais antigos para a camada cool ou archive.
+- **Logs e métricas**: Métricas de treinamento por passo (loss, learning rate, normas de gradiente) registradas no rastreamento de experimentos (MLflow ou Azure ML). Elas são pequenas mas numerosas — milhares de pontos de métrica por execução.
+- **Datasets**: Snapshots versionados dos dados de treinamento. Use Azure Data Lake Storage Gen2 com hierarchical namespace para acesso eficiente a datasets grandes. Habilite versionamento ou storage imutável para conformidade.
+- **Configuração**: Hiperparâmetros, definições de ambiente e configurações de pipeline. Armazene-os no Git junto com seu código de treinamento.
 
 ```bash
-# Create a storage account optimized for training artifacts
+# Criar uma conta de storage otimizada para artefatos de treinamento
 az storage account create \
   --name mltrainingartifacts \
   --resource-group ml-prod-rg \
@@ -483,7 +483,7 @@ az storage account create \
   --kind StorageV2 \
   --hns true
 
-# Set lifecycle policy to archive old checkpoints
+# Definir política de lifecycle para arquivar checkpoints antigos
 az storage account management-policy create \
   --account-name mltrainingartifacts \
   --resource-group ml-prod-rg \
@@ -492,30 +492,30 @@ az storage account management-policy create \
 
 ---
 
-## Feature Stores — The Infra View
+## Feature Stores — A Visão de Infra
 
-At some point, your ML teams will ask for a "feature store." If this term is new, don't worry — from an infrastructure perspective, it's a caching and data-serving layer that you already know how to build.
+Em algum momento, seus times de ML vão pedir uma "feature store." Se o termo é novo, não se preocupe — da perspectiva de infraestrutura, é uma camada de cache e serving de dados que você já sabe construir.
 
-### What Feature Stores Are and Why They Exist
+### O que São Feature Stores e Por que Existem
 
-A feature is a transformed data point used as input to a model. For example, a raw transaction log might contain timestamps and dollar amounts. Features derived from that data might include "average transaction amount in the last 7 days" or "number of transactions in the last hour." Computing these features is expensive, and different models often need the same features. A feature store computes features once and serves them to any model that needs them.
+Uma feature é um dado transformado usado como entrada para um modelo. Por exemplo, um log bruto de transações pode conter timestamps e valores em dólares. Features derivadas desses dados podem incluir "valor médio de transação nos últimos 7 dias" ou "número de transações na última hora." Computar essas features é caro, e modelos diferentes frequentemente precisam das mesmas features. Uma feature store computa features uma vez e as serve para qualquer modelo que precisar delas.
 
-From your perspective, a feature store is a system with two data paths and a consistency requirement between them.
+Da sua perspectiva, uma feature store é um sistema com dois caminhos de dados e um requisito de consistência entre eles.
 
-### Online vs. Offline Stores
+### Stores Online vs. Offline
 
-| Component | Purpose | Latency | Storage | Example Tech |
+| Componente | Finalidade | Latência | Storage | Tecnologia Exemplo |
 |---|---|---|---|---|
-| **Offline store** | Batch training data retrieval | Seconds to minutes | Terabytes to petabytes | Azure Data Lake, Synapse, Delta Lake |
-| **Online store** | Real-time inference serving | Single-digit milliseconds | Gigabytes to terabytes | Azure Cache for Redis, Cosmos DB |
+| **Offline store** | Recuperação de dados em lote para treinamento | Segundos a minutos | Terabytes a petabytes | Azure Data Lake, Synapse, Delta Lake |
+| **Online store** | Serving de inferência em tempo real | Milissegundos de um dígito | Gigabytes a terabytes | Azure Cache for Redis, Cosmos DB |
 
-**Offline stores** serve training pipelines. Data scientists query historical feature values to build training datasets. Performance requirements are throughput-oriented — scanning large volumes of data efficiently. This maps to your existing data lake architecture.
+**Offline stores** atendem pipelines de treinamento. Cientistas de dados consultam valores históricos de features para construir datasets de treinamento. Os requisitos de desempenho são orientados a throughput — escanear grandes volumes de dados de forma eficiente. Isso mapeia para sua arquitetura de data lake existente.
 
-**Online stores** serve inference endpoints. When a model receives a prediction request, it needs the latest feature values with sub-10ms latency. This is a key-value lookup pattern — exactly like the caching layers you've built for web applications.
+**Online stores** atendem endpoints de inferência. Quando um modelo recebe uma requisição de predição, ele precisa dos valores mais recentes das features com latência abaixo de 10ms. Esse é um padrão de lookup chave-valor — exatamente como as camadas de cache que você já construiu para aplicações web.
 
-### Infrastructure Components
+### Componentes de Infraestrutura
 
-A feature store deployment typically includes:
+Um deploy de feature store normalmente inclui:
 
 ```
 ┌─────────────────────────────────────────────┐
@@ -529,38 +529,38 @@ A feature store deployment typically includes:
 │  └──────────┘            └──────────────┘   │
 │       ▲                        │            │
 │       │                        ▼            │
-│  Training                  Inference        │
-│  Pipelines                 Endpoints        │
+│  Pipelines de              Endpoints de     │
+│  Treinamento               Inferência       │
 └─────────────────────────────────────────────┘
 ```
 
-- **Azure Data Lake Storage Gen2** for the offline store — batch access, schema evolution, and cost-effective storage for historical feature data.
-- **Azure Cache for Redis** or **Cosmos DB** for the online store — sub-millisecond reads for real-time serving. Choose Redis for simple key-value patterns with extreme low latency. Choose Cosmos DB when you need multi-region replication, richer query patterns, or SLA-backed availability.
-- **A synchronization pipeline** (Azure Data Factory, Spark, or custom) that materializes features from the offline store to the online store on a schedule or triggered by new data.
+- **Azure Data Lake Storage Gen2** para o offline store — acesso em lote, evolução de schema e storage com custo-benefício para dados históricos de features.
+- **Azure Cache for Redis** ou **Cosmos DB** para o online store — leituras sub-milissegundo para serving em tempo real. Escolha Redis para padrões simples de chave-valor com latência extremamente baixa. Escolha Cosmos DB quando precisar de replicação multi-região, padrões de consulta mais ricos ou disponibilidade com SLA garantido.
+- **Um pipeline de sincronização** (Azure Data Factory, Spark ou customizado) que materializa features do offline store para o online store em uma agenda ou acionado por novos dados.
 
-💡 **Pro Tip**: Treat the online feature store like any other caching tier. Apply the same operational practices — monitor hit rates, set eviction policies, plan capacity for peak load, and test failure scenarios. If Redis goes down, your inference endpoints lose access to features and predictions fail. This is a critical-path dependency.
-
----
-
-## Chapter Checklist
-
-Before moving to Chapter 7, verify that your model lifecycle management covers these essentials:
-
-- [ ] **Model registry in place** — All production models are registered with immutable versions, metadata, and lineage tracking (Azure ML, MLflow, or ACR).
-- [ ] **CI/CD pipeline for models** — Automated pipeline with Dev → Staging → Production stages and validation gates at each transition.
-- [ ] **Validation gates defined** — Accuracy thresholds, latency benchmarks, throughput tests, and security scans run automatically before any model reaches production.
-- [ ] **Traffic management configured** — Canary or blue/green deployment capability with percentage-based traffic splitting for safe model rollouts.
-- [ ] **Automated rollback** — Monitoring alerts trigger automatic traffic revert when model performance degrades beyond defined thresholds.
-- [ ] **Model supply chain secured** — Model artifacts are signed, scanned, stored in private registries, and accessed via managed identity and private endpoints.
-- [ ] **Reproducible training environments** — Framework, CUDA, Python, and data versions are pinned. Training runs in containerized environments with deterministic configurations.
-- [ ] **Storage architecture planned** — Blob storage for checkpoints with lifecycle policies, experiment tracking for metrics, versioned data lake for datasets.
-- [ ] **Feature store infrastructure scoped** — If required, offline store (ADLS), online store (Redis/Cosmos DB), and synchronization pipeline are provisioned and monitored.
-- [ ] **Rollback tested** — You've actually tested rolling back a model version in a non-production environment. Don't wait for a 2 AM incident to discover your rollback process has gaps.
+💡 **Dica**: Trate a online feature store como qualquer outra camada de cache. Aplique as mesmas práticas operacionais — monitore taxas de acerto, defina políticas de evicção, planeje capacidade para picos de carga e teste cenários de falha. Se o Redis cair, seus endpoints de inferência perdem acesso às features e as predições falham. Essa é uma dependência no caminho crítico.
 
 ---
 
-## Bridge to Chapter 7
+## Checklist do Capítulo
 
-Your models now have a lifecycle — versioned, tested, and deployable through automated pipelines with rollback capabilities. But deployment is only the beginning of a model's life in production. How do you know the model is performing well after the canary period ends? How do you detect when prediction quality degrades because the real world changed? How do you alert on GPU utilization patterns that indicate wasted spend?
+Antes de seguir para o Capítulo 7, verifique se o gerenciamento de ciclo de vida dos seus modelos cobre estes itens essenciais:
 
-Chapter 7 covers monitoring and observability for AI workloads: what to measure, how to alert, and why GPU metrics are only the beginning.
+- [ ] **Model registry implementado** — Todos os modelos de produção estão registrados com versões imutáveis, metadados e rastreamento de linhagem (Azure ML, MLflow ou ACR).
+- [ ] **Pipeline de CI/CD para modelos** — Pipeline automatizado com estágios Dev → Staging → Production e gates de validação em cada transição.
+- [ ] **Gates de validação definidos** — Thresholds de acurácia, benchmarks de latência, testes de throughput e scans de segurança rodam automaticamente antes de qualquer modelo chegar à produção.
+- [ ] **Gerenciamento de tráfego configurado** — Capacidade de deploy canary ou blue/green com divisão de tráfego baseada em porcentagem para rollouts seguros de modelos.
+- [ ] **Rollback automatizado** — Alertas de monitoramento disparam reversão automática de tráfego quando o desempenho do modelo degrada além dos thresholds definidos.
+- [ ] **Cadeia de suprimentos de modelos protegida** — Artefatos de modelo são assinados, escaneados, armazenados em registries privados e acessados via managed identity e private endpoints.
+- [ ] **Ambientes de treinamento reprodutíveis** — Versões de framework, CUDA, Python e dados estão fixadas. Treinamento roda em ambientes containerizados com configurações determinísticas.
+- [ ] **Arquitetura de storage planejada** — Blob storage para checkpoints com políticas de lifecycle, rastreamento de experimentos para métricas, data lake versionado para datasets.
+- [ ] **Infraestrutura de feature store dimensionada** — Se necessário, offline store (ADLS), online store (Redis/Cosmos DB) e pipeline de sincronização estão provisionados e monitorados.
+- [ ] **Rollback testado** — Você realmente testou fazer rollback de uma versão de modelo em um ambiente que não é de produção. Não espere por um incidente às 2 da manhã para descobrir que seu processo de rollback tem falhas.
+
+---
+
+## Ponte para o Capítulo 7
+
+Seus modelos agora têm um ciclo de vida — versionados, testados e implantáveis por meio de pipelines automatizados com capacidade de rollback. Mas o deploy é apenas o começo da vida de um modelo em produção. Como você sabe que o modelo está performando bem depois que o período de canary termina? Como você detecta quando a qualidade das predições degrada porque o mundo real mudou? Como você cria alertas sobre padrões de utilização de GPU que indicam desperdício de gastos?
+
+O Capítulo 7 cobre monitoramento e observabilidade para workloads de IA: o que medir, como alertar e por que métricas de GPU são apenas o começo.

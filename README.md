@@ -4,7 +4,7 @@
 
 [![Deploy MkDocs](https://github.com/ricmmartins/ai-for-infra-pros/actions/workflows/deploy-mkdocs.yml/badge.svg)](https://github.com/ricmmartins/ai-for-infra-pros/actions/workflows/deploy-mkdocs.yml)
 
-🌐 **Available in English:** [Read in English](https://github.com/ricmmartins/ai-for-infra-pros/tree/main)
+🌐 **Available in English:** [Read in English](https://github.com/ricmmartins/ai-for-infra-pros/tree/en-us)
 
 > *"Você não precisa ser um cientista de dados para trabalhar com IA — mas precisa entender como ela funciona, escala, quebra e custa dinheiro."*
 
