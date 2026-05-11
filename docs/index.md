@@ -166,6 +166,10 @@ This book is part of a complete learning ecosystem for infrastructure profession
 
     AI/ML for infrastructure engineers. From GPUs to MLOps.
 
+- :material-cloud: **[AKS Learning](https://aks-learning.github.io/)**
+
+    Using Azure? From zero to production on Azure Kubernetes Service.
+
 </div>
 
 ---
@@ -176,7 +180,7 @@ Created by **Ricardo Martins**
 
 :fontawesome-solid-briefcase: Principal Solutions Engineer @ Microsoft
 
-:fontawesome-solid-book: Author of [*Azure Governance Made Simple*](https://book.azgovernance.com/), [*Linux Hackathon*](https://linuxhackathon.com/), [*K8s Hackathon*](https://k8shackathon.com/) and [*From Server to Cluster*](https://fromservertocluster.com/)
+:fontawesome-solid-book: Author of [*Azure Governance Made Simple*](https://book.azgovernance.com/), [*Linux Hackathon*](https://linuxhackathon.com/), [*K8s Hackathon*](https://k8shackathon.com/), [*From Server to Cluster*](https://fromservertocluster.com/) and [*AKS Learning*](https://aks-learning.github.io/)
 
 :fontawesome-solid-globe: [rmmartins.com](https://rmmartins.com)
 
