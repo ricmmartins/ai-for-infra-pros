@@ -164,11 +164,46 @@ ai-for-infra-pros/
 
 ---
 
+## Ecossistema de Aprendizado
+
+Este livro faz parte de uma trilha de aprendizado progressiva para profissionais de infraestrutura:
+
+```mermaid
+flowchart TB
+    subgraph journey["🚀 Trilha de Aprendizado Progressiva"]
+        direction LR
+        A["🐧 <b>Linux FUNdamentals</b><br/>20 desafios práticos<br/><i>linuxhackathon.com</i>"] ==> B["☸️ <b>Kubernetes Hackathon</b><br/>20 desafios práticos<br/><i>k8shackathon.com</i>"] ==> C["🤖 <b>AI for Infrastructure</b><br/>IA + Cloud<br/><i>ai4infra.com</i>"]
+    end
+
+    A -.->|leitura complementar| D
+    B -.->|leitura complementar| D
+    C -.->|leitura complementar| D
+
+    B -.->|aprofundamento Azure| E
+
+    D["📖 <b>From Server to Cluster</b><br/>O PORQUÊ por trás do QUÊ<br/><i>fromservertocluster.com</i>"]
+    E["☁️ <b>AKS Learning</b><br/>Do zero à produção no AKS<br/><i>aks-learning.github.io</i>"]
+
+    classDef challenge fill:#2b5ea7,stroke:#1e4a8a,color:#fff,stroke-width:2px
+    classDef current fill:#1a7f37,stroke:#116329,color:#fff,stroke-width:3px
+
+    class A,B,D,E challenge
+    class C current
+
+    click A "https://linuxhackathon.com" _blank
+    click B "https://k8shackathon.com" _blank
+    click C "https://ai4infra.com" _blank
+    click D "https://fromservertocluster.com" _blank
+    click E "https://aks-learning.github.io" _blank
+```
+
+---
+
 ## Créditos
 
 Criado por **Ricardo Martins**
 Principal Solutions Engineer @ Microsoft
-Autor de [*Azure Governance Made Simple*](https://book.azgovernance.com/), [*Linux Hackathon*](https://linuxhackathon.com/), [*K8s Hackathon*](https://k8shackathon.com/) e [*From Server to Cluster*](https://fromservertocluster.com/)
+Autor de [*Azure Governance Made Simple*](https://book.azgovernance.com/), [*Linux Hackathon*](https://linuxhackathon.com/), [*K8s Hackathon*](https://k8shackathon.com/), [*From Server to Cluster*](https://fromservertocluster.com/) e [*AKS Learning*](https://aks-learning.github.io/)
 [rmmartins.com](https://rmmartins.com)
 
 ---
