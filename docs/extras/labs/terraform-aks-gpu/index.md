@@ -69,6 +69,9 @@ You need **Contributor** (or **Owner**) on the target subscription and sufficien
 # Authenticate and set your subscription
 az login
 az account set --subscription "<your-subscription-id>"
+
+# azurerm 4.x requires an explicit subscription ID; the provider reads it from this variable
+export ARM_SUBSCRIPTION_ID=$(az account show --query id -o tsv)   # PowerShell: $env:ARM_SUBSCRIPTION_ID = az account show --query id -o tsv
 ```
 
 ### Check GPU quota (do this first!)
@@ -157,7 +160,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = ">= 3.90.0, < 4.0.0"
+      version = "~> 4.0"
     }
   }
 }
@@ -450,7 +453,7 @@ This lab deploys a minimal configuration for learning. A production GPU cluster 
 
 ### Scaling
 
-- **Cluster autoscaler** — Set `enable_auto_scaling = true`, `min_count = 0`, and `max_count = N` on the GPU node pool. Scaling to zero when idle eliminates GPU costs during off-hours. *(Note: In azurerm provider v4.x, this argument was renamed to `auto_scaling_enabled`.)*
+- **Cluster autoscaler** — Set `auto_scaling_enabled = true`, `min_count = 0`, and `max_count = N` on the GPU node pool. Scaling to zero when idle eliminates GPU costs during off-hours. *(This lab uses azurerm 4.x, where the argument is `auto_scaling_enabled`; in 3.x it was `enable_auto_scaling`.)*
 - **KEDA** — For event-driven scaling of inference workloads based on queue depth or HTTP request rate.
 
 💡 **Pro Tip**: Setting `min_count = 0` on GPU node pools is the single highest-impact cost optimization for non-24/7 workloads. A T4 node sitting idle overnight costs ~$4.25 for nothing. The autoscaler takes 3–5 minutes to provision a new GPU node — acceptable for batch inference, too slow for real-time APIs. Know your latency budget.
