@@ -4,7 +4,7 @@
 
 You did everything right. The ML team asked for a GPU cluster, and you delivered — eight NVIDIA A100 GPUs across two nodes, connected with high-bandwidth networking, running the latest CUDA drivers. The deployment was textbook. The team kicked off their first training job at 6 PM on a Friday, and you headed home feeling good about a week well spent.
 
-Your phone buzzes at midnight. The lead data scientist sounds frustrated: "The GPUs aren't working. Training that should take four hours hasn't even finished the first epoch." You remote in and pull up the metrics. GPU utilization: 12%. GPU memory usage: barely a third. But then you see it — disk I/O is pegged at 100%, with read throughput crawling at 60 MB/s. The team stored 2 TB of training images on a Standard HDD-backed Blob Storage account mounted via a basic SMB share. Your storage architecture is starving the most expensive hardware in the rack.
+Your phone buzzes at midnight. The lead data scientist sounds frustrated: "The GPUs aren't working. Training that should take four hours hasn't even finished the first epoch." You remote in and pull up the metrics. GPU utilization: 12%. GPU memory usage: barely a third. But then you see it — disk I/O is pegged at 100%, with read throughput crawling at 60 MB/s. The team stored 2 TB of training images in Blob Storage and tried to treat it like a basic SMB share. Your storage architecture is starving the most expensive hardware in the rack.
 
 This story plays out in organizations every week. Teams pour budgets into GPUs, only to discover that their data pipeline — the part infrastructure engineers own — is the real bottleneck. Data is to AI what fuel is to an engine, but the fuel line matters as much as the fuel itself. This chapter will teach you how to build fuel lines that keep those GPUs fed.
 
@@ -25,7 +25,7 @@ Remove any one of these and you have nothing. But here is the insight that most 
 | Storage account / volume | Training dataset repository | Where raw data lives before the model sees it |
 | Read throughput (MB/s) | Data loader speed | Determines how fast GPUs receive training batches |
 | IOPS | Samples per second | Small-file workloads (images) need high IOPS |
-| Storage tiers (Hot/Cool/Archive) | Data lifecycle stages | Hot for active training, Cool for completed datasets, Archive for compliance |
+| Storage tiers (Hot/Cool/Cold/Archive) | Data lifecycle stages | Hot for active training, Cool/Cold for less-frequent access, Archive for compliance |
 | Blob container | Dataset partition | Logical grouping of training, validation, and test data |
 | NFS/SMB mount | POSIX file access for frameworks | PyTorch and TensorFlow expect filesystem semantics |
 | Encryption at rest | Data protection compliance | Required for PII, medical, and financial datasets |
@@ -72,7 +72,7 @@ Once ingested, data needs a home. Your choice of storage backend affects everyth
 
 **Key considerations:**
 - **Hot tier** for datasets under active training
-- **Cool tier** for completed experiment data you might revisit
+- **Cool or Cold tier** for completed experiment data you might revisit less often
 - **Archive tier** for compliance and audit retention
 - **Data Lake Gen2** for analytics-ready hierarchical storage
 
@@ -126,7 +126,7 @@ This is where your infrastructure expertise becomes critical. Choosing the right
 
 💡 **Pro Tip**: The most common production pattern is a two-tier approach: store raw datasets in Blob Storage or Data Lake Gen2 for durability and cost, then stage active training data to local NVMe for performance. Think of Blob as your warehouse and NVMe as your workbench.
 
-⚠️ **Production Gotcha**: Never use Standard HDD-backed storage for training workloads. The IOPS and throughput limits are orders of magnitude below what GPUs require. A single A100 GPU can consume data faster than a Standard HDD account can serve it. Always use Premium or at minimum Standard SSD-backed accounts for active training data.
+⚠️ **Production Gotcha**: Never think about Blob Storage in HDD-versus-SSD terms. Blob performance is framed around access tiers (Hot, Cool, Cold, Archive), and premium block blob accounts are a separate high-performance option. For active training data, keep blobs online in Hot or use premium block blob plus local NVMe staging. Cool and Cold are for data you touch less often; Archive is offline and not suitable for training.
 
 ---
 
@@ -178,6 +178,8 @@ sudo blobfuse2 mount /mnt/training-data \
   --preload
 ```
 
+⚠️ **Warning**: `--preload` makes the BlobFuse2 mount read-only and prevents file eviction. That's great for read-mostly training data, but don't write checkpoints, logs, or any other mutable outputs into that mount. Keep those on a separate writable path — ideally local NVMe during the run — and sync them back to Blob Storage afterward.
+
 💡 **Pro Tip**: Always point `--tmp-path` to the VM's local NVMe temp disk (`/mnt/resource` on Azure VMs) rather than the OS disk. This gives BlobFuse2's cache the lowest possible latency. On GPU VMs like the ND-series, the local temp disk can deliver 3-7 GB/s of read throughput.
 
 > For full configuration options, including managed identity authentication and streaming mode, see the [BlobFuse2 documentation](https://learn.microsoft.com/azure/storage/blobs/blobfuse2-what-is).
@@ -212,7 +214,7 @@ Azure GPU VMs (ND-series, NC-series) include local NVMe temporary disks that pro
 - **Ephemeral**: All data is lost when the VM is stopped or deallocated
 - No additional cost — included with the VM
 
-The recommended pattern: use AzCopy or BlobFuse2 preload to stage data from Blob Storage to local NVMe at job start, train from NVMe, then write checkpoints back to Blob Storage for durability.
+The recommended pattern: use AzCopy or BlobFuse2 preload to stage data from Blob Storage to local NVMe at job start, train from that fast local path, then write checkpoints to a separate writable path and copy them back to Blob Storage for durability.
 
 ⚠️ **Production Gotcha: "The 12% GPU Utilization Mystery"** — If a data scientist reports that their GPU utilization is suspiciously low, check the storage backend before investigating anything else. Nine times out of ten, the issue is one of: (1) training data on Standard HDD, (2) a remote mount without caching, or (3) the BlobFuse2 cache directory pointing to the OS disk instead of the NVMe temp disk. A five-minute storage fix can turn a multi-day training job into an overnight one.
 
@@ -414,7 +416,7 @@ azcopy copy './local-dataset/' \
 
 **Match storage to workload** — Use Blob/Data Lake Gen2 for durable storage, local NVMe for training scratch space, and Cosmos DB for low-latency inference features.
 
-**Use BlobFuse2 wisely** — Mount Blob Storage as a filesystem with file cache mode for training. Always point the cache to the VM's local NVMe temp disk.
+**Use BlobFuse2 wisely** — Mount Blob Storage as a filesystem with file cache mode for training. Always point the cache to the VM's local NVMe temp disk, and remember that `--preload` makes the mount read-only.
 
 **Stage data for training** — Copy datasets from Blob Storage to local NVMe before training starts. Write checkpoints back to Blob for durability.
 

@@ -251,7 +251,50 @@ PTU makes sense when:
 
 ### When PTU Pays for Itself
 
-The break-even point depends on your model, region, and traffic pattern, but as a general guideline: if your standard deployment is consistently utilized at **60–70% or above** of what a PTU allocation would provide, PTU typically becomes cheaper. Below that utilization, you're paying for reserved capacity you're not using.
+**Heuristic, not a law**: if your standard deployment is consistently operating at **roughly 60–70%+** of the throughput a PTU deployment would reserve for the same workload shape, PTU often starts to win economically. But don't treat that as a universal threshold. The real break-even depends on model, region, deployment type, cache rate, and current pricing.
+
+Start with the Azure OpenAI sizing calculator, because PTU cost comparisons are meaningless until you know how many PTUs the workload actually needs. Microsoft documents the sizing flow as:
+
+- Estimate required PTUs from **peak RPM**, **prompt tokens**, **response tokens**, and **cache rate**
+- Convert the workload to **normalized TPM**
+- Divide by the model's **Input TPM per PTU**
+- Round up to the deployment's minimum and increment
+
+The core formulas are:
+
+```text
+Normalized TPM = (input TPM × (1 − cache rate)) + (output-to-input ratio × output TPM)
+PTUs required = Normalized TPM ÷ Input TPM per PTU
+```
+
+Once you have the PTU count, compare monthly cost using variables from the **current** pricing page:
+
+```text
+Monthly PTU cost = Required PTUs × PTU monthly price
+Monthly PAYG cost = (Monthly input tokens ÷ 1,000 × input-token price)
+                  + (Monthly output tokens ÷ 1,000 × output-token price)
+                  + any cache-write charges
+```
+
+PTU breaks even when:
+
+```text
+Required PTUs × PTU monthly price <= Monthly PAYG cost
+```
+
+**Worked example with placeholders**:
+
+1. The sizing calculator says your workload needs **N** PTUs for its peak minute.
+2. Your current PAYG usage is **I** input tokens/month and **O** output tokens/month.
+3. Current pricing for your model and region is **P** per PTU/month, **Ci** per 1K input tokens, and **Co** per 1K output tokens.
+4. Compare:
+
+```text
+PTU monthly cost = N × P
+PAYG monthly cost = (I ÷ 1,000 × Ci) + (O ÷ 1,000 × Co)
+```
+
+If `N × P` is lower **and** the traffic is sustained enough that the PTUs won't sit idle most of the month, PTU is the better buy. If not, stay on Standard or use a hybrid pattern where PTU handles the steady baseline and Standard absorbs bursts.
 
 ### Decision Matrix: Standard vs PTU
 
@@ -265,19 +308,27 @@ The break-even point depends on your model, region, and traffic pattern, but as 
 | **Cost at high volume** | Higher (linear scaling) | Lower (amortized across tokens) |
 | **Scale to zero** | Yes | No (minimum PTU commitment) |
 
-> **Note**: PTU pricing, throughput-per-unit ratios, and minimum commitments vary by model, version, and region. Always use the Azure OpenAI capacity calculator for accurate sizing.
+> **Note**: PTU pricing, throughput-per-unit ratios, and minimum commitments vary by model, version, and region. Use the [PTU sizing guidance](https://learn.microsoft.com/azure/foundry/openai/how-to/provisioned-throughput-sizing), the Foundry capacity calculator, and the live [Azure OpenAI pricing page](https://azure.microsoft.com/pricing/details/cognitive-services/openai-service/) before you commit. Verify current numbers — they change.
 
 ### Token Optimization Strategies
 
 Regardless of whether you use Standard or PTU, reducing token consumption directly reduces cost:
 
-**Prompt caching**: Azure OpenAI supports automatic prompt caching for repeated prefixes. If your system prompt is 2,000 tokens and identical across all requests, cached tokens are charged at a reduced rate. Structure your prompts with the static portion first.
+**Prompt trimming first**: Most teams burn tokens on instructions they wrote once and never challenged again. Remove duplicated guidance, move verbose examples to retrieval where possible, and keep the most reusable, static instructions at the beginning of the prompt. Every token in the prefix gets paid for over and over.
 
-**Shorter system prompts**: A 3,000-token system prompt that could be 800 tokens wastes 2,200 tokens per request. At 10,000 requests per day with GPT-4o, that's 22 million wasted input tokens — roughly $55/day or $1,650/month in unnecessary spend.
+**Output caps**: Cap response size deliberately. On Chat Completions, that's typically `max_tokens`; on the Responses API, use the equivalent output cap for that API. If the business task only needs a 150-word answer, don't fund a 1,500-token essay. This is one of the cleanest cost and latency wins you can get.
 
-**Response length limits**: Use the `max_tokens` parameter to cap response length. If your application only needs 200-word answers, don't allow 2,000-token responses. This is both a cost and a latency optimization.
+**Prompt caching**: Azure OpenAI supports prompt caching for repeated prefixes. For supported models, the service can discount cached prompt reads; Microsoft documents that prompt caching kicks in when the prompt is at least 1,024 tokens and the first 1,024 tokens are identical. The operational lesson is simple: keep the static prefix stable, and put request-specific text later.
 
-**Multi-model routing**: Not every request needs your most capable (and most expensive) model. Route simple classification, extraction, or FAQ queries to GPT-4o-mini and reserve GPT-4o for complex reasoning, multi-step analysis, or tasks where quality measurably suffers with the smaller model. A well-implemented routing layer can cut inference costs by 50–80%.
+**Semantic caching via APIM**: If users ask near-duplicate questions, use Azure API Management semantic caching so you reuse prior completions instead of paying the model again. This works best for high-repeat workloads like internal policy Q&A, product FAQ, and knowledge assistants. Tune similarity thresholds conservatively — aggressive reuse saves money but can return stale or overly broad answers.
+
+**Smaller-model routing**: Not every request needs your most capable model. Route classification, extraction, moderation, and basic FAQ traffic to a cheaper model, and reserve premium models for the minority of requests that actually need deeper reasoning. This is usually the biggest structural savings lever after idle GPU cleanup.
+
+**RAG chunk and `top_k` control**: Retrieval is a hidden token tax. Oversized chunks and an inflated `top_k` value stuff your prompt with context the model never needed. Start with the smallest chunk size that still preserves meaning, cap `top_k` aggressively, and measure answer quality before raising either. Five relevant chunks beat twenty mediocre ones almost every time.
+
+**Batch API for offline workloads**: If the job isn't user-facing, don't run it on the expensive interactive path. Azure OpenAI's Batch API uses separate quota, targets a 24-hour turnaround, and Microsoft documents it at **50% less cost than Global Standard**. Summarization backfills, nightly classification, large-scale extraction, and bulk evaluation are ideal candidates.
+
+**Shorter system prompts**: A 3,000-token system prompt that could be 800 tokens wastes 2,200 tokens per request. At 10,000 requests per day, that waste becomes a budget line item.
 
 💡 **Pro Tip**: Build a simple evaluation harness that runs the same 200 representative queries through both GPT-4o and GPT-4o-mini, then have a domain expert score the outputs. If GPT-4o-mini scores within 5% on 70%+ of queries, you've identified a huge cost savings opportunity with minimal quality impact.
 
@@ -408,7 +459,8 @@ Before moving on, confirm you have these cost engineering practices in place:
 - **Spot VMs evaluated** for fault-tolerant training workloads with checkpointing implemented
 - **Right-sizing validated** — GPU utilization benchmarked before provisioning larger SKUs
 - **Azure OpenAI pricing model selected** — Standard vs PTU evaluated based on utilization data
-- **Token optimization implemented** — prompt caching, system prompt trimming, response length limits, multi-model routing
+- **Token optimization implemented** — prompt trimming, output caps, prompt caching, semantic caching, smaller-model routing, and RAG `top_k` control
+- **Batch API evaluated** for non-interactive workloads that can trade latency for lower unit cost
 - **GPU quota governance** centralized with approval workflow
 - **Monthly cost review meeting** scheduled with infra, data science, and finance stakeholders
 - **Namespace-level cost tracking** enabled for shared AKS clusters

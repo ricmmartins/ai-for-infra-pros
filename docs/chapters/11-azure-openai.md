@@ -125,7 +125,7 @@ TPM is the total throughput ceiling. It caps the aggregate number of tokens — 
 
 ### RPM — Requests Per Minute
 
-RPM caps the number of individual API calls per minute, regardless of how many tokens each request contains. Azure OpenAI sets a default RPM derived from your TPM allocation (typically TPM ÷ 6 for chat models), but the actual binding limit depends on your workload shape.
+RPM caps the number of individual API calls per minute, regardless of how many tokens each request contains. Azure OpenAI derives RPM from your TPM allocation, and for older chat models the documented ratio is typically **6 RPM per 1,000 TPM** (`RPM = TPM × 6 / 1000`). That ratio varies by model class, so don't assume one fixed TPM↔RPM conversion everywhere.
 
 ### Why You Hit One Before the Other
 
@@ -205,7 +205,7 @@ Default quotas are starting points, not hard ceilings. You can request quota inc
 
 ### Multi-Deployment Load Balancing
 
-When a single deployment's quota isn't enough, spread traffic across multiple deployments. You can deploy the same model multiple times within a region (each drawing from the region's quota pool) or across regions. Azure API Management is the natural front door for this pattern — it can round-robin requests, route based on priority, and automatically fail over on 429 responses.
+When a single deployment's quota isn't enough, spread traffic across multiple deployments. You can deploy the same model multiple times within a region (each drawing from the region's quota pool) or across regions. Azure API Management is the natural front door for this pattern — it can round-robin requests, route by priority, and, when you configure retry policies plus backend pools and circuit breakers, fail over around 429s and backend errors.
 
 💡 **Pro Tip**: When requesting quota for capacity planning, document your expected peak usage and use case. Quota reviewers approve increases faster when they understand the workload. "We need 2M TPM for a 500-user internal support chatbot with documented peak patterns" gets approved faster than "please increase our quota."
 
@@ -223,7 +223,7 @@ Deploy the same model in at least two Azure regions. If your primary region hits
 
 Azure API Management (APIM) sits between your application and Azure OpenAI, providing:
 
-- **Retry on 429**: When a backend deployment returns 429, APIM automatically retries against an alternate deployment
+- **Retry and failover logic**: With explicit retry policies, backend pools, and circuit breakers, APIM can retry transient failures and route around throttled or unhealthy deployments
 - **Load balancing**: Distribute requests across multiple deployments using round-robin or weighted routing
 - **Priority routing**: Send critical requests to PTU (guaranteed capacity), overflow to Standard
 - **Rate limiting**: Apply per-client or per-application quotas on top of Azure OpenAI quotas

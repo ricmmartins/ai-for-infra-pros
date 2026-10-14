@@ -26,7 +26,7 @@ The approach is straightforward: collect telemetry (SMART data for disks, ECC er
 
 **Infra ↔ AI Translation**: Think of predictive failure as proactive monitoring on steroids. Instead of alerting when a threshold is crossed (reactive), you're alerting when a *trend* predicts a future threshold crossing (predictive). Same data sources, same alerting pipeline, fundamentally different outcome.
 
-**Quantified impact**: Organizations running predictive disk replacement typically see a 40–60% reduction in unplanned storage incidents and near-elimination of the 3 AM replacement scenario.
+**Illustrative impact**: Teams that operationalize predictive disk replacement often report materially fewer unplanned storage incidents — sometimes on the order of 40–60% in internal programs — but the exact reduction depends heavily on telemetry quality, fleet size, and how quickly operations acts on the prediction.
 
 ### Log Anomaly Detection
 
@@ -55,7 +55,7 @@ Alert fatigue is real. If your team receives 200 alerts per day and 190 of them 
 
 Azure Monitor's smart alert grouping uses ML to correlate alerts that fire together — a VM CPU spike, a dependent service timeout, and a load balancer health probe failure that are all symptoms of the same root cause get grouped into one incident instead of three separate pages. Combined with dynamic thresholds (ML-learned baselines instead of static numbers), your team sees fewer, higher-quality alerts.
 
-**Quantified impact**: Teams implementing intelligent alerting consistently report 60–80% reduction in alert volume with zero increase in missed incidents.
+**Illustrative impact**: Intelligent alerting often cuts alert volume dramatically. In mature environments, anecdotal results commonly land in the 60–80% range — but only after baseline tuning, suppression cleanup, and careful monitoring for missed incidents.
 
 ### Capacity Forecasting
 
@@ -145,7 +145,7 @@ Beyond reactive operations, ML enables proactive optimization across your entire
 
 Azure Advisor already provides right-sizing recommendations, but custom ML models using your actual utilization data can go deeper. Analyze CPU, memory, disk, and network patterns over 30–90 days and identify VMs that are consistently over-provisioned, workloads that would benefit from burstable SKUs, and clusters where node pools could be consolidated.
 
-**Quantified impact**: Organizations running ML-driven right-sizing typically identify 20–35% cost savings beyond what Azure Advisor catches alone, because the models account for time-of-day patterns, seasonal variations, and correlated workload behaviors that static threshold analysis misses.
+**Illustrative impact**: ML-driven right-sizing can uncover savings that static threshold analysis misses by accounting for time-of-day patterns, seasonality, and correlated workload behavior. In practice, teams often treat 20–35% as an aspirational optimization range, not a guaranteed result.
 
 ### Network Traffic Analysis
 
@@ -231,7 +231,7 @@ Before moving on, confirm you understand these concepts:
 
 - AI can predict hardware failures by analyzing SMART data trends, ECC errors, and telemetry patterns — turning reactive replacements into planned maintenance
 - Log anomaly detection in Azure Monitor uses ML to surface unusual patterns without requiring you to define every possible failure scenario
-- Intelligent alerting with dynamic thresholds and alert correlation reduces noise by 60–80% while maintaining incident coverage
+- Intelligent alerting with dynamic thresholds and alert correlation can reduce noise dramatically; in well-tuned environments, anecdotal results often land in the 60–80% range without sacrificing incident coverage
 - RAG over existing runbooks is the highest-ROI AI project for ops teams — no model training required, just index your documentation
 - Automated incident response with Logic Apps + Azure OpenAI can classify, remediate, and report on known failure patterns without human intervention
 - Right-sizing recommendations powered by ML analysis of utilization patterns catch optimization opportunities that static threshold tools miss

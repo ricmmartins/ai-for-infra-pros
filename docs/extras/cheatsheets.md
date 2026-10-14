@@ -161,7 +161,7 @@ az ml online-endpoint create --name fraud-api \
 az ml online-deployment create --name blue \
   --endpoint-name fraud-api \
   --model azureml:fraud-detector:1 \
-  --instance-type Standard_NC4as_T4_v3 \
+  --instance-type Standard_NC16as_T4_v3 \
   --instance-count 2 \
   --file deployment.yml
 
@@ -458,12 +458,13 @@ Step 2: Calculate sustained TPM
          Requests per minute: 150
          Sustained TPM = 150 × 1,200 = 180,000 TPM
 
-Step 3: Use Azure capacity calculator or:
-         ~1 PTU ≈ 3,600 TPM (GPT-4o, approximate)
-         PTUs needed ≈ 180,000 ÷ 3,600 = 50 PTUs
+Step 3: Size with the Azure AI Foundry PTU calculator
+         using your exact model, prompt size, completion size,
+         cache hit rate, and target RPM
 
 Step 4: Add 25% headroom for bursts
-         Recommended: 63 PTUs
+         Result: usually dozens of PTUs for this workload shape,
+         but the exact count is model-specific
 ```
 
 ### Token Estimation Rules of Thumb
@@ -510,7 +511,7 @@ GPU not visible to workload?
 ├── nvidia-smi returns error?
 │   ├── Driver not installed → Install NVIDIA driver extension:
 │   │   az vm extension set --name NvidiaGpuDriverLinux \
-│   │     --publisher Microsoft.HCPCompute --version 1.9 \
+│   │     --publisher Microsoft.HpcCompute --version 1.6 \
 │   │     --vm-name <vm> --resource-group <rg>
 │   └── Driver version mismatch → Check CUDA compatibility matrix
 ├── In AKS pod, `nvidia-smi` not found?
