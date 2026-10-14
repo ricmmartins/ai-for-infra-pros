@@ -82,7 +82,7 @@ Choosing the right GPU VM family is the single highest-impact decision you'll ma
 
 *Prices are approximate pay-as-you-go rates for East US. Always check [Azure Pricing Calculator](https://azure.microsoft.com/pricing/calculator/) for current rates.*
 
-⚠️ **Production Gotcha**: The **original ND-series** (ND6s, ND12s, ND24s, ND24rs) was **retired in September 2023**. If you find Terraform templates, ARM scripts, or blog posts referencing these SKUs, they will fail to deploy. Always verify against the [Azure VM retirement page](https://learn.microsoft.com/azure/virtual-machines/sizes/overview) before provisioning. The current ND-series VMs are `Standard_ND96asr_v4` (A100) and `Standard_ND96isr_H100_v5` (H100) — completely different hardware.
+⚠️ **Production Gotcha**: The **original ND-series** (ND6s, ND12s, ND24s, ND24rs) was **retired in September 2023**. If you find Terraform templates, ARM scripts, or blog posts referencing those P40-based SKUs, they will fail to deploy. That retirement does **not** apply to NDv2, and newer ND families are separate. Always verify against the [ND-series retirement page](https://learn.microsoft.com/azure/virtual-machines/sizes/lifecycle/retirement/nd-series-retirement) and the current [GPU-accelerated VM sizes docs](https://learn.microsoft.com/azure/virtual-machines/sizes/overview#gpu-accelerated) before provisioning.
 
 ### Choosing the right family
 
@@ -102,7 +102,15 @@ az vm list-skus \
   -o table
 ```
 
-If the `Restrictions` column shows `NotAvailableForSubscription`, you need to request a quota increase through the Azure portal.
+That tells you whether the SKU is exposed in that region for your subscription. It does **not** tell you whether you have enough quota to deploy it. Check quota separately:
+
+```bash
+az vm list-usage \
+  --location eastus2 \
+  -o table
+```
+
+If the SKU is present but your N-family quota is exhausted or zero, request more quota through **Usage + quotas** (or the Quotas service in the portal).
 
 ---
 
@@ -283,7 +291,7 @@ ADMIN_USER="azureuser"
 
 ### Step 1: Check GPU quota availability
 
-Before creating anything, verify that the GPU SKU is available in your target region and that you have sufficient quota:
+Before creating anything, verify two different things: that the GPU SKU is available in your target region, and that you have enough quota to deploy it.
 
 ```bash
 az vm list-skus \
@@ -293,6 +301,14 @@ az vm list-skus \
   --query "[].{Name:name, Restrictions:restrictions[0].reasonCode}" \
   -o table
 ```
+
+```bash
+az vm list-usage \
+  --location $LOCATION \
+  -o table
+```
+
+Use `az vm list-skus` to check SKU exposure and subscription restrictions. Use `az vm list-usage` (or the Quotas experience in the portal) to check your current regional vCPU quota and usage for the relevant GPU family.
 
 If the output shows `NotAvailableForSubscription`, request a quota increase in the Azure portal under **Subscriptions → Usage + quotas**.
 

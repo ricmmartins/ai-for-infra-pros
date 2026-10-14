@@ -186,8 +186,10 @@ resource "azurerm_kubernetes_cluster" "ai" {
   }
 
   network_profile {
-    network_plugin = "azure"
-    network_policy = "calico"
+    network_plugin      = "azure"
+    network_plugin_mode = "overlay"
+    network_policy      = "cilium"
+    network_data_plane  = "cilium"
   }
 
   tags = azurerm_resource_group.ai.tags
@@ -216,6 +218,8 @@ resource "azurerm_kubernetes_cluster_node_pool" "gpu" {
   tags = azurerm_resource_group.ai.tags
 }
 ```
+
+For Linux AKS clusters, this uses Azure CNI powered by Cilium — the direction Microsoft now recommends over older iptables-based policy engines — and the `azurerm` `~> 4.0` provider supports the matching Terraform settings.
 
 ⚠️ **Production Gotcha**: The `sku=gpu:NoSchedule` taint is critical. Without it, Kubernetes will happily schedule your monitoring DaemonSets, log collectors, and other non-GPU workloads onto your $3.80/hr GPU nodes. The taint ensures only pods with a matching toleration land on GPU hardware. Every GPU pod in your cluster must include `tolerations: [{key: "sku", operator: "Equal", value: "gpu", effect: "NoSchedule"}]` in its spec.
 
@@ -711,17 +715,43 @@ Azure Policy can enforce rules at the subscription or management group level. Fo
     "if": {
       "allOf": [
         {
-          "field": "type",
-          "equals": "Microsoft.Compute/virtualMachines"
-        },
-        {
-          "field": "Microsoft.Compute/virtualMachines/sku.name",
-          "in": [
-            "Standard_NC24ads_A100_v4",
-            "Standard_NC48ads_A100_v4",
-            "Standard_NC96ads_A100_v4",
-            "Standard_ND96asr_v4",
-            "Standard_ND96amsr_A100_v4"
+          "anyOf": [
+            {
+              "allOf": [
+                {
+                  "field": "type",
+                  "equals": "Microsoft.Compute/virtualMachines"
+                },
+                {
+                  "field": "Microsoft.Compute/virtualMachines/sku.name",
+                  "in": [
+                    "Standard_NC24ads_A100_v4",
+                    "Standard_NC48ads_A100_v4",
+                    "Standard_NC96ads_A100_v4",
+                    "Standard_ND96asr_v4",
+                    "Standard_ND96amsr_A100_v4"
+                  ]
+                }
+              ]
+            },
+            {
+              "allOf": [
+                {
+                  "field": "type",
+                  "equals": "Microsoft.Compute/virtualMachineScaleSets"
+                },
+                {
+                  "field": "Microsoft.Compute/virtualMachineScaleSets/sku.name",
+                  "in": [
+                    "Standard_NC24ads_A100_v4",
+                    "Standard_NC48ads_A100_v4",
+                    "Standard_NC96ads_A100_v4",
+                    "Standard_ND96asr_v4",
+                    "Standard_ND96amsr_A100_v4"
+                  ]
+                }
+              ]
+            }
           ]
         },
         {
@@ -738,7 +768,7 @@ Azure Policy can enforce rules at the subscription or management group level. Fo
 }
 ```
 
-This policy denies the creation of high-end GPU VMs (A100, ND-series) unless they carry a `cost-center` tag. No tag, no GPU. It's a simple rule that prevents shadow GPU clusters from appearing on your bill.
+This policy denies the creation of high-end GPU compute unless it carries a `cost-center` tag. It covers both standalone VMs and VM scale sets, which matters because AKS GPU node pools land on VMSS resources rather than plain virtual machines. If you want to block unsupported node sizes earlier in the AKS control plane, add a companion AKS policy that restricts agent-pool VM sizes too.
 
 ### Naming Conventions for AI Resources
 
