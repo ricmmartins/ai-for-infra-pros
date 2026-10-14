@@ -4,7 +4,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = ">= 3.90.0"
+      version = ">= 3.90.0, < 4.0.0"
     }
   }
 }
@@ -30,7 +30,6 @@ resource "azurerm_kubernetes_cluster" "aks" {
     name       = "system"
     node_count = 1
     vm_size    = "Standard_DS2_v2"
-    mode       = "System"
   }
 
   identity {

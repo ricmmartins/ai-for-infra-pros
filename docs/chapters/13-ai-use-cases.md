@@ -26,7 +26,7 @@ A abordagem é direta: colete telemetria (dados SMART para discos, contadores de
 
 **Tradução Infra ↔ IA**: Pense em previsão de falhas como monitoramento proativo turbinado. Em vez de alertar quando um threshold é ultrapassado (reativo), você está alertando quando uma *tendência* prevê um futuro cruzamento de threshold (preditivo). Mesmas fontes de dados, mesmo pipeline de alertas, resultado fundamentalmente diferente.
 
-**Impacto quantificado**: Organizações que adotam substituição preditiva de discos normalmente observam uma redução de 40–60% nos incidentes não planejados de storage e praticamente eliminam o cenário de troca às 3 da manhã.
+**Impacto ilustrativo**: Times que operacionalizam substituição preditiva de discos frequentemente relatam uma queda relevante nos incidentes não planejados de storage — às vezes na faixa de 40–60% em programas internos — mas a redução exata depende muito da qualidade da telemetria, do tamanho da frota e da rapidez com que a operação age sobre a previsão.
 
 ### Detecção de Anomalias em Logs
 
@@ -55,7 +55,7 @@ Fadiga de alertas é real. Se seu time recebe 200 alertas por dia e 190 deles s�
 
 O agrupamento inteligente de alertas do Azure Monitor usa ML para correlacionar alertas que disparam juntos — um pico de CPU em uma VM, um timeout de serviço dependente e uma falha de health probe do load balancer que são todos sintomas da mesma causa raiz são agrupados em um único incidente em vez de três acionamentos separados. Combinado com thresholds dinâmicos (baselines aprendidos por ML em vez de números estáticos), seu time vê menos alertas, porém de maior qualidade.
 
-**Impacto quantificado**: Times que implementam alertas inteligentes consistentemente reportam redução de 60–80% no volume de alertas sem nenhum aumento em incidentes não detectados.
+**Impacto ilustrativo**: Alertas inteligentes costumam reduzir drasticamente o volume de alertas. Em ambientes maduros, resultados anedóticos frequentemente caem na faixa de 60–80% — mas só depois de ajuste de baseline, limpeza de supressões e monitoramento cuidadoso para garantir que incidentes não estejam passando despercebidos.
 
 ### Previsão de Capacidade
 
@@ -145,7 +145,7 @@ Além de operações reativas, ML possibilita otimização proativa em todo o se
 
 O Azure Advisor já fornece recomendações de right-sizing, mas modelos de ML customizados usando seus dados reais de utilização podem ir mais fundo. Analise padrões de CPU, memória, disco e rede ao longo de 30–90 dias e identifique VMs que estão consistentemente superprovisionadas, workloads que se beneficiariam de SKUs burstable e clusters onde node pools poderiam ser consolidados.
 
-**Impacto quantificado**: Organizações que adotam right-sizing baseado em ML tipicamente identificam 20–35% de economia de custos além do que o Azure Advisor captura sozinho, porque os modelos consideram padrões por horário do dia, variações sazonais e comportamentos correlacionados de workload que a análise estática de threshold não enxerga.
+**Impacto ilustrativo**: Right-sizing orientado por ML pode revelar economias que a análise estática por thresholds não encontra, ao considerar padrões por horário do dia, sazonalidade e comportamento correlacionado de workloads. Na prática, muitos times tratam 20–35% como uma faixa aspiracional de otimização, não como resultado garantido.
 
 ### Análise de Tráfego de Rede
 
@@ -231,7 +231,7 @@ Antes de seguir em frente, confirme que você entende estes conceitos:
 
 - IA pode prever falhas de hardware analisando tendências de dados SMART, erros ECC e padrões de telemetria — transformando substituições reativas em manutenção planejada
 - A detecção de anomalias em logs no Azure Monitor usa ML para identificar padrões incomuns sem exigir que você defina cada cenário de falha possível
-- Alertas inteligentes com thresholds dinâmicos e correlação de alertas reduzem o ruído em 60–80% mantendo a cobertura de incidentes
+- Alertas inteligentes com thresholds dinâmicos e correlação podem reduzir drasticamente o ruído; em ambientes bem ajustados, resultados anedóticos costumam cair na faixa de 60–80% sem sacrificar a cobertura de incidentes
 - RAG sobre runbooks existentes é o projeto de IA com maior ROI para times de operações — sem necessidade de treinamento de modelo, apenas indexe sua documentação
 - Resposta automatizada a incidentes com Logic Apps + Azure OpenAI pode classificar, remediar e reportar padrões de falha conhecidos sem intervenção humana
 - Recomendações de right-sizing baseadas em análise de ML dos padrões de utilização capturam oportunidades de otimização que ferramentas de threshold estático não enxergam

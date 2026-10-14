@@ -42,7 +42,7 @@ Quando você tem múltiplas GPUs em uma única VM, elas precisam se comunicar. O
 - **H100 NVLink**: 900 GB/s de largura de banda bidirecional
 - **B200 NVLink 5.0**: 1,8 TB/s de largura de banda bidirecional
 
-O NVLink importa porque as estratégias de treinamento multi-GPU (abordadas mais adiante neste capítulo) trocam quantidades massivas de dados entre GPUs a cada poucos milissegundos. Se essa troca faz gargalo no PCIe (64 GB/s), suas GPUs caras ficam ociosas esperando por dados. No Azure, o NVLink está disponível nas VMs da série ND — e você pode verificar sua presença com `nvidia-smi topo -m`.
+O NVLink importa porque as estratégias de treinamento multi-GPU (abordadas mais adiante neste capítulo) trocam quantidades massivas de dados entre GPUs a cada poucos milissegundos. Se essa troca faz gargalo no PCIe (64 GB/s), suas GPUs caras ficam ociosas esperando por dados. No Azure, a disponibilidade de NVLink varia conforme o SKU: por exemplo, a ND H100 v5 documenta explicitamente NVLINK 4.0, e a NCads H100 v5 usa GPUs NVIDIA H100 NVL. Verifique a documentação do SKU exato e confirme a topologia real com `nvidia-smi topo -m`.
 
 💡 **Dica**: Se `nvidia-smi topo -m` mostrar `PIX` ou `PHB` entre as GPUs em vez de `NV#`, você está usando PCIe, não NVLink. Para treinamento multi-GPU, isso faz uma diferença dramática no throughput. Verifique se você está no SKU de VM correto antes de depurar problemas de desempenho.
 
@@ -465,10 +465,10 @@ GPU3    PHB     PHB     PHB      X
 
 Todas as conexões mostram `PHB` (PCIe Host Bridge) ou `PIX` (switch PCIe) em vez de `NV#` (NVLink).
 
-**Por que acontece:** O SKU da VM não suporta NVLink (apenas VMs da série ND têm NVLink no Azure), a versão do driver não suporta a topologia NVLink, ou o hardware do NVLink tem uma falha.
+**Por que acontece:** O SKU da VM pode não expor NVLink, a versão do driver pode não reportar a topologia corretamente ou o hardware pode ter uma falha. Não assuma isso apenas pelo nome da família — confira a documentação do SKU exato e a saída real da topologia.
 
 **O que fazer:**
-1. Verifique o SKU da VM: NVLink está disponível na série ND (ND96asr_v4, ND96amsr_A100_v4, ND_H100_v5, etc.). As séries NC e NV usam PCIe.
+1. Verifique o SKU exato na documentação: a ND H100 v5 lista explicitamente NVLINK 4.0, e a NCads H100 v5 usa GPUs NVIDIA H100 NVL. Depois confirme o que sua VM realmente expõe com `nvidia-smi topo -m`.
 2. Atualize o driver NVIDIA para a versão mais recente suportada pela sua GPU.
 3. Se estiver no SKU correto com os drivers corretos e o NVLink ainda não aparecer, abra um ticket de suporte ao Azure — isso indica um problema de hardware.
 

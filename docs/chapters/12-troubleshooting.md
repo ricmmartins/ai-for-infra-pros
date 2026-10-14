@@ -67,8 +67,7 @@ az vm extension set \
   --resource-group myRG \
   --vm-name myGPUVM \
   --name NvidiaGpuDriverLinux \
-  --publisher Microsoft.HKS \
-  --version 1.9
+  --publisher Microsoft.HpcCompute
 ```
 
 Isso recompila o módulo do kernel para o kernel atual.
@@ -247,7 +246,7 @@ Nenhum toleration de GPU presente.
 
 ### Causa Raiz
 
-Node pools de GPU no AKS aplicam o taint `sku=gpu:NoSchedule` por padrão. Pods devem incluir um toleration correspondente para serem agendados nos nós de GPU. O spec do pod estava sem esse toleration — então o scheduler viu os nós de GPU como inelegíveis e não conseguiu encontrar nenhum nó com GPUs e sem taints.
+O AKS não adiciona `sku=gpu:NoSchedule` por padrão para você. Se você usou `--node-taints` ao criar ou atualizar o node pool de GPU, os pods precisam de um toleration correspondente. Por isso a primeira checagem aqui é `kubectl describe node` — confirme se o taint realmente existe nos nós antes de alterar os specs dos pods. Neste caso, o spec do pod estava sem o toleration correspondente, então o scheduler viu esses nós de GPU como inelegíveis.
 
 Outras causas comuns incluem:
 
@@ -294,7 +293,7 @@ az quota create --resource-name "StandardNDSv2Family" \
 
 ### Prevenção
 
-- **Padronize todos os specs de pods GPU** com o toleration correto pré-configurado. Use defaults de Helm charts ou políticas OPA/Gatekeeper que injetam tolerations automaticamente.
+- **Se você aplicar taints em node pools de GPU, padronize os tolerations correspondentes** nos specs dos pods de GPU. Use defaults de Helm charts ou políticas OPA/Gatekeeper que injetam tolerations automaticamente.
 - **Configure alertas de monitoramento de quota** que disparam a 80% de uso da quota de GPU (veja Capítulo 9).
 - **Configure o cluster autoscaler corretamente**: defina `maxCount` com folga para que o autoscaler possa responder à demanda.
 
@@ -490,7 +489,7 @@ resources:
     nvidia.com/gpu: 1  # GPUs são sempre exclusivas por container
 ```
 
-Defina `requests = limits` tanto para CPU quanto para memória para obter a classe de QoS Guaranteed, que previne eviction e contenção de CPU por vizinhos barulhentos.
+Defina `requests = limits` tanto para CPU quanto para memória para obter a classe de QoS Guaranteed, o que melhora a prioridade diante de eviction. Mas não confunda isso com isolamento de CPU: se você precisa de proteção contra contenção de CPU causada por vizinhos barulhentos, habilite a política static do CPU Manager no kubelet e use requests inteiros de CPU para que o Kubernetes possa atribuir CPUs exclusivas.
 
 ### Prevenção
 
@@ -702,10 +701,10 @@ resources:
 **Para arquivos de modelo corrompidos:**
 
 ```bash
-# Verificar integridade do arquivo do modelo
-$ md5sum /models/model-7b.safetensors
+# Comparar o MD5 local com o Content-MD5 em base64 do Azure
+$ md5sum /models/model-7b.safetensors | cut -d' ' -f1 | xxd -r -p | base64
 $ az storage blob show --container-name models --name model-7b.safetensors \
-  --account-name mystorageaccount --query "properties.contentMd5"
+  --account-name mystorageaccount --query "properties.contentSettings.contentMd5"
 ```
 
 **Para dependências faltando:**
@@ -1085,7 +1084,7 @@ Antes de fechar este capítulo, certifique-se de que você tem:
 - **Monitoramento de driver GPU** ativo — alertas em falhas do `nvidia-smi`, não apenas utilização de GPU
 - **Fixação de kernel** configurada em VMs de GPU para prevenir quebras por atualizações automáticas
 - **Cálculos de memória** feitos antes de jobs de treinamento começarem — use a fórmula do Capítulo 4
-- **Templates de pods GPU** com tolerations `sku=gpu:NoSchedule` corretos como padrão
+- **Templates de pods GPU** com tolerations que correspondam aos node taints que você realmente usa
 - **Exponential backoff com jitter** implementado em todo código cliente do Azure OpenAI
 - **Readiness probes** com `initialDelaySeconds` adequado em containers de model serving
 - **Timeout do NCCL** configurado para jobs de treinamento distribuído (não deixe travamentos rodarem para sempre)

@@ -141,7 +141,7 @@ Essa policy permite que pods dentro do namespace `team-data-science` se comuniqu
 
 ### O Problema Fundamental
 
-Recursos de GPU são finitos e caros. Um único nó A100 custa aproximadamente US$ 3 por hora no Azure. Quando você tem 20 nós e 4 times, o scheduling padrão do Kubernetes — primeiro a chegar, primeiro a ser servido — gera atrito constante. Jobs de treinamento monopolizam GPUs por horas. Workloads de inferência ficam sem recursos. Data scientists submetem 10 jobs de uma vez e ficam se perguntando por que só 2 estão rodando.
+Recursos de GPU são finitos e caros. Como referência concreta, uma VM Linux `Standard_NC24ads_A100_v4` no East US estava em cerca de **US$ 3,67/hora no modelo pay-as-you-go** na Azure Retail Prices API em outubro de 2026 — mas o valor real varia bastante conforme SKU, região e modelo de precificação, então sempre confirme na [calculadora de preços do Azure](https://azure.microsoft.com/pricing/calculator/) ou na Retail Prices API antes de fechar orçamento. Quando você tem 20 nós e 4 times, o scheduling simples do Kubernetes — primeiro a chegar, primeiro a ser servido — gera atrito constante. Jobs de treinamento monopolizam GPUs por horas. Workloads de inferência ficam sem recursos. Data scientists submetem 10 jobs de uma vez e ficam se perguntando por que só 2 estão rodando.
 
 Você precisa de scheduling que entenda prioridades, fairness e as características únicas de workloads de IA.
 
@@ -375,6 +375,8 @@ Configure alertas quando qualquer cota ultrapassar 80% de utilização. Com 80%,
 Todo endpoint de inferência precisa de service-level objectives claros. Sem eles, cada pico de latência vira um incêndio e o workload de cada time é igualmente "crítico."
 
 ### Matriz de Decisão: Tiers de SLO para Serviços de IA
+
+Trate esses tiers como pontos de partida ilustrativos, não como metas universais. Eles assumem modelos razoavelmente otimizados, instâncias aquecidas e caminhos de requisição simples — não prompts no pior caso, cold starts ou saltos entre regiões.
 
 | Tier | Latência (P99) | Disponibilidade | Throughput | Exemplos de Uso |
 |---|---|---|---|---|
