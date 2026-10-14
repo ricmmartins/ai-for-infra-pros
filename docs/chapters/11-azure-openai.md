@@ -125,7 +125,7 @@ TPM é o teto de throughput total. Ele limita o número agregado de tokens — e
 
 ### RPM — Requests Per Minute
 
-RPM limita o número de chamadas individuais à API por minuto, independentemente de quantos tokens cada requisição contém. O Azure OpenAI define um RPM padrão derivado da sua alocação de TPM (tipicamente TPM ÷ 6 para modelos de chat), mas o limite efetivo depende do perfil da sua carga de trabalho.
+RPM limita o número de chamadas individuais à API por minuto, independentemente de quantos tokens cada requisição contém. O Azure OpenAI deriva o RPM da sua alocação de TPM e, para modelos de chat mais antigos, a proporção documentada costuma ser de **6 RPM para cada 1.000 TPM** (`RPM = TPM × 6 / 1000`). Essa proporção varia por classe de modelo, então não assuma uma conversão fixa de TPM↔RPM em todo lugar.
 
 ### Por Que Você Atinge Um Antes do Outro
 
@@ -205,7 +205,7 @@ Cotas padrão são pontos de partida, não tetos fixos. Você pode solicitar aum
 
 ### Balanceamento de Carga Multi-Deployment
 
-Quando a cota de um único deployment não é suficiente, distribua o tráfego entre múltiplos deployments. Você pode implantar o mesmo modelo várias vezes dentro de uma região (cada um consumindo do pool de cota da região) ou entre regiões. O Azure API Management é a porta de entrada natural para esse padrão — ele pode fazer round-robin de requisições, rotear com base em prioridade e automaticamente fazer failover em respostas 429.
+Quando a cota de um único deployment não é suficiente, distribua o tráfego entre múltiplos deployments. Você pode implantar o mesmo modelo várias vezes dentro de uma região (cada um consumindo do pool de cota da região) ou entre regiões. O Azure API Management é a porta de entrada natural para esse padrão — ele pode fazer round-robin de requisições, rotear por prioridade e, quando você configura políticas de retry junto com backend pools e circuit breakers, contornar erros 429 e falhas de backend.
 
 💡 **Dica Pro**: Ao solicitar cota para planejamento de capacidade, documente seu uso de pico esperado e caso de uso. Revisores de cota aprovam aumentos mais rápido quando entendem a carga de trabalho. "Precisamos de 2M TPM para um chatbot de suporte interno para 500 usuários com padrões de pico documentados" é aprovado mais rápido do que "por favor, aumente nossa cota."
 
@@ -223,7 +223,7 @@ Implante o mesmo modelo em pelo menos duas regiões do Azure. Se sua região pri
 
 O Azure API Management (APIM) fica entre sua aplicação e o Azure OpenAI, fornecendo:
 
-- **Retry em 429**: Quando um deployment backend retorna 429, o APIM automaticamente tenta novamente em um deployment alternativo
+- **Lógica de retry e failover**: Com políticas explícitas de retry, backend pools e circuit breakers, o APIM pode repetir falhas transitórias e desviar de deployments com throttling ou indisponíveis
 - **Balanceamento de carga**: Distribui requisições entre múltiplos deployments usando round-robin ou roteamento ponderado
 - **Roteamento por prioridade**: Envia requisições críticas para PTU (capacidade garantida), overflow para Standard
 - **Rate limiting**: Aplica cotas por cliente ou por aplicação sobre as cotas do Azure OpenAI

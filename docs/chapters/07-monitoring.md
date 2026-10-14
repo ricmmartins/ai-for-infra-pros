@@ -101,7 +101,7 @@ az aks show \
   --query "azureMonitorProfile.metrics.enabled"
 ```
 
-💡 **Dica Profissional**: O Azure Managed Prometheus descobre e coleta automaticamente os pods do DCGM Exporter por meio do service discovery do Kubernetes. Você não precisa configurar manualmente os targets de coleta — basta implantar o DaemonSet do DCGM Exporter e a instância do Managed Prometheus o encontrará. Se você precisar de configurações customizadas de coleta, use o ConfigMap `ama-metrics-settings-configmap`.
+💡 **Dica Profissional**: O Managed Prometheus **não** coleta métricas do DCGM só porque existe um pod `dcgm-exporter`. No AKS, você precisa dos pré-requisitos para métricas gerenciadas de GPU: um node pool de GPU NVIDIA gerenciado, o Azure Managed Prometheus habilitado no cluster e um `ama-metrics-settings-configmap` em `kube-system` com `dcgmexporter = true`. Depois que esse perfil é habilitado, node pools de GPU gerenciados já existentes e novos passam a ser coletados automaticamente.
 
 ### Métricas-Chave de GPU e Limites de Alertas
 
@@ -109,7 +109,7 @@ az aks show \
 |---------|-----------|-------|---------|-----------------|
 | Utilização de GPU | `DCGM_FI_DEV_GPU_UTIL` | < 30% sustentado | < 10% sustentado | Subutilização — desperdiçando gastos com GPU |
 | Memória de GPU Usada | `DCGM_FI_DEV_FB_USED` | > 85% | > 95% | Risco de OOM para novos workloads |
-| Temperatura da GPU | `DCGM_FI_DEV_GPU_TEMP` | > 78°C | > 83°C | Thermal throttling iminente |
+| Temperatura da GPU | `DCGM_FI_DEV_TEMPERATURE` | > 78°C | > 83°C | Thermal throttling iminente |
 | Erros ECC (Não Corrigíveis) | `DCGM_FI_DEV_ECC_DBE_VOL_TOTAL` | > 0 | > 0 | Degradação de hardware — substituir GPU |
 | Throttle de Clock de Memória | `DCGM_FI_DEV_CLOCK_THROTTLE_REASONS` | Thermal | HW Slowdown | Desempenho limitado por temperatura ou energia |
 
@@ -148,7 +148,7 @@ O Azure OpenAI possui seus próprios requisitos de monitoramento, distintos da i
 
 ### Monitorando Throttling na Prática
 
-Configure diagnostic settings no seu recurso do Azure OpenAI para enviar logs a um workspace do Log Analytics. Uma vez habilitado, cada chamada à API é registrada com status code, latência, contagem de tokens e nome do deployment. Esta é a base de dados para cada consulta KQL mais adiante neste capítulo.
+Configure diagnostic settings no seu recurso do Azure OpenAI para enviar logs e métricas para um workspace do Log Analytics. No Azure OpenAI, você quer tanto os logs de requisição/resposta quanto os logs de uso. `AzureOpenAIRequestUsage` é a categoria que captura dados de uso de tokens por requisição em `AzureDiagnostics`; sem ela, suas consultas de custo e atribuição de tokens ficam cegas.
 
 ```bash
 # Habilitar logging de diagnóstico para Azure OpenAI
@@ -156,7 +156,7 @@ az monitor diagnostic-settings create \
   --resource "/subscriptions/<sub-id>/resourceGroups/myRG/providers/Microsoft.CognitiveServices/accounts/myAOAI" \
   --name "aoai-diagnostics" \
   --workspace "/subscriptions/<sub-id>/resourceGroups/myRG/providers/Microsoft.OperationalInsights/workspaces/myWorkspace" \
-  --logs '[{"category":"RequestResponse","enabled":true},{"category":"Audit","enabled":true}]' \
+  --logs '[{"category":"RequestResponse","enabled":true},{"category":"Audit","enabled":true},{"category":"AzureOpenAIRequestUsage","enabled":true}]' \
   --metrics '[{"category":"AllMetrics","enabled":true}]'
 ```
 
@@ -271,115 +271,132 @@ Logs estruturados permitem filtrar por versão do modelo, correlacionar por requ
 
 ## Consultas KQL para Troubleshooting de IA
 
-Essas consultas KQL prontas para produção rodam no Application Insights (Log Analytics) e cobrem os cenários mais comuns de troubleshooting de IA. Todas as consultas usam a tabela `AppRequests` com os nomes de coluna atuais.
+Estas consultas KQL prontas para produção estão divididas por fonte de telemetria, porque o Azure OpenAI e a sua aplicação **não** caem nas mesmas tabelas:
 
-### 1. Requisições de Inferência com Alta Latência
+- A **telemetria do recurso Azure OpenAI** vai para `AzureDiagnostics` (logs de recurso) e `AzureMetrics` (métricas de plataforma).
+- A **telemetria da sua aplicação** vai para `AppRequests` (tabelas do Application Insights baseadas em workspace).
 
-Identifique requisições de inferência que excedem seu SLO de latência. Ajuste o limite para corresponder ao seu objetivo — 2000ms é um SLO P95 comum para inferência em tempo real.
+Misturar essas fontes é uma maneira rápida de obter conjuntos de resultados vazios ou números enganosos.
 
-```kusto
-AppRequests
-| where TimeGenerated > ago(24h)
-| where DurationMs > 2000
-| summarize
-    Count = count(),
-    AvgLatencyMs = avg(DurationMs),
-    P95LatencyMs = percentile(DurationMs, 95),
-    P99LatencyMs = percentile(DurationMs, 99)
-    by bin(TimeGenerated, 15m), AppRoleName
-| order by P99LatencyMs desc
-```
+### Telemetria do Recurso Azure OpenAI
 
-### 2. Taxa de Throttling HTTP 429 ao Longo do Tempo
+### 1. Taxa de Throttling HTTP 429 a partir dos Logs de Requisição do Azure OpenAI
 
-Acompanhe eventos de throttling para entender quando você está atingindo limites de capacidade e se o throttling correlaciona com janelas de tempo específicas.
+Use a categoria de log de recurso `RequestResponse` para identificar janelas de throttling e correlacioná-las com a latência observada no gateway.
 
 ```kusto
-AppRequests
+AzureDiagnostics
 | where TimeGenerated > ago(7d)
+| where ResourceProvider == "MICROSOFT.COGNITIVESERVICES"
+| where Category == "RequestResponse"
 | summarize
     TotalRequests = count(),
-    ThrottledRequests = countif(ResultCode == "429"),
-    ThrottleRate = round(100.0 * countif(ResultCode == "429") / count(), 2)
-    by bin(TimeGenerated, 1h), AppRoleName
+    ThrottledRequests = countif(ResultSignature == "429"),
+    ThrottleRatePct = round(100.0 * countif(ResultSignature == "429") / count(), 2),
+    P95GatewayLatencyMs = percentile(DurationMs, 95)
+    by bin(TimeGenerated, 1h), OperationName
 | where ThrottledRequests > 0
 | order by TimeGenerated desc
 ```
 
-### 3. Correlação de Utilização de GPU com Throughput de Requisições
+### 2. Latência do Azure OpenAI por Deployment a partir das Métricas de Plataforma
 
-Correlacione taxas de requisição da aplicação com a utilização de GPU para identificar se é necessário escalar. Esta consulta junta métricas de nível de aplicação com métricas customizadas de GPU, caso você esteja enviando-as para o mesmo workspace.
+Para latência do Azure OpenAI, use as métricas do Azure OpenAI — não a métrica legada `Latency` do Cognitive Services.
 
 ```kusto
-AppRequests
-| where TimeGenerated > ago(6h)
+AzureMetrics
+| where TimeGenerated > ago(24h)
+| where MetricName == "AzureOpenAITTLTInMS"
+| extend Dimensions = parse_json(Tags)
+| extend Deployment = tostring(Dimensions["ModelDeploymentName"])
 | summarize
-    RequestsPerMin = count(),
-    AvgLatencyMs = avg(DurationMs),
-    ErrorRate = round(100.0 * countif(toint(ResultCode) >= 500) / count(), 2)
-    by bin(TimeGenerated, 5m), AppRoleName
-| order by TimeGenerated asc
+    AvgLatencyMs = avg(Average),
+    P95LatencyMs = percentile(Average, 95),
+    MaxLatencyMs = max(Maximum)
+    by bin(TimeGenerated, 15m), Deployment
+| order by TimeGenerated desc
 ```
 
-### 4. Consumo de Tokens por Deployment e Modelo
+### 3. Consumo de Tokens por Deployment
 
-Acompanhe o uso de tokens entre deployments usando custom dimensions. Isso requer que sua aplicação registre contagens de tokens como propriedades customizadas (veja a seção de instrumentação com OpenTelemetry acima).
+Use as métricas de plataforma do Azure OpenAI para obter o volume de tokens de prompt e completion por deployment.
+
+```kusto
+AzureMetrics
+| where TimeGenerated > ago(24h)
+| where MetricName in ("ProcessedPromptTokens", "GeneratedTokens")
+| extend Dimensions = parse_json(Tags)
+| extend Deployment = tostring(Dimensions["ModelDeploymentName"])
+| extend TokenType = iff(MetricName == "ProcessedPromptTokens", "Prompt", "Completion")
+| summarize
+    TotalTokens = sum(Total)
+    by Deployment, TokenType
+| order by Deployment asc, TokenType asc
+```
+
+### 4. Pontos Quentes de Utilização de PTU
+
+Se você estiver em Provisioned Throughput, esta é a consulta que mostra se você está operando perto do limite.
+
+```kusto
+AzureMetrics
+| where TimeGenerated > ago(6h)
+| where MetricName == "AzureOpenAIProvisionedManagedUtilizationV2"
+| extend Dimensions = parse_json(Tags)
+| extend Deployment = tostring(Dimensions["ModelDeploymentName"])
+| summarize
+    AvgUtilizationPct = avg(Average),
+    MaxUtilizationPct = max(Maximum)
+    by bin(TimeGenerated, 5m), Deployment
+| where MaxUtilizationPct > 80
+| order by MaxUtilizationPct desc
+```
+
+### Telemetria da Aplicação (`AppRequests`)
+
+### 5. Latência de Ponta a Ponta da Aplicação e Taxa de Erros
+
+Use `AppRequests` para o que o usuário realmente sentiu na sua aplicação: entrada, orquestração, busca vetorial, retries e tempo de serviços downstream somados.
 
 ```kusto
 AppRequests
 | where TimeGenerated > ago(24h)
-| extend TokensUsed = tolong(Properties["tokens.total"])
-| extend Deployment = tostring(Properties["deployment"])
-| where isnotempty(TokensUsed)
 | summarize
-    TotalTokens = sum(TokensUsed),
-    AvgTokensPerRequest = avg(TokensUsed),
-    RequestCount = count()
-    by Deployment, AppRoleName
-| order by TotalTokens desc
+    RequestCount = count(),
+    AvgDurationMs = avg(DurationMs),
+    P95DurationMs = percentile(DurationMs, 95),
+    ErrorRatePct = round(100.0 * countif(toint(ResultCode) >= 500) / count(), 2)
+    by bin(TimeGenerated, 15m), AppRoleName
+| order by TimeGenerated desc
 ```
 
-### 5. Detecção de Picos na Taxa de Erros
+### 6. Detecção de Picos na Taxa de Erros na Camada de Aplicação
 
-Detecte aumentos repentinos nas taxas de erro comparando a hora atual com a baseline histórica. Um pico acima de 2× a baseline justifica investigação.
+Detecte aumentos repentinos na taxa de erros da aplicação comparando a hora atual com a baseline histórica.
 
 ```kusto
 let baseline = AppRequests
     | where TimeGenerated between (ago(7d) .. ago(1d))
-    | summarize BaselineErrorRate = round(100.0 * countif(toint(ResultCode) >= 500) / count(), 2)
+    | summarize BaselineErrorRatePct = 100.0 * countif(toint(ResultCode) >= 500) / count()
         by AppRoleName;
 AppRequests
 | where TimeGenerated > ago(1h)
 | summarize
-    CurrentErrorRate = round(100.0 * countif(toint(ResultCode) >= 500) / count(), 2),
+    CurrentErrorRatePct = 100.0 * countif(toint(ResultCode) >= 500) / count(),
     TotalRequests = count()
     by AppRoleName
 | join kind=inner baseline on AppRoleName
-| extend SpikeRatio = iff(BaselineErrorRate > 0, CurrentErrorRate / BaselineErrorRate, 0.0)
-| where SpikeRatio > 2.0
-| project AppRoleName, CurrentErrorRate, BaselineErrorRate, SpikeRatio, TotalRequests
+| extend SpikeRatio = iff(BaselineErrorRatePct > 0, CurrentErrorRatePct / BaselineErrorRatePct, 0.0)
+| where SpikeRatio > 2.0 and TotalRequests > 100
+| project
+    AppRoleName,
+    CurrentErrorRatePct = round(CurrentErrorRatePct, 2),
+    BaselineErrorRatePct = round(BaselineErrorRatePct, 2),
+    SpikeRatio = round(SpikeRatio, 2),
+    TotalRequests
 ```
 
-### 6. Distribuição de Latência por Faixas de Percentil
-
-Entenda a distribuição completa de latência, não apenas as médias. Médias escondem a dor dos seus usuários de cauda de latência.
-
-```kusto
-AppRequests
-| where TimeGenerated > ago(4h)
-| summarize
-    P50 = percentile(DurationMs, 50),
-    P75 = percentile(DurationMs, 75),
-    P90 = percentile(DurationMs, 90),
-    P95 = percentile(DurationMs, 95),
-    P99 = percentile(DurationMs, 99),
-    Max = max(DurationMs),
-    Count = count()
-    by AppRoleName
-| order by P99 desc
-```
-
-⚠️ **Cuidado em Produção**: A função `percentile()` do KQL é aproximada para datasets grandes. Para percentis exatos em relatórios críticos de SLO, use `percentile_tdigest()` ou exporte os dados para análise offline. Para dashboards operacionais, a aproximação padrão é precisa o suficiente.
+⚠️ **Cuidado em Produção**: `percentile()` e `percentile_tdigest()` no KQL são ambos estimadores aproximados de percentil. `percentile_tdigest()` fornece uma aproximação baseada em t-digest útil para rollups e mesclagem de dados — **não** é matemática exata. Para relatórios de SLO com grau de auditoria ou obrigação contratual, exporte as amostras brutas de latência e calcule percentis exatos offline.
 
 ---
 
@@ -518,7 +535,7 @@ az aks update \
 helm repo add nvidia https://nvidia.github.io/dcgm-exporter/helm-charts
 helm repo update
 
-# Instalar o DCGM Exporter direcionado aos nós com GPU
+# Instalar o DCGM Exporter
 helm install dcgm-exporter nvidia/dcgm-exporter \
   --namespace gpu-monitoring \
   --create-namespace \
@@ -529,35 +546,26 @@ helm install dcgm-exporter nvidia/dcgm-exporter \
 kubectl get pods -n gpu-monitoring -o wide
 ```
 
-### Passo 3: Configurar Custom Scrape para Métricas DCGM
+### Passo 3: Habilitar o Perfil Gerenciado de Coleta de Métricas de GPU
 
-Crie um ConfigMap para garantir que o Azure Managed Prometheus colete os endpoints do DCGM Exporter:
+No AKS, use o `ama-metrics-settings-configmap` do agente do Azure Monitor para habilitar o perfil interno de coleta `dcgmexporter`:
 
 ```yaml
-# dcgm-scrape-config.yaml
+# ama-metrics-settings-configmap.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: ama-metrics-prometheus-config
+  name: ama-metrics-settings-configmap
   namespace: kube-system
 data:
-  prometheus-config: |
-    scrape_configs:
-    - job_name: dcgm-exporter
-      kubernetes_sd_configs:
-      - role: pod
-      relabel_configs:
-      - source_labels: [__meta_kubernetes_pod_label_app]
-        regex: dcgm-exporter
-        action: keep
-      - source_labels: [__meta_kubernetes_namespace]
-        target_label: namespace
-      - source_labels: [__meta_kubernetes_pod_name]
-        target_label: pod
+  schema-version: v1
+  config-version: ver1
+  default-scrape-settings-enabled: |-
+    dcgmexporter = true
 ```
 
 ```bash
-kubectl apply -f dcgm-scrape-config.yaml
+kubectl apply -f ama-metrics-settings-configmap.yaml
 ```
 
 ### Passo 4: Importar Dashboard de GPU no Grafana
@@ -587,9 +595,9 @@ kubectl run prom-test --rm -it --image=curlimages/curl -- \
   curl -s "http://dcgm-exporter.gpu-monitoring:9400/metrics" | head -20
 ```
 
-Você deve ver linhas de métricas como `DCGM_FI_DEV_GPU_UTIL`, `DCGM_FI_DEV_FB_USED` e `DCGM_FI_DEV_GPU_TEMP` com valores atuais.
+Você deve ver linhas de métricas como `DCGM_FI_DEV_GPU_UTIL`, `DCGM_FI_DEV_FB_USED` e `DCGM_FI_DEV_TEMPERATURE` com valores atuais.
 
-⚠️ **Cuidado em Produção**: O DCGM Exporter requer que o driver de GPU NVIDIA e as bibliotecas DCGM estejam presentes no host. No AKS, o driver de GPU é instalado automaticamente via o DaemonSet do NVIDIA device plugin quando você provisiona node pools de GPU. Se os pods do DCGM Exporter estiverem crashando, verifique a instalação do driver de GPU com `kubectl logs -n gpu-resources -l name=nvidia-device-plugin-ds`.
+⚠️ **Cuidado em Produção**: O DCGM Exporter requer que o driver de GPU NVIDIA e as bibliotecas DCGM estejam presentes no host. Em node pools de GPU gerenciados do AKS, confirme primeiro que os componentes NVIDIA realmente estão instalados nos nós antes de investigar a coleta. Se os pods do `dcgm-exporter` estiverem crashando, primeiro verifique o status do node pool de GPU e depois inspecione os pods gerenciados pela NVIDIA no cluster com `kubectl get pods -A | grep -i nvidia`.
 
 ---
 
