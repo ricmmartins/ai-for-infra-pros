@@ -4,7 +4,7 @@
 
 Você fez tudo certo. O time de ML pediu um cluster de GPUs e você entregou — oito NVIDIA A100 GPUs distribuídas em dois nós, conectadas com rede de alta largura de banda, rodando os drivers CUDA mais recentes. O deploy foi perfeito. O time iniciou o primeiro job de treinamento às 18h de uma sexta-feira, e você foi para casa satisfeito com uma semana bem aproveitada.
 
-Seu telefone toca à meia-noite. O cientista de dados líder parece frustrado: "As GPUs não estão funcionando. O treinamento que deveria levar quatro horas nem terminou a primeira epoch." Você acessa remotamente e abre as métricas. Utilização de GPU: 12%. Uso de memória da GPU: mal chega a um terço. Mas aí você vê — o I/O de disco está cravado em 100%, com throughput de leitura rastejando a 60 MB/s. O time armazenou 2 TB de imagens de treinamento em uma conta de Blob Storage com disco Standard HDD, montada via um compartilhamento SMB básico. Sua arquitetura de armazenamento está matando de fome o hardware mais caro do rack.
+Seu telefone toca à meia-noite. O cientista de dados líder parece frustrado: "As GPUs não estão funcionando. O treinamento que deveria levar quatro horas nem terminou a primeira epoch." Você acessa remotamente e abre as métricas. Utilização de GPU: 12%. Uso de memória da GPU: mal chega a um terço. Mas aí você vê — o I/O de disco está cravado em 100%, com throughput de leitura rastejando a 60 MB/s. O time armazenou 2 TB de imagens de treinamento no Blob Storage e tentou tratá-lo como se fosse um compartilhamento SMB básico. Sua arquitetura de armazenamento está matando de fome o hardware mais caro do rack.
 
 Essa história se repete em organizações toda semana. Times investem fortunas em GPUs, apenas para descobrir que o pipeline de dados — a parte que os engenheiros de infraestrutura gerenciam — é o verdadeiro gargalo. Dados são para a IA o que o combustível é para um motor, mas a tubulação importa tanto quanto o próprio combustível. Este capítulo vai ensinar você a construir tubulações que mantêm essas GPUs alimentadas.
 
@@ -25,7 +25,7 @@ Remova qualquer um deles e você não tem nada. Mas aqui está o insight que a m
 | Storage account / volume | Repositório de dataset de treinamento | Onde os dados brutos ficam antes do modelo acessá-los |
 | Throughput de leitura (MB/s) | Velocidade do data loader | Determina quão rápido as GPUs recebem batches de treinamento |
 | IOPS | Amostras por segundo | Workloads com arquivos pequenos (imagens) precisam de alto IOPS |
-| Camadas de armazenamento (Hot/Cool/Archive) | Estágios do ciclo de vida dos dados | Hot para treinamento ativo, Cool para datasets concluídos, Archive para compliance |
+| Camadas de armazenamento (Hot/Cool/Cold/Archive) | Estágios do ciclo de vida dos dados | Hot para treinamento ativo, Cool/Cold para acesso menos frequente, Archive para compliance |
 | Blob container | Partição de dataset | Agrupamento lógico de dados de treinamento, validação e teste |
 | Montagem NFS/SMB | Acesso POSIX para frameworks | PyTorch e TensorFlow esperam semântica de sistema de arquivos |
 | Criptografia em repouso | Conformidade de proteção de dados | Obrigatória para datasets com PII, dados médicos e financeiros |
@@ -72,7 +72,7 @@ Após a ingestão, os dados precisam de um lar. Sua escolha de backend de armaze
 
 **Considerações principais:**
 - **Hot tier** para datasets em treinamento ativo
-- **Cool tier** para dados de experimentos concluídos que você pode revisitar
+- **Cool ou Cold tier** para dados de experimentos concluídos que você pode revisitar com menos frequência
 - **Archive tier** para retenção de compliance e auditoria
 - **Data Lake Gen2** para armazenamento hierárquico pronto para analytics
 
@@ -126,7 +126,7 @@ No momento da inferência, os dados fluem na direção oposta — requisições 
 
 💡 **Dica**: O padrão de produção mais comum é uma abordagem de duas camadas: armazene datasets brutos no Blob Storage ou Data Lake Gen2 para durabilidade e custo, depois transfira os dados de treinamento ativos para o NVMe local para performance. Pense no Blob como seu armazém e no NVMe como sua bancada de trabalho.
 
-⚠️ **Armadilha em Produção**: Nunca use armazenamento com Standard HDD para workloads de treinamento. Os limites de IOPS e throughput estão em ordens de magnitude abaixo do que as GPUs exigem. Uma única GPU A100 consegue consumir dados mais rápido do que uma conta com Standard HDD consegue servir. Sempre use contas Premium ou, no mínimo, com Standard SSD para dados de treinamento ativos.
+⚠️ **Armadilha em Produção**: Não pense em Blob Storage em termos de HDD versus SSD. A performance do Blob é definida por camadas de acesso (Hot, Cool, Cold, Archive), e contas premium de block blob são uma opção separada de alto desempenho. Para dados de treinamento ativos, mantenha os blobs online em Hot ou use premium block blob com staging em NVMe local. Cool e Cold servem para dados acessados com menos frequência; Archive é offline e não serve para treinamento.
 
 ---
 
@@ -178,6 +178,8 @@ sudo blobfuse2 mount /mnt/training-data \
   --preload
 ```
 
+⚠️ **Aviso**: `--preload` faz com que a montagem do BlobFuse2 fique somente leitura e impede a eliminação de arquivos do cache. Isso é ótimo para dados de treinamento majoritariamente de leitura, mas não grave checkpoints, logs nem qualquer outra saída mutável nessa montagem. Mantenha esses artefatos em um caminho gravável separado — de preferência no NVMe local durante a execução — e depois sincronize-os de volta para o Blob Storage.
+
 💡 **Dica**: Sempre aponte `--tmp-path` para o disco temporário NVMe local da VM (`/mnt/resource` em VMs Azure) em vez do disco do sistema operacional. Isso dá ao cache do BlobFuse2 a menor latência possível. Em VMs com GPU como a série ND, o disco temporário local pode entregar de 3 a 7 GB/s de throughput de leitura.
 
 > Para opções completas de configuração, incluindo autenticação com managed identity e modo streaming, consulte a [documentação do BlobFuse2](https://learn.microsoft.com/azure/storage/blobs/blobfuse2-what-is).
@@ -212,7 +214,7 @@ As VMs com GPU do Azure (séries ND, NC) incluem discos temporários NVMe locais
 - **Efêmero**: Todos os dados são perdidos quando a VM é parada ou desalocada
 - Sem custo adicional — incluso na VM
 
-O padrão recomendado: use o AzCopy ou o preload do BlobFuse2 para transferir dados do Blob Storage para o NVMe local no início do job, treine a partir do NVMe e depois escreva os checkpoints de volta no Blob Storage para durabilidade.
+O padrão recomendado: use o AzCopy ou o preload do BlobFuse2 para transferir dados do Blob Storage para o NVMe local no início do job, treine a partir desse caminho local rápido e depois grave os checkpoints em um caminho gravável separado antes de copiá-los de volta para o Blob Storage para durabilidade.
 
 ⚠️ **Armadilha em Produção: "O Mistério dos 12% de Utilização de GPU"** — Se um cientista de dados reportar que a utilização da GPU está suspeitamente baixa, verifique o backend de armazenamento antes de investigar qualquer outra coisa. Nove em cada dez vezes, o problema é um destes: (1) dados de treinamento em Standard HDD, (2) montagem remota sem cache ou (3) o diretório de cache do BlobFuse2 apontando para o disco do SO em vez do disco temporário NVMe. Uma correção de cinco minutos no armazenamento pode transformar um job de treinamento de vários dias em um que roda durante a noite.
 
@@ -414,7 +416,7 @@ azcopy copy './local-dataset/' \
 
 **Combine o armazenamento com o workload** — Use Blob/Data Lake Gen2 para armazenamento durável, NVMe local para espaço scratch de treinamento e Cosmos DB para features de inferência de baixa latência.
 
-**Use o BlobFuse2 com sabedoria** — Monte o Blob Storage como sistema de arquivos com modo file cache para treinamento. Sempre aponte o cache para o disco temporário NVMe local da VM.
+**Use o BlobFuse2 com sabedoria** — Monte o Blob Storage como sistema de arquivos com modo file cache para treinamento. Sempre aponte o cache para o disco temporário NVMe local da VM e lembre-se de que `--preload` deixa a montagem somente leitura.
 
 **Prepare os dados para o treinamento** — Copie datasets do Blob Storage para o NVMe local antes de iniciar o treinamento. Escreva checkpoints de volta no Blob para durabilidade.
 

@@ -306,14 +306,16 @@ Exemplo (GPT-4o):
 3. Consistência de latência importa (ex.: chat voltado ao usuário)
 4. Você pode se comprometer com 1+ mês de capacidade
 
-**Cálculo de dimensionamento de PTU:**
+**Fluxo de dimensionamento de PTU:**
 
 ```
-TPM sustentado necessário: 180.000
-Capacidade aproximada por PTU (GPT-4o): ~3.600 TPM por PTU
-PTUs base: 180.000 ÷ 3.600 = 50 PTUs
-Com 25% de margem para picos: 63 PTUs
+1. Medir RPM, média de tokens de entrada, média de tokens de saída e taxa de acerto de cache
+2. Usar a calculadora de PTU do Azure AI Foundry para seu modelo/versão exatos e formato de chamada
+3. Validar com tráfego representativo antes de assumir o compromisso
+4. Adicionar margem para picos
 ```
+
+**Exemplo rápido para estimativa:** Um workload estável de 180K TPM normalmente cai na faixa de **dezenas de PTUs**, não de um único dígito, para deployments da classe GPT-4o — mas o número exato **depende do modelo e do formato da requisição**. Não trate nenhuma proporção fixa de TPM por PTU como universal; use a calculadora e os benchmarks como fonte de verdade.
 
 ⚠️ **Armadilha em Produção**: PTUs são específicos por região e sujeitos à disponibilidade. Se você precisa de 100+ PTUs de um modelo específico, verifique a capacidade regional com seu time de contas Microsoft *antes* de planejar a migração. Regiões populares esgotam rapidamente.
 
@@ -359,8 +361,8 @@ az vm extension list --resource-group <rg> --vm-name <vm> --output table
 az vm extension set \
   --resource-group <rg> --vm-name <vm> \
   --name NvidiaGpuDriverLinux \
-  --publisher Microsoft.HCPCompute \
-  --version 1.9
+  --publisher Microsoft.HpcCompute \
+  --version 1.6
 
 # Passo 3: Reiniciar e verificar
 az vm restart --resource-group <rg> --name <vm>
@@ -387,7 +389,7 @@ docker inspect <image> | grep CUDA
 
 O CUDA toolkit no seu container deve ser ≤ a versão de CUDA suportada pelo driver. Se seu container usa CUDA 12.3, mas o driver suporta 12.2, ele falhará silenciosamente ou lançará `CUDA error: no kernel image is available`.
 
-⚠️ **Armadilha em Produção**: A extensão de driver NVIDIA do Azure atualiza automaticamente por padrão. Fixe a versão em produção para evitar que uma atualização automática quebre a compatibilidade CUDA: `--version 1.9 --settings '{"driverVersion":"535.129.03"}'`.
+⚠️ **Armadilha em Produção**: A extensão de driver NVIDIA do Azure **não atualiza automaticamente o driver após a instalação**. Se você precisar de um driver mais novo, instale-o manualmente ou remova e adicione novamente a extensão. Ainda assim, fixar a versão da extensão/as configurações do driver em produção ajuda a manter a compatibilidade CUDA previsível: `--version 1.6 --settings '{"driverVersion":"535.129.03"}'`.
 
 ---
 
@@ -449,7 +451,7 @@ AzureDiagnostics
 az ml online-deployment create --name green \
   --endpoint-name prod-api \
   --model azureml:fraud-detector:5 \
-  --instance-type Standard_NC4as_T4_v3 \
+  --instance-type Standard_NC16as_T4_v3 \
   --instance-count 2
 
 # Direcionar 10% do tráfego para green (canary)

@@ -75,7 +75,7 @@ az ml model show \
   --query "jobs"
 ```
 
-💡 **Dica**: Use as coleções de modelo do Azure ML para agrupar modelos relacionados (por exemplo, todos os modelos de um pipeline de recomendação). Isso facilita promover ou fazer rollback de um ensemble inteiro de modelos em vez de componentes individuais.
+💡 **Dica**: Mantenha artefatos relacionados sob um nome consistente de modelo registrado, deixe versões imutáveis marcarem cada release e use tags/propriedades para indicar framework, tarefa ou status de aprovação. Se você precisar compartilhar modelos aprovados entre workspaces, promova-os por meio de um registry do Azure ML em vez de inventar seu próprio esquema de nomenclatura.
 
 ### MLflow Model Registry
 
@@ -87,20 +87,29 @@ mlflow server \
   --backend-store-uri sqlite:///mlflow.db \
   --default-artifact-root ./mlruns \
   --host 0.0.0.0 --port 5000
-
-# Registrar um modelo via CLI do MLflow
-mlflow models register \
-  --model-uri runs:/<run-id>/model \
-  --name sentiment-classifier
-
-# Transicionar um modelo para o estágio de produção
-mlflow models transition-stage \
-  --name sentiment-classifier \
-  --version 3 \
-  --stage Production
 ```
 
-O conceito de `stages` do MLflow (Staging, Production, Archived) mapeia diretamente para o modelo de promoção que engenheiros de infraestrutura usam para deploys de aplicações. Um modelo começa em "None", passa para "Staging" após validação, é promovido para "Production" após aprovação, e vai para "Archived" quando é substituído.
+```python
+import mlflow
+
+client = mlflow.tracking.MlflowClient()
+
+# Registrar um modelo
+mlflow.register_model(
+    model_uri="runs:/<run-id>/model",
+    name="sentiment-classifier",
+)
+
+# Transicionar um modelo para o estágio de produção
+client.transition_model_version_stage(
+    "sentiment-classifier",
+    version=3,
+    stage="Production",
+    archive_existing_versions=True,
+)
+```
+
+O conceito de `stages` do MLflow (Staging, Production, Archived) mapeia diretamente para o modelo de promoção que engenheiros de infraestrutura usam para deploys de aplicações. Um modelo começa em "None", passa para "Staging" após validação, é promovido para "Production" após aprovação, e vai para "Archived" quando é substituído. No Azure ML, esses stages só ficam expostos via SDK do MLflow — não pelo Azure ML CLI, SDK, API REST ou interface do Studio — e você não consegue fazer deploy diretamente por stage, então muitos times dirigem a promoção com tags mais uma versão explícita no pipeline de deploy.
 
 ### Container Registries para Servir Modelos
 
@@ -244,11 +253,21 @@ jobs:
     steps:
       - name: Deploy to staging endpoint
         run: |
+          az ml online-endpoint show \
+            --name sentiment-staging \
+            --resource-group ${{ env.AZURE_RG }} \
+            --workspace-name ${{ env.AZURE_ML_WS }} >/dev/null 2>&1 || \
+          az ml online-endpoint create \
+            --name sentiment-staging \
+            --auth-mode key \
+            --resource-group ${{ env.AZURE_RG }} \
+            --workspace-name ${{ env.AZURE_ML_WS }}
+
           az ml online-deployment create \
             --name staging-${{ inputs.model_version }} \
             --endpoint-name sentiment-staging \
             --model azureml:${{ inputs.model_name }}:${{ inputs.model_version }} \
-            --instance-type Standard_NC4as_T4_v3 \
+            --instance-type Standard_NC16as_T4_v3 \
             --instance-count 1 \
             --resource-group ${{ env.AZURE_RG }} \
             --workspace-name ${{ env.AZURE_ML_WS }}
@@ -266,12 +285,22 @@ jobs:
     steps:
       - name: Deploy canary (10% traffic)
         run: |
+          az ml online-endpoint show \
+            --name sentiment-prod \
+            --resource-group ${{ env.AZURE_RG }} \
+            --workspace-name ${{ env.AZURE_ML_WS }} >/dev/null 2>&1 || \
+          az ml online-endpoint create \
+            --name sentiment-prod \
+            --auth-mode key \
+            --resource-group ${{ env.AZURE_RG }} \
+            --workspace-name ${{ env.AZURE_ML_WS }}
+
           az ml online-deployment create \
             --name prod-${{ inputs.model_version }} \
             --endpoint-name sentiment-prod \
             --model azureml:${{ inputs.model_name }}:${{ inputs.model_version }} \
-            --instance-type Standard_NC4as_T4_v3 \
-            --instance-count 2 \
+            --instance-type Standard_NC16as_T4_v3 \
+            --instance-count 3 \
             --resource-group ${{ env.AZURE_RG }} \
             --workspace-name ${{ env.AZURE_ML_WS }}
 
@@ -282,7 +311,7 @@ jobs:
             --workspace-name ${{ env.AZURE_ML_WS }}
 ```
 
-**Tradução Infra ↔ IA**: Esse é o seu pipeline de deploy blue/green, mas para pesos de modelo em vez de imagens de container. O flag `--traffic` funciona exatamente como roteamento ponderado no Azure Front Door ou Application Gateway — você está desviando uma porcentagem das requisições de produção para a nova versão do modelo enquanto a versão antiga continua servindo.
+**Tradução Infra ↔ IA**: Esse é o seu pipeline de deploy blue/green, mas para pesos de modelo em vez de imagens de container. O flag `--traffic` funciona exatamente como roteamento ponderado no Azure Front Door ou Application Gateway — você está desviando uma porcentagem das requisições de produção para a nova versão do modelo enquanto a versão antiga continua servindo. Repare também na mudança de SKU de GPU: `Standard_NC16as_T4_v3` está na lista de SKUs aceitos pelos managed online endpoints do Azure ML, enquanto `NC4as_T4_v3` não está, então o piso de custo de staging e canary fica mais alto do que o de uma caixinha dev. É também por isso que o exemplo de produção usa três réplicas no deployment canary em vez de fingir que uma ou duas GPUs caras representam "alta disponibilidade".
 
 ### Responsabilidades de Infraestrutura em Cada Estágio
 

@@ -82,7 +82,7 @@ Escolher a família certa de VM com GPU é a decisão de maior impacto que você
 
 *Preços aproximados no modelo pay-as-you-go para East US. Sempre consulte a [Calculadora de Preços do Azure](https://azure.microsoft.com/pricing/calculator/) para valores atualizados.*
 
-⚠️ **Pegadinha de Produção**: A **série ND original** (ND6s, ND12s, ND24s, ND24rs) foi **descontinuada em setembro de 2023**. Se você encontrar templates Terraform, scripts ARM ou posts de blog referenciando esses SKUs, o deploy vai falhar. Sempre verifique na [página de descontinuação de VMs do Azure](https://learn.microsoft.com/azure/virtual-machines/sizes/overview) antes de provisionar. As VMs ND-series atuais são `Standard_ND96asr_v4` (A100) e `Standard_ND96isr_H100_v5` (H100) — hardware completamente diferente.
+⚠️ **Pegadinha de Produção**: A **série ND original** (ND6s, ND12s, ND24s, ND24rs) foi **descontinuada em setembro de 2023**. Se você encontrar templates Terraform, scripts ARM ou posts de blog referenciando esses SKUs baseados em P40, o deploy vai falhar. Essa descontinuação **não** se aplica à NDv2, e as famílias ND mais novas são separadas. Sempre verifique na [página de descontinuação da série ND](https://learn.microsoft.com/azure/virtual-machines/sizes/lifecycle/retirement/nd-series-retirement) e na documentação atual de [tamanhos de VM com GPU acelerada](https://learn.microsoft.com/azure/virtual-machines/sizes/overview#gpu-accelerated) antes de provisionar.
 
 ### Escolhendo a família certa
 
@@ -102,7 +102,15 @@ az vm list-skus \
   -o table
 ```
 
-Se a coluna `Restrictions` mostrar `NotAvailableForSubscription`, você precisa solicitar um aumento de cota pelo portal do Azure.
+Isso mostra se o SKU está exposto nessa região para a sua assinatura. **Não** mostra se você tem cota suficiente para fazer o deploy. Verifique a cota separadamente:
+
+```bash
+az vm list-usage \
+  --location eastus2 \
+  -o table
+```
+
+Se o SKU aparecer, mas sua cota N-family estiver zerada ou esgotada, solicite mais cota em **Uso + cotas** (ou no serviço Quotas no portal).
 
 ---
 
@@ -283,7 +291,7 @@ ADMIN_USER="azureuser"
 
 ### Passo 1: Verifique a disponibilidade de cota de GPU
 
-Antes de criar qualquer coisa, verifique se o SKU de GPU está disponível na sua região alvo e se você tem cota suficiente:
+Antes de criar qualquer coisa, verifique duas coisas diferentes: se o SKU de GPU está disponível na sua região alvo e se você tem cota suficiente para fazer o deploy.
 
 ```bash
 az vm list-skus \
@@ -293,6 +301,14 @@ az vm list-skus \
   --query "[].{Name:name, Restrictions:restrictions[0].reasonCode}" \
   -o table
 ```
+
+```bash
+az vm list-usage \
+  --location $LOCATION \
+  -o table
+```
+
+Use `az vm list-skus` para verificar exposição do SKU e restrições da assinatura. Use `az vm list-usage` (ou a experiência de Quotas no portal) para verificar sua cota regional atual de vCPUs e o uso da família de GPU relevante.
 
 Se a saída mostrar `NotAvailableForSubscription`, solicite um aumento de cota no portal do Azure em **Assinaturas → Uso + cotas**.
 

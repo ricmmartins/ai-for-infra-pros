@@ -161,7 +161,7 @@ az ml online-endpoint create --name fraud-api \
 az ml online-deployment create --name blue \
   --endpoint-name fraud-api \
   --model azureml:fraud-detector:1 \
-  --instance-type Standard_NC4as_T4_v3 \
+  --instance-type Standard_NC16as_T4_v3 \
   --instance-count 2 \
   --file deployment.yml
 
@@ -458,12 +458,13 @@ Passo 2: Calcular TPM sustentado
          Requisições por minuto: 150
          TPM sustentado = 150 × 1.200 = 180.000 TPM
 
-Passo 3: Usar a calculadora de capacidade do Azure ou:
-         ~1 PTU ≈ 3.600 TPM (GPT-4o, aproximado)
-         PTUs necessários ≈ 180.000 ÷ 3.600 = 50 PTUs
+Passo 3: Dimensionar com a calculadora de PTU do Azure AI Foundry
+         usando seu modelo exato, tamanho de prompt, tamanho de completion,
+         taxa de acerto de cache e RPM desejado
 
 Passo 4: Adicionar 25% de margem para picos
-         Recomendado: 63 PTUs
+         Resultado: normalmente dezenas de PTUs para esse perfil de workload,
+         mas a contagem exata depende do modelo
 ```
 
 ### Regras Práticas para Estimativa de Tokens
@@ -510,7 +511,7 @@ GPU não está visível para a carga de trabalho?
 ├── nvidia-smi retorna erro?
 │   ├── Driver não instalado → Instale a extensão de driver NVIDIA:
 │   │   az vm extension set --name NvidiaGpuDriverLinux \
-│   │     --publisher Microsoft.HCPCompute --version 1.9 \
+│   │     --publisher Microsoft.HpcCompute --version 1.6 \
 │   │     --vm-name <vm> --resource-group <rg>
 │   └── Versão do driver incompatível → Verifique a matriz de compatibilidade CUDA
 ├── No pod AKS, `nvidia-smi` não encontrado?
