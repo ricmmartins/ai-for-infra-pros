@@ -711,6 +711,27 @@ Azure Policy can enforce rules at the subscription or management group level. Fo
 ```json
 {
   "mode": "All",
+  "parameters": {
+    "effect": {
+      "type": "String",
+      "allowedValues": [
+        "Audit",
+        "Deny",
+        "Disabled"
+      ],
+      "defaultValue": "Audit"
+    },
+    "gpuSkus": {
+      "type": "Array",
+      "defaultValue": [
+        "Standard_NC24ads_A100_v4",
+        "Standard_NC48ads_A100_v4",
+        "Standard_NC96ads_A100_v4",
+        "Standard_ND96asr_v4",
+        "Standard_ND96amsr_A100_v4"
+      ]
+    }
+  },
   "policyRule": {
     "if": {
       "allOf": [
@@ -724,13 +745,7 @@ Azure Policy can enforce rules at the subscription or management group level. Fo
                 },
                 {
                   "field": "Microsoft.Compute/virtualMachines/sku.name",
-                  "in": [
-                    "Standard_NC24ads_A100_v4",
-                    "Standard_NC48ads_A100_v4",
-                    "Standard_NC96ads_A100_v4",
-                    "Standard_ND96asr_v4",
-                    "Standard_ND96amsr_A100_v4"
-                  ]
+                  "in": "[parameters('gpuSkus')]"
                 }
               ]
             },
@@ -742,13 +757,37 @@ Azure Policy can enforce rules at the subscription or management group level. Fo
                 },
                 {
                   "field": "Microsoft.Compute/virtualMachineScaleSets/sku.name",
-                  "in": [
-                    "Standard_NC24ads_A100_v4",
-                    "Standard_NC48ads_A100_v4",
-                    "Standard_NC96ads_A100_v4",
-                    "Standard_ND96asr_v4",
-                    "Standard_ND96amsr_A100_v4"
-                  ]
+                  "in": "[parameters('gpuSkus')]"
+                }
+              ]
+            },
+            {
+              "allOf": [
+                {
+                  "field": "type",
+                  "equals": "Microsoft.ContainerService/managedClusters"
+                },
+                {
+                  "count": {
+                    "field": "Microsoft.ContainerService/managedClusters/agentPoolProfiles[*]",
+                    "where": {
+                      "field": "Microsoft.ContainerService/managedClusters/agentPoolProfiles[*].vmSize",
+                      "in": "[parameters('gpuSkus')]"
+                    }
+                  },
+                  "greater": 0
+                }
+              ]
+            },
+            {
+              "allOf": [
+                {
+                  "field": "type",
+                  "equals": "Microsoft.ContainerService/managedClusters/agentPools"
+                },
+                {
+                  "field": "Microsoft.ContainerService/managedClusters/agentPools/vmSize",
+                  "in": "[parameters('gpuSkus')]"
                 }
               ]
             }
@@ -761,14 +800,13 @@ Azure Policy can enforce rules at the subscription or management group level. Fo
       ]
     },
     "then": {
-      "effect": "deny"
+      "effect": "[parameters('effect')]"
     }
-  },
-  "parameters": {}
+  }
 }
 ```
 
-This policy denies the creation of high-end GPU compute unless it carries a `cost-center` tag. It covers both standalone VMs and VM scale sets, which matters because AKS GPU node pools land on VMSS resources rather than plain virtual machines. If you want to block unsupported node sizes earlier in the AKS control plane, add a companion AKS policy that restricts agent-pool VM sizes too.
+This policy flags (or denies) high-end GPU compute that doesn't carry a `cost-center` tag. It covers standalone VMs, VM scale sets, and AKS at the control plane: `agentPoolProfiles[*].vmSize` for pools defined inline on the cluster and `agentPools/vmSize` for pools created as separate resources (what the `azurerm_kubernetes_cluster_node_pool` resource does). Covering the AKS API matters because the reader picks the VM size there, before AKS creates the scale set in the managed node resource group. The `effect` parameter defaults to `Audit`: roll the policy out in audit mode first, review the compliance results, and switch to `Deny` once you've confirmed it won't block legitimate cluster or autoscaler operations. Treat the SKU list as an example, not a complete inventory of GPU sizes.
 
 ### Naming Conventions for AI Resources
 
