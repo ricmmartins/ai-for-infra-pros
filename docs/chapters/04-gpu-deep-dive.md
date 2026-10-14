@@ -42,7 +42,7 @@ When you have multiple GPUs in a single VM, they need to communicate. PCIe provi
 - **H100 NVLink**: 900 GB/s bidirectional bandwidth
 - **B200 NVLink 5.0**: 1.8 TB/s bidirectional bandwidth
 
-NVLink matters because multi-GPU training strategies (covered later in this chapter) exchange massive amounts of data between GPUs every few milliseconds. If that exchange bottlenecks on PCIe (64 GB/s), your expensive GPUs sit idle waiting for data. On Azure, NVLink availability varies by SKU: for example, ND H100 v5 explicitly documents NVLINK 4.0, and NCads H100 v5 uses NVIDIA H100 NVL GPUs. Verify the exact SKU docs and confirm the live topology with `nvidia-smi topo -m`.
+NVLink matters because multi-GPU training strategies (covered later in this chapter) exchange massive amounts of data between GPUs every few milliseconds. If that exchange bottlenecks on PCIe (64 GB/s), your expensive GPUs sit idle waiting for data. On Azure, NVLink availability varies by SKU: for example, ND H100 v5 explicitly documents NVLINK 4.0, while NCads H100 v5 is documented as H100 NVL GPUs without an NVLink specification, so don't assume GPU-to-GPU NVLink there. Verify the exact SKU docs and confirm the live topology with `nvidia-smi topo -m`.
 
 💡 **Pro Tip**: If `nvidia-smi topo -m` shows `PIX` or `PHB` between GPUs instead of `NV#`, you're running on PCIe, not NVLink. For multi-GPU training, this makes a dramatic difference in throughput. Verify you're on the right VM SKU before debugging performance problems.
 
@@ -468,7 +468,7 @@ All connections show `PHB` (PCIe Host Bridge) or `PIX` (PCIe switch) instead of 
 **Why it happens:** The VM SKU might not expose NVLink, the driver version might not report the topology correctly, or the hardware might have a fault. Don't assume from the family name alone — check the exact SKU docs and the live topology output.
 
 **What to do:**
-1. Verify the exact VM SKU in the docs: ND H100 v5 explicitly lists NVLINK 4.0, and NCads H100 v5 uses NVIDIA H100 NVL GPUs. Then confirm what your VM actually exposes with `nvidia-smi topo -m`.
+1. Verify the exact VM SKU in the docs: ND H100 v5 explicitly lists NVLINK 4.0, while the NCads H100 v5 page lists H100 NVL GPUs but no NVLink specification. Then confirm what your VM actually exposes with `nvidia-smi topo -m`.
 2. Update the NVIDIA driver to the latest version supported by your GPU.
 3. If on the correct SKU with correct drivers and NVLink still doesn't appear, open an Azure support ticket — this indicates a hardware issue.
 
