@@ -711,6 +711,27 @@ O Azure Policy pode impor regras no nível de subscription ou management group. 
 ```json
 {
   "mode": "All",
+  "parameters": {
+    "effect": {
+      "type": "String",
+      "allowedValues": [
+        "Audit",
+        "Deny",
+        "Disabled"
+      ],
+      "defaultValue": "Audit"
+    },
+    "gpuSkus": {
+      "type": "Array",
+      "defaultValue": [
+        "Standard_NC24ads_A100_v4",
+        "Standard_NC48ads_A100_v4",
+        "Standard_NC96ads_A100_v4",
+        "Standard_ND96asr_v4",
+        "Standard_ND96amsr_A100_v4"
+      ]
+    }
+  },
   "policyRule": {
     "if": {
       "allOf": [
@@ -724,13 +745,7 @@ O Azure Policy pode impor regras no nível de subscription ou management group. 
                 },
                 {
                   "field": "Microsoft.Compute/virtualMachines/sku.name",
-                  "in": [
-                    "Standard_NC24ads_A100_v4",
-                    "Standard_NC48ads_A100_v4",
-                    "Standard_NC96ads_A100_v4",
-                    "Standard_ND96asr_v4",
-                    "Standard_ND96amsr_A100_v4"
-                  ]
+                  "in": "[parameters('gpuSkus')]"
                 }
               ]
             },
@@ -742,13 +757,37 @@ O Azure Policy pode impor regras no nível de subscription ou management group. 
                 },
                 {
                   "field": "Microsoft.Compute/virtualMachineScaleSets/sku.name",
-                  "in": [
-                    "Standard_NC24ads_A100_v4",
-                    "Standard_NC48ads_A100_v4",
-                    "Standard_NC96ads_A100_v4",
-                    "Standard_ND96asr_v4",
-                    "Standard_ND96amsr_A100_v4"
-                  ]
+                  "in": "[parameters('gpuSkus')]"
+                }
+              ]
+            },
+            {
+              "allOf": [
+                {
+                  "field": "type",
+                  "equals": "Microsoft.ContainerService/managedClusters"
+                },
+                {
+                  "count": {
+                    "field": "Microsoft.ContainerService/managedClusters/agentPoolProfiles[*]",
+                    "where": {
+                      "field": "Microsoft.ContainerService/managedClusters/agentPoolProfiles[*].vmSize",
+                      "in": "[parameters('gpuSkus')]"
+                    }
+                  },
+                  "greater": 0
+                }
+              ]
+            },
+            {
+              "allOf": [
+                {
+                  "field": "type",
+                  "equals": "Microsoft.ContainerService/managedClusters/agentPools"
+                },
+                {
+                  "field": "Microsoft.ContainerService/managedClusters/agentPools/vmSize",
+                  "in": "[parameters('gpuSkus')]"
                 }
               ]
             }
@@ -761,14 +800,13 @@ O Azure Policy pode impor regras no nível de subscription ou management group. 
       ]
     },
     "then": {
-      "effect": "deny"
+      "effect": "[parameters('effect')]"
     }
-  },
-  "parameters": {}
+  }
 }
 ```
 
-Esta política nega a criação de compute GPU de alto desempenho a menos que ele carregue a tag `cost-center`. Ela cobre tanto VMs avulsas quanto conjuntos de escala de VMs, o que importa porque node pools GPU do AKS aterrissam em recursos de VMSS, não em máquinas virtuais simples. Se você quiser bloquear tamanhos de nó sem suporte mais cedo, já no plano de controle do AKS, adicione também uma política complementar do AKS que restrinja os tamanhos de VM dos agent pools.
+Esta política sinaliza (ou nega) compute GPU de alto desempenho que não carregue a tag `cost-center`. Ela cobre VMs avulsas, conjuntos de escala de VMs e o AKS no control plane: `agentPoolProfiles[*].vmSize` para pools definidos inline no cluster e `agentPools/vmSize` para pools criados como recursos separados (o que o recurso `azurerm_kubernetes_cluster_node_pool` faz). Cobrir a API do AKS importa porque é ali que o leitor escolhe o tamanho da VM, antes de o AKS criar o scale set no resource group gerenciado dos nós. O parâmetro `effect` tem `Audit` como padrão: implante a política primeiro em modo de auditoria, revise os resultados de conformidade e mude para `Deny` só depois de confirmar que ela não bloqueia operações legítimas do cluster ou do autoscaler. Trate a lista de SKUs como exemplo, não como inventário completo de tamanhos GPU.
 
 ### Convenções de Nomenclatura para Recursos de IA
 
