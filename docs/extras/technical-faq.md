@@ -306,14 +306,16 @@ Example (GPT-4o):
 3. Latency consistency matters (e.g., user-facing chat)
 4. You can commit to 1+ month of capacity
 
-**PTU sizing calculation:**
+**PTU sizing workflow:**
 
 ```
-Sustained TPM needed: 180,000
-Approximate PTU capacity (GPT-4o): ~3,600 TPM per PTU
-Base PTUs: 180,000 ÷ 3,600 = 50 PTUs
-With 25% burst headroom: 63 PTUs
+1. Measure RPM, average input tokens, average output tokens, and cache hit rate
+2. Use the Azure AI Foundry PTU calculator for your exact model/version and call shape
+3. Benchmark with representative traffic before committing
+4. Add burst headroom
 ```
+
+**Back-of-the-envelope example:** A steady 180K TPM workload usually lands in the **dozens of PTUs**, not single digits, for GPT-4o-class deployments — but the exact number is **model- and request-shape-specific**. Don't treat any fixed TPM-per-PTU ratio as universal; use the calculator and benchmark results as the source of truth.
 
 ⚠️ **Production Gotcha**: PTUs are region-specific and subject to availability. If you need 100+ PTUs of a specific model, check regional capacity with your Microsoft account team *before* planning the migration. Popular regions fill up.
 
@@ -359,8 +361,8 @@ az vm extension list --resource-group <rg> --vm-name <vm> --output table
 az vm extension set \
   --resource-group <rg> --vm-name <vm> \
   --name NvidiaGpuDriverLinux \
-  --publisher Microsoft.HCPCompute \
-  --version 1.9
+  --publisher Microsoft.HpcCompute \
+  --version 1.6
 
 # Step 3: Reboot and verify
 az vm restart --resource-group <rg> --name <vm>
@@ -387,7 +389,7 @@ docker inspect <image> | grep CUDA
 
 The CUDA toolkit in your container must be ≤ the driver's supported CUDA version. If your container uses CUDA 12.3 but the driver supports 12.2, it will fail silently or throw `CUDA error: no kernel image is available`.
 
-⚠️ **Production Gotcha**: The Azure NVIDIA driver extension auto-updates by default. Pin the version in production to prevent an auto-update from breaking CUDA compatibility: `--version 1.9 --settings '{"driverVersion":"535.129.03"}'`.
+⚠️ **Production Gotcha**: The Azure NVIDIA driver extension **doesn't automatically update the driver after installation**. If you need a newer driver, manually install it or remove and re-add the extension. Pinning the extension/driver settings in production still helps you keep CUDA compatibility predictable: `--version 1.6 --settings '{"driverVersion":"535.129.03"}'`.
 
 ---
 
@@ -449,7 +451,7 @@ AzureDiagnostics
 az ml online-deployment create --name green \
   --endpoint-name prod-api \
   --model azureml:fraud-detector:5 \
-  --instance-type Standard_NC4as_T4_v3 \
+  --instance-type Standard_NC16as_T4_v3 \
   --instance-count 2
 
 # Shift 10% traffic to green (canary)

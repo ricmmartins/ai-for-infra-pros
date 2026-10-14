@@ -141,7 +141,7 @@ This policy allows pods within the `team-data-science` namespace to communicate 
 
 ### The Fundamental Problem
 
-GPU resources are finite and expensive. A single A100 node costs roughly $3 per hour on Azure. When you have 20 nodes and 4 teams, simple Kubernetes scheduling — first-come, first-served — creates constant friction. Training jobs hog GPUs for hours. Inference workloads get starved. Data scientists submit 10 jobs at once and wonder why only 2 are running.
+GPU resources are finite and expensive. As one concrete reference point, a `Standard_NC24ads_A100_v4` Linux VM in East US was about **$3.67/hour pay-as-you-go** in the Azure Retail Prices API as of October 2026 — but the actual number depends heavily on SKU, region, and pricing model, so always confirm in the [Azure pricing calculator](https://azure.microsoft.com/pricing/calculator/) or Retail Prices API before budgeting. When you have 20 nodes and 4 teams, simple Kubernetes scheduling — first-come, first-served — creates constant friction. Training jobs hog GPUs for hours. Inference workloads get starved. Data scientists submit 10 jobs at once and wonder why only 2 are running.
 
 You need scheduling that understands priorities, fairness, and the unique characteristics of AI workloads.
 
@@ -375,6 +375,8 @@ Set alerts when any quota crosses 80% utilization. At 80%, you still have time t
 Every inference endpoint needs clear service-level objectives. Without them, every latency spike is a fire drill and every team's workload is equally "critical."
 
 ### Decision Matrix: SLO Tiers for AI Services
+
+Treat these tiers as illustrative starting points, not universal targets. They assume reasonably optimized models, warm instances, and straightforward request paths — not worst-case prompts, cold starts, or cross-region hops.
 
 | Tier | Latency (P99) | Availability | Throughput | Example Use Cases |
 |---|---|---|---|---|

@@ -2,7 +2,9 @@
 
 Real-world scenarios showing how infrastructure teams deliver measurable business impact with AI workloads on Azure. Each case study maps directly to the concepts covered in this book, so you can trace every decision back to a specific chapter.
 
-These are production stories — not proofs of concept. Every metric is grounded in realistic operational data, and every architecture decision reflects the trade-offs infrastructure engineers face daily.
+> **Note:** These case studies are anonymized composites built from recurring field patterns. The architectures and trade-offs are realistic, but the organizations, timelines, and many of the numbers are illustrative rather than verified customer results.
+
+These are production-style stories — not proofs of concept. The architectures reflect real operational trade-offs infrastructure engineers face daily, but treat the metrics as teaching examples, not audited benchmarks.
 
 ---
 
@@ -172,7 +174,7 @@ The infrastructure team discovered several cost drivers: GPU VMs running 24/7 fo
 
 1. **Usage analysis** — Exported 90 days of Azure Cost Management data and correlated it with Prometheus GPU utilization metrics. Found that GPU VMs averaged 22% utilization during off-peak hours (10 PM – 8 AM) and 78% during business hours.
 2. **GPU scheduling** — Implemented Azure Automation runbooks to deallocate the image classification VMs from 10 PM to 7 AM daily. Added a 30-minute warm-up buffer with health checks before the first request was routed. Saved 37% on GPU compute.
-3. **Azure OpenAI migration to PTU** — Analyzed token consumption patterns: the document summarization feature consumed a steady 180K TPM during business hours. Migrated from standard (pay-per-token) to 300 PTU, which provided 200K+ TPM at a fixed hourly rate. This eliminated 429 errors and reduced cost per token by 42%.
+3. **Azure OpenAI migration to PTU** — Analyzed token consumption patterns: the document summarization feature consumed a steady 180K TPM during business hours. Migrated from standard (pay-per-token) to a calculator-sized PTU deployment based on the model, prompt/completion mix, and burst headroom. This eliminated 429 errors and reduced cost per token by 42%.
 4. **Spot VMs for batch workloads** — Moved the nightly model retraining job (anomaly detection) to `Standard_NC4as_T4_v3` Spot VMs with a max price of 60% of on-demand. Implemented checkpointing every 30 minutes so evictions only lost 30 minutes of work. Spot eviction rate averaged 3% over 90 days.
 5. **Chargeback tagging** — Implemented mandatory resource tags (`CostCenter`, `Product`, `WorkloadType`) enforced by Azure Policy. Built a Power BI dashboard showing cost per product team per AI feature. Within one month, the image classification team voluntarily reduced their batch size after seeing their per-request cost.
 6. **Reserved Instances** — Purchased 1-year reservations for the 4 GPU VMs that ran during business hours, saving an additional 21% versus pay-as-you-go.
@@ -192,7 +194,7 @@ The infrastructure team discovered several cost drivers: GPU VMs running 24/7 fo
 ### Lessons Learned
 
 - **GPU utilization data is the foundation of cost engineering** — without Prometheus metrics, the team would have guessed at scheduling windows. *(Ch9)*
-- **PTU is almost always cheaper for sustained workloads** — the break-even point was roughly 120K TPM sustained for 8+ hours/day. *(Ch11)*
+- **PTU economics depend on model and request shape** — in their analysis, PTU became attractive once demand stayed high for most of the business day, but they still sized it with the calculator and benchmarked real traffic. *(Ch11)*
 - **Chargeback changes behavior** — teams optimize when they see their own costs. Tag enforcement is a cost control. *(Ch9)*
 
 💡 **Pro Tip**: Before committing to PTU, run a 2-week analysis of your standard deployment's actual TPM consumption. Azure OpenAI's metrics in Azure Monitor give you the exact numbers to calculate break-even.
