@@ -414,7 +414,7 @@ The `--no-wait` flag returns immediately while deletion proceeds in the backgrou
 az group show --name rg-ai-lab --query "properties.provisioningState" -o tsv 2>/dev/null || echo "Deleted"
 ```
 
-⚠️ **Production Gotcha**: GPU VMs continue billing even when stopped (deallocated) if the **public IP** remains allocated. Deleting the resource group is the only way to guarantee zero charges.
+⚠️ **Armadilha em Produção**: Uma VM **parada (desalocada)** deixa de cobrar compute, mas você continua pagando pelos recursos que permanecem alocados — especialmente discos gerenciados e qualquer IP público estático. Excluir o resource group garante a limpeza completa, mas não é a única forma de parar os custos de compute.
 
 ---
 

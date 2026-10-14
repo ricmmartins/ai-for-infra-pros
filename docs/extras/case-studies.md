@@ -2,7 +2,9 @@
 
 Cenários reais mostrando como times de infraestrutura entregam impacto de negócio mensurável com workloads de IA no Azure. Cada estudo de caso mapeia diretamente para os conceitos abordados neste livro, para que você possa rastrear cada decisão até um capítulo específico.
 
-Estas são histórias de produção — não provas de conceito. Toda métrica é fundamentada em dados operacionais realistas, e toda decisão de arquitetura reflete os trade-offs que engenheiros de infraestrutura enfrentam diariamente.
+> **Nota:** Estes estudos de caso são composições anonimizadas baseadas em padrões recorrentes observados em campo. As arquiteturas e os trade-offs são realistas, mas as organizações, os cronogramas e muitos dos números são ilustrativos, não resultados verificados de clientes.
+
+Estas são histórias em estilo de produção — não provas de conceito. As arquiteturas refletem trade-offs operacionais reais enfrentados por engenheiros de infraestrutura, mas trate as métricas como exemplos didáticos, não benchmarks auditados.
 
 ---
 
@@ -172,7 +174,7 @@ O time de infraestrutura descobriu diversos fatores de custo: VMs GPU rodando 24
 
 1. **Análise de uso** — Exportaram 90 dias de dados do Azure Cost Management e correlacionaram com métricas de utilização de GPU do Prometheus. Descobriram que as VMs GPU tinham em média 22% de utilização durante horários fora de pico (22h – 8h) e 78% durante horário comercial.
 2. **Agendamento de GPU** — Implementaram runbooks do Azure Automation para desalocar as VMs de classificação de imagens das 22h às 7h diariamente. Adicionaram um buffer de aquecimento de 30 minutos com health checks antes de rotear a primeira requisição. Economizaram 37% em compute GPU.
-3. **Migração do Azure OpenAI para PTU** — Analisaram padrões de consumo de tokens: a funcionalidade de sumarização de documentos consumia um fluxo estável de 180K TPM durante horário comercial. Migraram do standard (pay-per-token) para 300 PTU, que fornecia 200K+ TPM a uma taxa horária fixa. Isso eliminou erros 429 e reduziu o custo por token em 42%.
+3. **Migração do Azure OpenAI para PTU** — Analisaram padrões de consumo de tokens: a funcionalidade de sumarização de documentos consumia um fluxo estável de 180K TPM durante horário comercial. Migraram do standard (pay-per-token) para um deployment em PTU dimensionado com a calculadora, com base no modelo, na proporção entre prompt e completion e na margem para picos. Isso eliminou erros 429 e reduziu o custo por token em 42%.
 4. **Spot VMs para workloads batch** — Moveram o job noturno de retreinamento de modelo (detecção de anomalias) para VMs spot `Standard_NC4as_T4_v3` com preço máximo de 60% do on-demand. Implementaram checkpointing a cada 30 minutos, de modo que evictions só perdiam 30 minutos de trabalho. A taxa de eviction de spot teve média de 3% ao longo de 90 dias.
 5. **Tagging de chargeback** — Implementaram tags obrigatórias nos recursos (`CostCenter`, `Product`, `WorkloadType`) impostas por Azure Policy. Construíram um dashboard no Power BI mostrando custo por time de produto por funcionalidade de IA. Em um mês, o time de classificação de imagens reduziu voluntariamente seu batch size após ver o custo por requisição.
 6. **Reserved Instances** — Compraram reservas de 1 ano para as 4 VMs GPU que rodavam durante horário comercial, economizando 21% adicionais versus pay-as-you-go.
@@ -192,7 +194,7 @@ O time de infraestrutura descobriu diversos fatores de custo: VMs GPU rodando 24
 ### Lições Aprendidas
 
 - **Dados de utilização de GPU são a base da engenharia de custos** — sem métricas do Prometheus, o time teria adivinhado as janelas de agendamento. *(Cap9)*
-- **PTU é quase sempre mais barato para workloads sustentados** — o ponto de break-even foi aproximadamente 120K TPM sustentados por 8+ horas/dia. *(Cap11)*
+- **A economia com PTU depende do modelo e do formato das requisições** — na análise deles, PTU passou a valer a pena quando a demanda permaneceu alta durante a maior parte do horário comercial, mas ainda assim eles dimensionaram com a calculadora e validaram com tráfego real. *(Cap11)*
 - **Chargeback muda o comportamento** — times otimizam quando veem seus próprios custos. Imposição de tags é um controle de custo. *(Cap9)*
 
 💡 **Dica Pro**: Antes de se comprometer com PTU, faça uma análise de 2 semanas do consumo real de TPM do seu deployment standard. As métricas do Azure OpenAI no Azure Monitor fornecem os números exatos para calcular o break-even.

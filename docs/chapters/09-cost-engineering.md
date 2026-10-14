@@ -251,7 +251,50 @@ PTU faz sentido quando:
 
 ### Quando o PTU Se Paga
 
-O ponto de equilíbrio depende do seu modelo, região e padrão de tráfego, mas como diretriz geral: se seu deployment standard está consistentemente utilizado a **60–70% ou acima** do que uma alocação de PTU proporcionaria, o PTU tipicamente se torna mais barato. Abaixo dessa utilização, você está pagando por capacidade reservada que não está usando.
+**Heurística, não lei**: se seu deployment standard estiver operando de forma consistente em **algo em torno de 60–70% ou mais** do throughput que um deployment com PTU reservaria para o mesmo perfil de workload, o PTU frequentemente começa a vencer em termos econômicos. Mas não trate isso como um limiar universal. O ponto real de equilíbrio depende do modelo, da região, do tipo de deployment, da taxa de cache e dos preços vigentes.
+
+Comece pela calculadora de dimensionamento do Azure OpenAI, porque comparações de custo de PTU não fazem sentido até você saber de quantos PTUs o workload realmente precisa. A Microsoft documenta o fluxo de dimensionamento assim:
+
+- Estimar os PTUs necessários a partir de **RPM de pico**, **tokens de prompt**, **tokens de resposta** e **taxa de cache**
+- Converter o workload em **TPM normalizado**
+- Dividir pelo **Input TPM por PTU** do modelo
+- Arredondar para cima até o mínimo e o incremento do deployment
+
+As fórmulas centrais são:
+
+```text
+Normalized TPM = (input TPM × (1 − cache rate)) + (output-to-input ratio × output TPM)
+PTUs required = Normalized TPM ÷ Input TPM per PTU
+```
+
+Depois de obter a contagem de PTUs, compare o custo mensal usando variáveis da página de preços **atual**:
+
+```text
+Monthly PTU cost = Required PTUs × PTU monthly price
+Monthly PAYG cost = (Monthly input tokens ÷ 1,000 × input-token price)
+                  + (Monthly output tokens ÷ 1,000 × output-token price)
+                  + any cache-write charges
+```
+
+O PTU atinge o ponto de equilíbrio quando:
+
+```text
+Required PTUs × PTU monthly price <= Monthly PAYG cost
+```
+
+**Exemplo trabalhado com placeholders**:
+
+1. A calculadora de dimensionamento diz que seu workload precisa de **N** PTUs para o minuto de pico.
+2. Seu uso PAYG atual é de **I** tokens de entrada/mês e **O** tokens de saída/mês.
+3. O preço atual do seu modelo e região é **P** por PTU/mês, **Ci** por 1K tokens de entrada e **Co** por 1K tokens de saída.
+4. Compare:
+
+```text
+PTU monthly cost = N × P
+PAYG monthly cost = (I ÷ 1,000 × Ci) + (O ÷ 1,000 × Co)
+```
+
+Se `N × P` for menor **e** o tráfego for sustentado o suficiente para que os PTUs não fiquem ociosos na maior parte do mês, PTU é a melhor compra. Caso contrário, permaneça em Standard ou use um padrão híbrido em que PTU atenda a baseline estável e Standard absorva os picos.
 
 ### Matriz de Decisão: Standard vs PTU
 
@@ -265,19 +308,27 @@ O ponto de equilíbrio depende do seu modelo, região e padrão de tráfego, mas
 | **Custo em alto volume** | Maior (escala linear) | Menor (amortizado entre tokens) |
 | **Escala a zero** | Sim | Não (compromisso mínimo de PTU) |
 
-> **Nota**: Preços de PTU, proporções de throughput por unidade e compromissos mínimos variam por modelo, versão e região. Sempre use a calculadora de capacidade do Azure OpenAI para dimensionamento preciso.
+> **Nota**: Preços de PTU, proporções de throughput por unidade e compromissos mínimos variam por modelo, versão e região. Use a [orientação de dimensionamento de PTU](https://learn.microsoft.com/azure/foundry/openai/how-to/provisioned-throughput-sizing), a calculadora de capacidade do Foundry e a [página de preços do Azure OpenAI](https://azure.microsoft.com/pricing/details/cognitive-services/openai-service/) em tempo real antes de assumir qualquer compromisso. Confirme os números atuais — eles mudam.
 
 ### Estratégias de Otimização de Tokens
 
 Independentemente de usar Standard ou PTU, reduzir o consumo de tokens reduz diretamente o custo:
 
-**Cache de prompts**: O Azure OpenAI suporta cache automático de prompts para prefixos repetidos. Se seu system prompt tem 2.000 tokens e é idêntico em todas as requisições, tokens em cache são cobrados com tarifa reduzida. Estruture seus prompts com a parte estática primeiro.
+**Enxugue o prompt primeiro**: A maioria das equipes queima tokens com instruções que escreveram uma vez e nunca mais desafiaram. Remova orientações duplicadas, mova exemplos verbosos para a camada de retrieval quando possível e mantenha as instruções estáticas mais reutilizáveis no começo do prompt. Cada token no prefixo é pago repetidamente.
 
-**System prompts mais curtos**: Um system prompt de 3.000 tokens que poderia ter 800 desperdiça 2.200 tokens por requisição. A 10.000 requisições por dia com GPT-4o, isso são 22 milhões de tokens de entrada desperdiçados — aproximadamente $55/dia ou $1.650/mês em gastos desnecessários.
+**Limites de saída**: Limite deliberadamente o tamanho da resposta. Em Chat Completions, isso normalmente significa `max_tokens`; na Responses API, use o limite equivalente de saída para essa API. Se a tarefa de negócio só precisa de uma resposta de 150 palavras, não financie um ensaio de 1.500 tokens. Esse é um dos ganhos mais limpos de custo e latência que você pode obter.
 
-**Limites de tamanho de resposta**: Use o parâmetro `max_tokens` para limitar o tamanho da resposta. Se sua aplicação precisa apenas de respostas de 200 palavras, não permita respostas de 2.000 tokens. Isso é tanto uma otimização de custo quanto de latência.
+**Cache de prompts**: O Azure OpenAI oferece prompt caching para prefixos repetidos. Em modelos compatíveis, o serviço pode dar desconto nas leituras de prompt em cache; a Microsoft documenta que o prompt caching entra em ação quando o prompt tem pelo menos 1.024 tokens e os primeiros 1.024 tokens são idênticos. A lição operacional é simples: mantenha o prefixo estático estável e coloque o texto específico da requisição depois.
 
-**Roteamento multi-modelo**: Nem toda requisição precisa do seu modelo mais capaz (e mais caro). Roteie consultas simples de classificação, extração ou FAQ para o GPT-4o-mini e reserve o GPT-4o para raciocínio complexo, análise em múltiplas etapas ou tarefas onde a qualidade piora mensuravelmente com o modelo menor. Uma camada de roteamento bem implementada pode reduzir custos de inferência em 50–80%.
+**Cache semântico via APIM**: Se os usuários fazem perguntas quase duplicadas, use semantic caching no Azure API Management para reutilizar conclusões anteriores em vez de pagar novamente pelo modelo. Isso funciona melhor em workloads com alta repetição, como Q&A de políticas internas, FAQ de produto e assistentes de conhecimento. Ajuste os limiares de similaridade com conservadorismo — uma reutilização agressiva economiza dinheiro, mas pode devolver respostas desatualizadas ou amplas demais.
+
+**Roteamento para modelos menores**: Nem toda requisição precisa do seu modelo mais capaz. Roteie classificação, extração, moderação e tráfego básico de FAQ para um modelo mais barato, e reserve modelos premium para a minoria das requisições que realmente precisam de raciocínio mais profundo. Normalmente, essa é a maior alavanca estrutural de economia depois de eliminar GPUs ociosas.
+
+**Controle de chunk e `top_k` no RAG**: Retrieval é um imposto oculto de tokens. Chunks grandes demais e um valor inflado de `top_k` entopem o prompt com contexto de que o modelo nem precisava. Comece com o menor chunk size que ainda preserve significado, limite `top_k` de forma agressiva e meça a qualidade das respostas antes de aumentar qualquer um dos dois. Cinco chunks relevantes quase sempre vencem vinte medianos.
+
+**Batch API para workloads offline**: Se o job não é voltado ao usuário, não o execute no caminho interativo caro. A Batch API do Azure OpenAI usa cota separada, mira um turnaround de 24 horas e a Microsoft a documenta com **50% menos custo do que Global Standard**. Backfills de sumarização, classificação noturna, extração em larga escala e avaliação em lote são candidatos ideais.
+
+**System prompts mais curtos**: Um system prompt de 3.000 tokens que poderia ter 800 desperdiça 2.200 tokens por requisição. A 10.000 requisições por dia, esse desperdício vira uma linha do orçamento.
 
 💡 **Dica**: Monte um harness de avaliação simples que execute as mesmas 200 consultas representativas no GPT-4o e no GPT-4o-mini, e peça a um especialista do domínio para pontuar as saídas. Se o GPT-4o-mini pontuar dentro de 5% em 70%+ das consultas, você identificou uma enorme oportunidade de economia com impacto mínimo na qualidade.
 
@@ -408,7 +459,8 @@ Antes de seguir em frente, confirme que você tem estas práticas de engenharia 
 - **Spot VMs avaliadas** para cargas de treinamento tolerantes a falhas com checkpointing implementado
 - **Dimensionamento correto validado** — utilização de GPU benchmarkada antes de provisionar SKUs maiores
 - **Modelo de precificação do Azure OpenAI selecionado** — Standard vs PTU avaliado com base em dados de utilização
-- **Otimização de tokens implementada** — cache de prompts, redução de system prompts, limites de tamanho de resposta, roteamento multi-modelo
+- **Otimização de tokens implementada** — enxugamento de prompt, limites de saída, cache de prompts, cache semântico, roteamento para modelos menores e controle de `top_k` no RAG
+- **Batch API avaliada** para workloads não interativos que podem trocar latência por menor custo unitário
 - **Governança de cotas de GPU** centralizada com workflow de aprovação
 - **Reunião mensal de revisão de custos** agendada com stakeholders de infra, data science e financeiro
 - **Rastreamento de custos por namespace** habilitado para clusters AKS compartilhados
